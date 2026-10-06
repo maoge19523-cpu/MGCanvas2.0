@@ -1,0 +1,1902 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API 设置</title>
+    <script>(function(){try{var t=localStorage.getItem("studio_theme")||localStorage.getItem("canvas_theme")||"light";if(t==="dark"){document.documentElement.classList.add("studio-theme-dark");document.documentElement.classList.add("theme-dark");}}catch(e){}})();</script>
+    <script>
+        // 检测是否在设置弹窗内嵌展示
+        (function(){
+            if (location.search.indexOf('embed=1') !== -1) {
+                document.documentElement.classList.add('settings-embed');
+            }
+        })();
+    </script>
+    <script src="/static/vendor/js/tailwindcss-cdn.js?v=1.0.0.1790512746"></script>
+    <script src="/static/vendor/js/lucide-subset.js?v=1.0.0.1790512746"></script>
+    <script src="/static/js/shared/icons.js?v=1.0.0.1791308700"></script>
+    <script src="/static/js/theme.js?v=1.0.0.1790512746"></script>
+    <script src="/static/js/shared/utils.js?v=1.0.0.1791308700"></script>
+    <script src="/static/js/shared/morph-button.js?v=1.0.0.1791308700"></script>
+    <script src="/static/js/i18n.js?v=1.0.0.1790512746"></script>
+    <link rel="stylesheet" href="/static/css/theme.css?v=1.0.0.1791308700">
+    <link rel="stylesheet" href="/static/css/api-settings.css?v=1.0.0.1790512746">
+
+<link rel="stylesheet" href="/static/vendor/css/fonts.css?v=1.0.0.1790512746">
+<link rel="stylesheet" href="/static/css/marvis-shared.css?v=1.0.0.1791309025">
+<style>
+/* --- 页面特定 Marvis 覆盖 --- */
+body { background: transparent !important; color: var(--text) !important; }
+/* --- Marvis 增强覆盖 (api-settings.html) --- */
+.page { background: var(--bg) !important; padding: 20px 24px !important; }
+.page-head { border-bottom-color: var(--divider) !important; }
+.sidebar { background: var(--stage-bg) !important; border-radius: var(--radius-xl) !important; }
+.block { background: var(--stage-bg) !important; border: 0 !important; border-radius: var(--radius-xl) !important; box-shadow: var(--shadow-sm) !important; }
+.field-frame { background: var(--bg) !important; border-radius: var(--radius-sm) !important; }
+.field-frame input, .field-frame select { color: var(--text) !important; }
+.field-frame input:focus, .field-frame select:focus { box-shadow: 0 0 0 3px color-mix(in srgb, var(--strong) 18%, transparent) !important; }
+.action-btn { border-radius: var(--radius-sm) !important; }
+.save-btn { background: var(--text) !important; color: var(--bg) !important; }
+.provider-list .provider-item { color: var(--muted) !important; border-radius: var(--radius-sm) !important; }
+.provider-list .provider-item.active { background: var(--nav-hover-bg) !important; color: var(--text) !important; }
+.model-list .model-item { background: var(--bg) !important; border-radius: var(--radius-sm) !important; }
+.picker-modal { background: color-mix(in srgb, var(--panel) 78%, transparent) !important; border: 0 !important; border-radius: var(--radius-xl) !important; box-shadow: var(--shadow-xl) !important; backdrop-filter: blur(44px) saturate(190%); -webkit-backdrop-filter: blur(44px) saturate(190%); }
+.picker-search { background: var(--bg) !important; border-radius: var(--radius-lg) !important; color: var(--text) !important; }
+/* ═══════════════════════════════════════════════════════════════════
+   设置弹窗内嵌（?embed=1）— 对齐 index.html「通用设置」的设计语言：
+   扁平、半透明、无描边、无重阴影、灰度中性，唯一强调是黑白反转。
+   规则全部限定在 html.settings-embed，独立页面观感不受影响。
+   body:not(#settings-embed-scope) 用来把这些规则提到 id 级特异性：
+   api-settings.css 里有大量 body:not(...) 前缀的 !important 规则，否则盖不住。
+   亮/暗差异收敛到下面的 --embed-* 令牌，其余规则只写一份。
+   ═══════════════════════════════════════════════════════════════════ */
+html.settings-embed,
+html.settings-embed body,
+html.settings-embed body:not(#settings-embed-scope) {
+    --stage-bg: #ffffff;
+    --bg: #f5f5f7;
+    --panel-bg: #ffffff;
+    --panel: #ffffff;
+    --surface: #ffffff;
+    --surface-2: #f5f5f7;
+    --card: #ffffff;
+    --text: #1c1c1e;
+    --muted: #656569;
+    --faint: #8a8a8a;
+    --text-2: #656569;
+    --text-3: #8a8a8a;
+    --nav-hover-bg: rgba(0, 0, 0, .04);
+    --soft: rgba(0, 0, 0, .04);
+    --divider: rgba(0, 0, 0, .06);
+    --border: rgba(0, 0, 0, .06);
+    --border-2: rgba(0, 0, 0, .08);
+    --line: rgba(0, 0, 0, .06);
+    --line-strong: rgba(0, 0, 0, .08);
+    --info: #656569;
+    --info-bg: rgba(0, 0, 0, .04);
+    --info-border: rgba(0, 0, 0, .08);
+    --info-text: #656569;
+    --shadow-sm: none;
+    --shadow-md: none;
+    --embed-canvas: #ffffff;
+    --embed-aside: #F5F5F6;
+    --embed-card: rgba(255, 255, 255, .45);
+    background: var(--embed-canvas) !important;
+    color: var(--text) !important;
+    font-family: var(--font-sans) !important;
+}
+html.settings-embed.theme-dark,
+html.settings-embed.studio-theme-dark,
+html.settings-embed.theme-dark body,
+html.settings-embed.studio-theme-dark body,
+html.settings-embed.theme-dark body:not(#settings-embed-scope),
+html.settings-embed.studio-theme-dark body:not(#settings-embed-scope) {
+    --stage-bg: #141416;
+    --bg: #0c0c0c;
+    --panel-bg: #141416;
+    --panel: #141416;
+    --surface: #141416;
+    --surface-2: #1c1c1e;
+    --card: #141416;
+    --text: #f5f5f7;
+    --muted: #96969a;
+    --faint: #8a8a8a;
+    --text-2: #96969a;
+    --text-3: #8a8a8a;
+    --nav-hover-bg: rgba(255, 255, 255, .05);
+    --soft: rgba(255, 255, 255, .05);
+    --divider: rgba(255, 255, 255, .07);
+    --border: rgba(255, 255, 255, .07);
+    --border-2: rgba(255, 255, 255, .10);
+    --line: rgba(255, 255, 255, .07);
+    --line-strong: rgba(255, 255, 255, .10);
+    --info: #96969a;
+    --info-bg: rgba(255, 255, 255, .05);
+    --info-border: rgba(255, 255, 255, .10);
+    --info-text: #96969a;
+    --embed-canvas: #141416;
+    --embed-aside: #222326;
+    --embed-card: rgba(255, 255, 255, .04);
+}
+html.settings-embed,
+html.settings-embed body:not(#settings-embed-scope) * {
+    scrollbar-width: none !important;
+    -ms-overflow-style: none !important;
+}
+html.settings-embed::-webkit-scrollbar,
+html.settings-embed body:not(#settings-embed-scope) *::-webkit-scrollbar {
+    width: 0 !important;
+    height: 0 !important;
+    display: none !important;
+}
+
+/* ── 画布与栅格 ── */
+html.settings-embed body:not(#settings-embed-scope) .page { padding: 0 !important; margin: 0 !important; min-height: auto !important; background: transparent !important; }
+html.settings-embed body:not(#settings-embed-scope) .wrap { max-width: none !important; margin: 0 !important; padding: 0 !important; }
+html.settings-embed body:not(#settings-embed-scope) .page-head { display: none !important; }
+html.settings-embed body:not(#settings-embed-scope) .layout {
+    grid-template-columns: 244px minmax(0, 1fr) !important;
+    gap: 20px !important;
+    align-items: start !important;
+    height: 100%;
+    overflow: hidden;
+}
+html.settings-embed body:not(#settings-embed-scope) .content {
+    display: flex;
+    flex-direction: column;
+    gap: 0 !important;
+    min-width: 0;
+    overflow-y: auto !important;
+}
+/* Tailwind 注入的 [hidden] 规则特异性低，这里兜底保证 JS 的 hidden 切换有效 */
+html.settings-embed body:not(#settings-embed-scope) [hidden] { display: none !important; }
+
+/* ── 左侧导航面（= .settings-aside） ── */
+html.settings-embed body:not(#settings-embed-scope) .sidebar {
+    position: static !important;
+    top: auto !important;
+    width: 244px !important;
+    min-width: 244px !important;
+    max-height: none !important;
+    flex-shrink: 0;
+    gap: 4px !important;
+    padding: 24px 14px 22px !important;
+    border: none !important;
+    border-radius: 24px !important;
+    background: var(--embed-aside) !important;
+    box-shadow: none !important;
+    overflow-y: auto !important;
+}
+html.settings-embed body:not(#settings-embed-scope) .side-section-title {
+    padding: 0 0 0 12px !important;
+    margin: 8px 0 2px !important;
+    color: var(--muted) !important;
+    font-size: 12px !important;
+    font-weight: 700 !important;
+    letter-spacing: .02em !important;
+    line-height: 1.4 !important;
+    text-transform: none !important;
+}
+/* 左栏高度确定后，flex 子项会被压缩导致行重叠，这里禁止收缩改为滚动 */
+html.settings-embed body:not(#settings-embed-scope) .sidebar > * { flex: 0 0 auto !important; }
+html.settings-embed body:not(#settings-embed-scope) .provider-list {
+    display: flex !important;
+    flex: 0 0 auto !important;
+    flex-direction: column !important;
+    gap: 4px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: none !important;
+}
+html.settings-embed body:not(#settings-embed-scope) .cli-quick-group { gap: 4px !important; padding-top: 0 !important; margin-top: 8px !important; }
+html.settings-embed body:not(#settings-embed-scope) .cli-quick-list { gap: 4px !important; }
+
+/* ── 平台条目（= .settings-tab 行式导航） ── */
+html.settings-embed body:not(#settings-embed-scope) .provider-card,
+html.settings-embed body:not(#settings-embed-scope) .provider-card.provider-card-banner,
+html.settings-embed body:not(#settings-embed-scope) .provider-card.provider-card-sortable {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+    gap: 10px !important;
+    width: 100% !important;
+    min-height: 0 !important;
+    height: auto !important;
+    padding: 10px 12px !important;
+    border: none !important;
+    border-radius: 10px !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    color: var(--muted) !important;
+    font-size: 14px !important;
+    font-weight: 600 !important;
+    text-align: left !important;
+    transition: background .2s ease, color .2s ease !important;
+}
+/* 品牌行没有拖拽手柄，左侧补同样宽度，让 logo 与普通行的图标列对齐 */
+html.settings-embed body:not(#settings-embed-scope) .provider-card.provider-card-banner { padding-left: 36px !important; }
+html.settings-embed body:not(#settings-embed-scope) .provider-card::before,
+html.settings-embed body:not(#settings-embed-scope) .provider-card.active::before { content: none !important; display: none !important; }
+html.settings-embed body:not(#settings-embed-scope) .provider-card:hover,
+html.settings-embed body:not(#settings-embed-scope) .provider-card.active,
+html.settings-embed body:not(#settings-embed-scope) .provider-card.active:hover {
+    background: var(--nav-hover-bg) !important;
+    color: var(--text) !important;
+    box-shadow: none !important;
+}
+html.settings-embed body:not(#settings-embed-scope) .provider-card.is-disabled { opacity: .48 !important; }
+html.settings-embed body:not(#settings-embed-scope) .provider-card.is-dragging { opacity: .5 !important; }
+html.settings-embed body:not(#settings-embed-scope) .provider-card.provider-card-drop-target {
+    background: var(--nav-hover-bg) !important;
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--strong) 18%, transparent) !important;
+}
+html.settings-embed body:not(#settings-embed-scope) .provider-banner-inner {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    gap: 8px !important;
+    width: 100% !important;
+    min-width: 0 !important;
+}
+html.settings-embed body:not(#settings-embed-scope) .provider-logo-wrap {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+    gap: 8px !important;
+    width: auto !important;
+    min-width: 0 !important;
+}
+html.settings-embed body:not(#settings-embed-scope) .provider-card-banner img {
+    display: block !important;
+    width: auto !important;
+    height: 18px !important;
+    max-width: 96px !important;
+    object-fit: contain !important;
+}
+html.settings-embed body:not(#settings-embed-scope) .provider-card-banner .runninghub-icon,
+html.settings-embed body:not(#settings-embed-scope) .provider-card-banner .volcengine-icon { height: 18px !important; max-width: 96px !important; }
+html.settings-embed body:not(#settings-embed-scope) .provider-card-banner .ms-icon-dark { display: none !important; }
+html.settings-embed.theme-dark body:not(#settings-embed-scope) .provider-card-banner .ms-icon-light,
+html.settings-embed.studio-theme-dark body:not(#settings-embed-scope) .provider-card-banner .ms-icon-light { display: none !important; }
+html.settings-embed.theme-dark body:not(#settings-embed-scope) .provider-card-banner .ms-icon-dark,
+html.settings-embed.studio-theme-dark body:not(#settings-embed-scope) .provider-card-banner .ms-icon-dark { display: block !important; }
+html.settings-embed body:not(#settings-embed-scope) .provider-info { flex: 1 1 auto !important; min-width: 0 !important; overflow: hidden !important; }
+html.settings-embed body:not(#settings-embed-scope) .provider-name {
+    color: inherit !important;
+    font-size: 13px !important;
+    font-weight: 600 !important;
+    line-height: 1.3 !important;
+}
+html.settings-embed body:not(#settings-embed-scope) .provider-card.active .provider-name { color: var(--text) !important; }
+html.settings-embed body:not(#settings-embed-scope) .provider-meta {
+    margin-top: 1px !important;
+    color: var(--muted) !important;
+    font-size: 11px !important;
+    font-weight: 400 !important;
+    line-height: 1.3 !important;
+}
+html.settings-embed body:not(#settings-embed-scope) .provider-mark {
+    flex: 0 0 auto !important;
+    width: 18px !important;
+    height: 18px !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    color: var(--muted) !important;
+}
+html.settings-embed body:not(#settings-embed-scope) .provider-mark svg { width: 18px !important; height: 18px !important; }
+html.settings-embed body:not(#settings-embed-scope) .provider-card:hover .provider-mark,
+html.settings-embed body:not(#settings-embed-scope) .provider-card.active .provider-mark { background: transparent !important; color: var(--text) !important; }
+html.settings-embed body:not(#settings-embed-scope) .provider-drag-handle {
+    flex: 0 0 auto !important;
+    width: 14px !important;
+    height: 18px !important;
+    border: none !important;
+    background: transparent !important;
+    color: var(--muted) !important;
+    opacity: .55;
+    cursor: grab;
+}
+html.settings-embed body:not(#settings-embed-scope) .provider-drag-handle svg { width: 14px !important; height: 14px !important; }
+html.settings-embed body:not(#settings-embed-scope) .provider-card:hover .provider-drag-handle { opacity: .9; }
+html.settings-embed body:not(#settings-embed-scope) .provider-side-meta {
+    display: flex !important;
+    flex: 0 0 auto !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    justify-content: flex-end !important;
+    gap: 6px !important;
+    min-width: 0 !important;
+}
+html.settings-embed body:not(#settings-embed-scope) .provider-protocol-pill,
+html.settings-embed body:not(#settings-embed-scope) .provider-card-banner .provider-protocol-pill {
+    display: inline-flex !important;
+    align-items: center !important;
+    flex: 0 0 auto !important;
+    min-width: 0 !important;
+    max-width: none !important;
+    height: auto !important;
+    padding: 0 !important;
+    overflow: visible !important;
+    border: none !important;
+    background: transparent !important;
+    color: var(--muted) !important;
+    font-size: 11px !important;
+    font-weight: 600 !important;
+    letter-spacing: 0 !important;
+    text-transform: none !important;
+    white-space: nowrap !important;
+    opacity: .8;
+}
+html.settings-embed body:not(#settings-embed-scope) .provider-status-dot {
+    display: block !important;
+    flex: 0 0 auto !important;
+    width: 6px !important;
+    height: 6px !important;
+    border-radius: 999px !important;
+    background: var(--faint) !important;
+    opacity: .55 !important;
+}
+/* 外壳走中性灰，状态点保留原有语义色（已配置=绿） */
+html.settings-embed body:not(#settings-embed-scope) .provider-card.has-key .provider-status-dot {
+    background: #16a34a !important;
+    opacity: .85 !important;
+}
+html.settings-embed body:not(#settings-embed-scope) .provider-card.missing-key .provider-status-dot {
+    background: var(--faint) !important;
+    opacity: .5 !important;
+}
+html.settings-embed.theme-dark body:not(#settings-embed-scope) .provider-card.has-key .provider-status-dot,
+html.settings-embed.studio-theme-dark body:not(#settings-embed-scope) .provider-card.has-key .provider-status-dot {
+    background: #4ade80 !important;
+    opacity: .75 !important;
+}
+html.settings-embed body:not(#settings-embed-scope) .provider-logo-fallback { display: none !important; }
+
+/* ── 次级按钮语言（新增平台 / CLI 快捷项） ── */
+html.settings-embed body:not(#settings-embed-scope) .add-btn,
+html.settings-embed body:not(#settings-embed-scope) .cli-quick-btn {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+    gap: 10px !important;
+    width: 100% !important;
+    height: auto !important;
+    min-height: 0 !important;
+    margin: 0 !important;
+    padding: 9px 12px !important;
+    border: 0 !important;
+    border-radius: 10px !important;
+    background: var(--stage-bg) !important;
+    color: var(--muted) !important;
+    font-size: 13px !important;
+    font-weight: 600 !important;
+    box-shadow: none !important;
+    transition: background .2s ease, color .2s ease !important;
+}
+html.settings-embed body:not(#settings-embed-scope) .add-btn:hover,
+html.settings-embed body:not(#settings-embed-scope) .cli-quick-btn:hover,
+html.settings-embed body:not(#settings-embed-scope) .cli-quick-btn.active { background: var(--nav-hover-bg) !important; color: var(--text) !important; }
+html.settings-embed body:not(#settings-embed-scope) .add-btn svg,
+html.settings-embed body:not(#settings-embed-scope) .cli-quick-btn svg { width: 16px !important; height: 16px !important; flex: 0 0 auto; }
+html.settings-embed body:not(#settings-embed-scope) .cli-quick-note {
+    padding: 2px 12px 0 !important;
+    color: var(--muted) !important;
+    font-size: 11px !important;
+    font-weight: 400 !important;
+    line-height: 1.5 !important;
+}
+
+/* ── 左栏唯一主按钮：推荐API（黑白反转） ── */
+html.settings-embed body:not(#settings-embed-scope) .api-link-btn {
+    position: relative !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 6px !important;
+    width: 100% !important;
+    height: 38px !important;
+    min-height: 38px !important;
+    margin: 4px 0 0 !important;
+    border: 0 !important;
+    border-radius: 10px !important;
+    background: var(--text) !important;
+    color: var(--stage-bg) !important;
+    font-size: 13px !important;
+    font-weight: 600 !important;
+    box-shadow: none !important;
+    overflow: hidden !important;
+    transform: none !important;
+}
+html.settings-embed body:not(#settings-embed-scope) .api-link-btn::after { content: none !important; display: none !important; }
+html.settings-embed body:not(#settings-embed-scope) .api-link-btn svg,
+html.settings-embed body:not(#settings-embed-scope) .api-link-btn i { animation: none !important; }
+html.settings-embed body:not(#settings-embed-scope) .api-link-btn:hover {
+    background: var(--text) !important;
+    color: var(--stage-bg) !important;
+    opacity: .88;
+    box-shadow: none !important;
+    transform: none !important;
+}
+
+/* ── 右列标题行（纯标题，无卡片底/边框） ── */
+html.settings-embed body:not(#settings-embed-scope) .content-head {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    gap: 16px !important;
+    flex-wrap: nowrap !important;
+    padding: 0 0 16px !important;
+    border: none !important;
+    border-radius: 0 !important;
+    background: var(--embed-canvas) !important;
+    box-shadow: none !important;
+}
+html.settings-embed body:not(#settings-embed-scope) .content-head .editor-title {
+    font-size: 15px !important;
+    font-weight: 800 !important;
+    letter-spacing: 0 !important;
+    line-height: 1.3 !important;
+    color: var(--text) !important;
+}
+html.settings-embed body:not(#settings-embed-scope) .content-head .editor-sub {
+    margin-top: 2px !important;
+    color: var(--muted) !important;
+    font-size: 12px !important;
+    font-weight: 400 !important;
+    letter-spacing: 0 !important;
+    line-height: 1.5 !important;
+}
+html.settings-embed body:not(#settings-embed-scope) .content-actions { display: flex !important; align-items: center !important; gap: 8px !important; flex: 0 0 auto; }
+
+/* ── 卡片（= .settings-card） ── */
+html.settings-embed body:not(#settings-embed-scope) .block {
+    margin: 0 0 16px !important;
+    padding: 18px 20px !important;
+    border: 0 !important;
+    border-radius: 16px !important;
+    background: var(--embed-card) !important;
+    box-shadow: none !important;
+}
+html.settings-embed body:not(#settings-embed-scope) .block:last-child { margin-bottom: 0 !important; }
+html.settings-embed body:not(#settings-embed-scope) .model-grid { display: flex !important; flex-direction: column !important; gap: 16px !important; }
+html.settings-embed body:not(#settings-embed-scope) .model-grid .block { margin-bottom: 0 !important; }
+html.settings-embed body:not(#settings-embed-scope) .block-head {
+    display: flex !important;
+    align-items: flex-start !important;
+    justify-content: space-between !important;
+    gap: 12px !important;
+    margin: 0 0 16px !important;
+    padding: 0 !important;
+    border: none !important;
+}
+html.settings-embed body:not(#settings-embed-scope) .block-title {
+    margin: 0 0 4px !important;
+    color: var(--text) !important;
+    font-size: 14px !important;
+    font-weight: 700 !important;
+    letter-spacing: 0 !important;
+    line-height: 1.35 !important;
+}
+html.settings-embed body:not(#settings-embed-scope) .block-desc {
+    margin: 0 !important;
+    color: var(--muted) !important;
+    font-size: 12px !important;
+    font-weight: 400 !important;
+    letter-spacing: 0 !important;
+    line-height: 1.5 !important;
+}
+
+/* ── 表单 ── */
+html.settings-embed body:not(#settings-embed-scope) .form { display: flex !important; flex-direction: column !important; gap: 16px !important; }
+html.settings-embed body:not(#settings-embed-scope) .field { gap: 6px !important; }
+html.settings-embed body:not(#settings-embed-scope) .label {
+    color: var(--muted) !important;
+    font-size: 12px !important;
+    font-weight: 600 !important;
+    letter-spacing: 0 !important;
+    text-transform: none !important;
+}
+html.settings-embed body:not(#settings-embed-scope) .field-frame {
+    display: flex !important;
+    align-items: center !important;
+    min-height: 36px !important;
+    padding: 0 !important;
+    border: 0 !important;
+    border-radius: 10px !important;
+    background: var(--bg) !important;
+    box-shadow: none !important;
+}
+html.settings-embed body:not(#settings-embed-scope) .field-frame:focus-within { box-shadow: 0 0 0 3px color-mix(in srgb, var(--strong) 18%, transparent) !important; }
+html.settings-embed body:not(#settings-embed-scope) .field-frame input,
+html.settings-embed body:not(#settings-embed-scope) .field-frame select,
+html.settings-embed body:not(#settings-embed-scope) .field-frame textarea {
+    flex: 1 1 auto;
+    width: 100%;
+    min-width: 0;
+    height: 34px !important;
+    padding: 0 12px !important;
+    border: none !important;
+    border-radius: 10px !important;
+    background: transparent !important;
+    color: var(--text) !important;
+    font-size: 13px !important;
+    font-weight: 400 !important;
+    box-shadow: none !important;
+    outline: none !important;
+}
+html.settings-embed body:not(#settings-embed-scope) .field-frame input:focus,
+html.settings-embed body:not(#settings-embed-scope) .field-frame select:focus,
+html.settings-embed body:not(#settings-embed-scope) .field-frame textarea:focus { border: none !important; box-shadow: none !important; outline: none !important; }
+html.settings-embed body:not(#settings-embed-scope) .field-frame input::placeholder { color: var(--muted) !important; opacity: .7; }
+html.settings-embed body:not(#settings-embed-scope) .hint,
+html.settings-embed body:not(#settings-embed-scope) .ms-hint,
+html.settings-embed body:not(#settings-embed-scope) .field-hint {
+    color: var(--muted) !important;
+    font-size: 11.5px !important;
+    font-weight: 400 !important;
+    line-height: 1.5 !important;
+    letter-spacing: 0 !important;
+}
+html.settings-embed body:not(#settings-embed-scope) .ms-line { color: var(--muted) !important; }
+html.settings-embed body:not(#settings-embed-scope) .ms-hint a,
+html.settings-embed body:not(#settings-embed-scope) .hint a,
+html.settings-embed body:not(#settings-embed-scope) .runninghub-hint a,
+html.settings-embed body:not(#settings-embed-scope) .apimart-hint a,
+html.settings-embed body:not(#settings-embed-scope) .rh-key-links a {
+    color: var(--text) !important;
+    font-weight: 600 !important;
+    text-decoration: underline !important;
+    text-underline-offset: 2px;
+}
+html.settings-embed body:not(#settings-embed-scope) .inline-code {
+    padding: 1px 5px !important;
+    border: none !important;
+    border-radius: 4px !important;
+    background: var(--bg) !important;
+    color: var(--muted) !important;
+    font-family: var(--font-mono) !important;
+    font-size: 11px !important;
+    font-weight: 400 !important;
+}
+html.settings-embed body:not(#settings-embed-scope) .key-panel,
+html.settings-embed body:not(#settings-embed-scope) .rh-key-item,
+html.settings-embed body:not(#settings-embed-scope) .rh-card-group,
+html.settings-embed body:not(#settings-embed-scope) .rh-config-card,
+html.settings-embed body:not(#settings-embed-scope) .advanced-endpoints {
+    padding: 12px 14px !important;
+    border: 0 !important;
+    border-radius: 12px !important;
+    background: var(--bg) !important;
+    box-shadow: none !important;
+}
+html.settings-embed body:not(#settings-embed-scope) .rh-key-title,
+html.settings-embed body:not(#settings-embed-scope) .rh-group-title {
+    color: var(--text) !important;
+    font-size: 13px !important;
+    font-weight: 700 !important;
+    letter-spacing: 0 !important;
+}
+html.settings-embed body:not(#settings-embed-scope) .rh-key-desc {
+    color: var(--muted) !important;
+    font-size: 11.5px !important;
+    font-weight: 400 !important;
+    line-height: 1.5 !important;
+}
+html.settings-embed body:not(#settings-embed-scope) .rh-group-count,
+html.settings-embed body:not(#settings-embed-scope) .jimeng-status-pill {
+    display: inline-flex !important;
+    align-items: center !important;
+    padding: 2px 9px !important;
+    border: 0 !important;
+    border-radius: 999px !important;
+    background: var(--stage-bg) !important;
+    color: var(--muted) !important;
+    font-size: 11px !important;
+    font-weight: 600 !important;
+    box-shadow: none !important;
+}
+html.settings-embed body:not(#settings-embed-scope) .verify-action-row { gap: 8px !important; flex-wrap: wrap !important; }
+html.settings-embed body:not(#settings-embed-scope) .rh-paste-row { gap: 8px !important; }
+html.settings-embed body:not(#settings-embed-scope) .rh-paste-input {
+    flex: 1 1 auto;
+    min-width: 0;
+    height: 34px !important;
+    padding: 0 12px !important;
+    border: 0 !important;
+    border-radius: 10px !important;
+    background: var(--bg) !important;
+    color: var(--text) !important;
+    font-size: 13px !important;
+    box-shadow: none !important;
+}
+html.settings-embed body:not(#settings-embed-scope) .rh-paste-input:focus { box-shadow: 0 0 0 3px color-mix(in srgb, var(--strong) 18%, transparent) !important; }
+
+/* ── 按钮家族 ── */
+html.settings-embed body:not(#settings-embed-scope) .action-btn,
+html.settings-embed body:not(#settings-embed-scope) .ghost-btn {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 6px !important;
+    height: auto !important;
+    min-height: 34px !important;
+    padding: 7px 14px !important;
+    border: 0 !important;
+    border-radius: 8px !important;
+    background: var(--stage-bg) !important;
+    color: var(--text) !important;
+    font-size: 12px !important;
+    font-weight: 600 !important;
+    box-shadow: none !important;
+    transform: none !important;
+    transition: background .2s ease, color .2s ease !important;
+}
+html.settings-embed body:not(#settings-embed-scope) .action-btn:hover,
+html.settings-embed body:not(#settings-embed-scope) .ghost-btn:hover {
+    background: var(--nav-hover-bg) !important;
+    color: var(--text) !important;
+    box-shadow: none !important;
+    transform: none !important;
+}
+html.settings-embed body:not(#settings-embed-scope) .action-btn svg,
+html.settings-embed body:not(#settings-embed-scope) .ghost-btn svg { width: 15px !important; height: 15px !important; }
+html.settings-embed body:not(#settings-embed-scope) .action-btn.primary-btn,
+html.settings-embed body:not(#settings-embed-scope) .action-btn.save-btn {
+    background: var(--text) !important;
+    color: var(--stage-bg) !important;
+}
+html.settings-embed body:not(#settings-embed-scope) .action-btn.primary-btn:hover,
+html.settings-embed body:not(#settings-embed-scope) .action-btn.save-btn:hover {
+    background: var(--text) !important;
+    color: var(--stage-bg) !important;
+    opacity: .88;
+}
+html.settings-embed body:not(#settings-embed-scope) .action-btn.danger-btn {
+    background: var(--danger-bg) !important;
+    color: var(--danger-text) !important;
+}
+html.settings-embed body:not(#settings-embed-scope) .action-btn.danger-btn:hover {
+    background: color-mix(in srgb, var(--danger) 20%, transparent) !important;
+    color: var(--danger-text) !important;
+}
+html.settings-embed body:not(#settings-embed-scope) .key-btn {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 30px !important;
+    height: 30px !important;
+    min-width: 30px !important;
+    padding: 0 !important;
+    border: 0 !important;
+    border-radius: 8px !important;
+    background: var(--stage-bg) !important;
+    color: var(--muted) !important;
+    box-shadow: none !important;
+}
+html.settings-embed body:not(#settings-embed-scope) .key-btn:hover { background: var(--nav-hover-bg) !important; color: var(--text) !important; }
+html.settings-embed body:not(#settings-embed-scope) .key-btn svg { width: 15px !important; height: 15px !important; }
+html.settings-embed body:not(#settings-embed-scope) .key-btn.key-clear { color: var(--danger-text) !important; }
+html.settings-embed body:not(#settings-embed-scope) .key-btn.key-clear:hover {
+    background: color-mix(in srgb, var(--danger) 20%, transparent) !important;
+    color: var(--danger-text) !important;
+}
+html.settings-embed body:not(#settings-embed-scope) .key-input-line { gap: 8px !important; }
+html.settings-embed body:not(#settings-embed-scope) .key-actions { gap: 6px !important; }
+
+/* ── 模型区：分类 pill + 行式条目 ── */
+html.settings-embed body:not(#settings-embed-scope) .models-toolbar { display: flex; flex-direction: column; gap: 12px; }
+html.settings-embed body:not(#settings-embed-scope) .models-toolbar-main {
+    display: flex !important;
+    align-items: flex-start !important;
+    justify-content: space-between !important;
+    gap: 12px !important;
+    margin: 0 !important;
+}
+html.settings-embed body:not(#settings-embed-scope) .models-toolbar-actions { display: flex !important; gap: 8px !important; flex-wrap: wrap !important; }
+html.settings-embed body:not(#settings-embed-scope) .model-cat-tabs {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    gap: 8px !important;
+    padding: 0 !important;
+    border: none !important;
+    background: transparent !important;
+}
+html.settings-embed body:not(#settings-embed-scope) .model-cat-tab {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+    height: auto !important;
+    padding: 8px 14px !important;
+    border: 0 !important;
+    border-radius: 999px !important;
+    background: var(--stage-bg) !important;
+    color: var(--text) !important;
+    font-size: 13px !important;
+    font-weight: 600 !important;
+    box-shadow: none !important;
+    transition: background .2s ease, color .2s ease !important;
+}
+html.settings-embed body:not(#settings-embed-scope) .model-cat-tab:hover { background: var(--nav-hover-bg) !important; }
+html.settings-embed body:not(#settings-embed-scope) .model-cat-tab.active {
+    background: var(--text) !important;
+    color: var(--stage-bg) !important;
+}
+html.settings-embed body:not(#settings-embed-scope) .model-row,
+html.settings-embed body:not(#settings-embed-scope) .lora-row {
+    display: grid !important;
+    align-items: center !important;
+    gap: 8px !important;
+    padding: 8px 10px !important;
+    border: 0 !important;
+    border-radius: 12px !important;
+    background: var(--embed-card) !important;
+    box-shadow: none !important;
+}
+html.settings-embed body:not(#settings-embed-scope) .model-row { grid-template-columns: minmax(0, 1fr) 36px !important; }
+html.settings-embed body:not(#settings-embed-scope) .model-row.has-protocol { grid-template-columns: minmax(0, 1fr) auto 36px !important; }
+html.settings-embed body:not(#settings-embed-scope) .lora-row { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) 86px 36px !important; }
+html.settings-embed body:not(#settings-embed-scope) .model-id-field,
+html.settings-embed body:not(#settings-embed-scope) .model-protocol-auto,
+html.settings-embed body:not(#settings-embed-scope) .model-protocol-select { min-width: 0 !important; }
+html.settings-embed body:not(#settings-embed-scope) .model-display-name {
+    color: var(--muted) !important;
+    font-size: 11px !important;
+    font-weight: 600 !important;
+}
+html.settings-embed body:not(#settings-embed-scope) .model-row input,
+html.settings-embed body:not(#settings-embed-scope) .lora-row input,
+html.settings-embed body:not(#settings-embed-scope) .lora-field input,
+html.settings-embed body:not(#settings-embed-scope) .lora-field select,
+html.settings-embed body:not(#settings-embed-scope) .model-protocol-select {
+    width: 100% !important;
+    min-width: 0 !important;
+    height: 32px !important;
+    padding: 0 12px !important;
+    border: 0 !important;
+    border-radius: 8px !important;
+    background-color: var(--bg) !important;
+    color: var(--text) !important;
+    font-size: 13px !important;
+    box-shadow: none !important;
+}
+html.settings-embed body:not(#settings-embed-scope) .lora-field select,
+html.settings-embed body:not(#settings-embed-scope) .model-protocol-select { padding-right: 24px !important; }
+html.settings-embed body:not(#settings-embed-scope) .model-protocol-select { min-width: 74px !important; cursor: pointer; }
+html.settings-embed body:not(#settings-embed-scope) .model-protocol-auto {
+    display: inline-flex !important;
+    align-items: center !important;
+    height: 30px !important;
+    padding: 0 9px !important;
+    border: 0 !important;
+    border-radius: 8px !important;
+    background: var(--nav-hover-bg) !important;
+    color: var(--muted) !important;
+    font-size: 11px !important;
+    font-weight: 600 !important;
+    white-space: nowrap;
+}
+html.settings-embed body:not(#settings-embed-scope) .lora-field { gap: 5px !important; min-width: 0 !important; }
+html.settings-embed body:not(#settings-embed-scope) .lora-field > span {
+    color: var(--muted) !important;
+    font-size: 11px !important;
+    font-weight: 600 !important;
+    letter-spacing: 0 !important;
+    text-transform: none !important;
+}
+html.settings-embed body:not(#settings-embed-scope) .icon-btn {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 30px !important;
+    height: 30px !important;
+    padding: 0 !important;
+    border: 0 !important;
+    border-radius: 8px !important;
+    background: var(--stage-bg) !important;
+    color: var(--muted) !important;
+    box-shadow: none !important;
+}
+html.settings-embed body:not(#settings-embed-scope) .icon-btn:hover { background: var(--nav-hover-bg) !important; color: var(--text) !important; }
+html.settings-embed body:not(#settings-embed-scope) .icon-btn svg { width: 15px !important; height: 15px !important; }
+html.settings-embed body:not(#settings-embed-scope) .model-row input:focus,
+html.settings-embed body:not(#settings-embed-scope) .lora-row input:focus,
+html.settings-embed body:not(#settings-embed-scope) .lora-field input:focus { box-shadow: 0 0 0 3px color-mix(in srgb, var(--strong) 18%, transparent) !important; }
+html.settings-embed body:not(#settings-embed-scope) .model-list,
+html.settings-embed body:not(#settings-embed-scope) .lora-list { display: flex !important; flex-direction: column !important; gap: 8px !important; }
+html.settings-embed body:not(#settings-embed-scope) .models-fetch-hint,
+html.settings-embed body:not(#settings-embed-scope) .empty { color: var(--muted) !important; font-size: 12px !important; font-weight: 400 !important; }
+
+/* ── 推荐平台视图（API 标签默认落地页） ── */
+html.settings-embed body:not(#settings-embed-scope) .recommend-content { max-width: none !important; }
+/* 推荐视图顶部三行标题去掉（推荐平台 / 推荐多平台注册 / 分组名），卡片直接顶到内容区顶部；
+   用子选择器限定作用域：#providerOnboardingCard 那张新手引导卡的标题必须留着 */
+html.settings-embed body:not(#settings-embed-scope) #recommendContent > .content-head,
+html.settings-embed body:not(#settings-embed-scope) #recommendPanel > .onboarding-head,
+html.settings-embed body:not(#settings-embed-scope) #recommendPanel .recommend-group-head {
+    display: none !important;
+}
+/* 推荐/新手引导视图不再套外层底板：内容是直接铺在弹窗面上，卡片自己就是唯一的框，
+   与通用设置「卡片直接铺在弹窗面」的层级一致 */
+html.settings-embed body:not(#settings-embed-scope) .provider-onboarding-card,
+html.settings-embed body:not(#settings-embed-scope) .recommend-inline-card {
+    max-width: none !important;
+    /* 去掉基类 min-height:360px 的占位，但必须显式声明为不可压缩的 flex 子项：
+       否则 .content 这个定高 flex 列会把它压扁成 0 高（min-height:0 会连自动最小尺寸一起取消） */
+    flex: 0 0 auto !important;
+    min-height: auto !important;
+    justify-content: flex-start !important;
+    gap: 16px !important;
+    padding: 0 !important;
+    border: none !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+}
+html.settings-embed body:not(#settings-embed-scope) .recommend-inline-body { display: flex !important; flex-direction: column !important; gap: 16px !important; padding: 0 !important; }
+html.settings-embed body:not(#settings-embed-scope) .recommend-api-body { display: flex !important; flex-direction: column !important; gap: 16px !important; padding: 0 !important; }
+html.settings-embed body:not(#settings-embed-scope) .recommend-group { display: flex !important; flex-direction: column !important; gap: 16px !important; }
+html.settings-embed body:not(#settings-embed-scope) .recommend-group-head,
+html.settings-embed body:not(#settings-embed-scope) .recommend-group-value,
+html.settings-embed body:not(#settings-embed-scope) .recommend-setup-title {
+    display: flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: none !important;
+    background: transparent !important;
+    color: var(--text) !important;
+    font-size: 14px !important;
+    font-weight: 700 !important;
+    letter-spacing: 0 !important;
+    text-transform: none !important;
+}
+html.settings-embed body:not(#settings-embed-scope) .recommend-group-value { margin-top: 0 !important; }
+html.settings-embed body:not(#settings-embed-scope) .recommend-platform-card,
+html.settings-embed body:not(#settings-embed-scope) .recommend-inline-card .recommend-platform-card {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 10px !important;
+    padding: 14px 16px !important;
+    border: 0 !important;
+    border-radius: 16px !important;
+    background: var(--embed-card) !important;
+    box-shadow: none !important;
+}
+html.settings-embed body:not(#settings-embed-scope) .recommend-name,
+html.settings-embed body:not(#settings-embed-scope) .recommend-name span {
+    color: var(--text) !important;
+    font-size: 14px !important;
+    font-weight: 700 !important;
+    letter-spacing: 0 !important;
+}
+html.settings-embed body:not(#settings-embed-scope) .recommend-platform-summary {
+    margin: 0 !important;
+    color: var(--muted) !important;
+    font-size: 12px !important;
+    font-weight: 400 !important;
+    line-height: 1.5 !important;
+}
+html.settings-embed body:not(#settings-embed-scope) .recommend-badge,
+html.settings-embed body:not(#settings-embed-scope) .onboarding-badge,
+html.settings-embed body:not(#settings-embed-scope) .recommend-tag,
+html.settings-embed body:not(#settings-embed-scope) .recommend-perk-tag,
+html.settings-embed body:not(#settings-embed-scope) .recommend-seedance-tag,
+html.settings-embed body:not(#settings-embed-scope) .recommend-tag.recommend-free-tag {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 4px !important;
+    height: auto !important;
+    padding: 3px 10px !important;
+    border: 0 !important;
+    border-radius: 999px !important;
+    background: var(--stage-bg) !important;
+    color: var(--muted) !important;
+    font-size: 11px !important;
+    font-weight: 600 !important;
+    letter-spacing: 0 !important;
+    text-transform: none !important;
+}
+html.settings-embed body:not(#settings-embed-scope) .recommend-tag.recommend-free-tag,
+html.settings-embed body:not(#settings-embed-scope) .recommend-tag.recommend-free-tag > span,
+html.settings-embed body:not(#settings-embed-scope) .recommend-tag.recommend-free-tag i,
+html.settings-embed body:not(#settings-embed-scope) .recommend-tag.recommend-free-tag svg {
+    background: var(--stage-bg) !important;
+    color: var(--muted) !important;
+    stroke: var(--muted) !important;
+}
+html.settings-embed body:not(#settings-embed-scope) .recommend-tags { display: flex !important; flex-wrap: wrap !important; gap: 6px !important; }
+html.settings-embed body:not(#settings-embed-scope) .recommend-platform-head { display: flex !important; align-items: center !important; gap: 8px !important; flex-wrap: wrap !important; }
+html.settings-embed body:not(#settings-embed-scope) .recommend-platform-info { display: flex !important; flex-direction: column !important; gap: 8px !important; min-width: 0 !important; }
+html.settings-embed body:not(#settings-embed-scope) .recommend-platform-setup { display: flex !important; flex-direction: column !important; gap: 8px !important; min-width: 0 !important; }
+html.settings-embed body:not(#settings-embed-scope) .recommend-guide-source,
+html.settings-embed body:not(#settings-embed-scope) .recommend-guide-save {
+    padding: 12px !important;
+    border: 0 !important;
+    border-radius: 12px !important;
+    background: var(--stage-bg) !important;
+    box-shadow: none !important;
+}
+html.settings-embed body:not(#settings-embed-scope) .recommend-flow-arrow,
+html.settings-embed body:not(#settings-embed-scope) .onboarding-flow-arrow,
+html.settings-embed body:not(#settings-embed-scope) .recommend-guide-arrow { color: var(--muted) !important; opacity: .55; }
+html.settings-embed body:not(#settings-embed-scope) .recommend-flow-arrow span,
+html.settings-embed body:not(#settings-embed-scope) .onboarding-rh-row-arrow span,
+html.settings-embed body:not(#settings-embed-scope) .recommend-guide-arrow span { color: var(--muted) !important; opacity: .55 !important; }
+html.settings-embed body:not(#settings-embed-scope) .recommend-flow-arrow i,
+html.settings-embed body:not(#settings-embed-scope) .recommend-guide-arrow i { color: var(--muted) !important; }
+html.settings-embed body:not(#settings-embed-scope) .recommend-guide-key-btn,
+html.settings-embed body:not(#settings-embed-scope) .onboarding-key-btn,
+html.settings-embed body:not(#settings-embed-scope) .recommend-account-link,
+html.settings-embed body:not(#settings-embed-scope) .recommend-single-action button {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 6px !important;
+    height: 34px !important;
+    min-height: 34px !important;
+    padding: 0 14px !important;
+    border: 0 !important;
+    border-radius: 8px !important;
+    background: var(--stage-bg) !important;
+    color: var(--text) !important;
+    font-size: 12px !important;
+    font-weight: 600 !important;
+    box-shadow: none !important;
+    text-decoration: none !important;
+}
+html.settings-embed body:not(#settings-embed-scope) .recommend-guide-key-btn:hover,
+html.settings-embed body:not(#settings-embed-scope) .onboarding-key-btn:hover,
+html.settings-embed body:not(#settings-embed-scope) .recommend-account-link:hover { background: var(--nav-hover-bg) !important; }
+html.settings-embed body:not(#settings-embed-scope) .onboarding-save-btn,
+html.settings-embed body:not(#settings-embed-scope) .recommend-guide-save-btn,
+html.settings-embed body:not(#settings-embed-scope) .recommend-register,
+html.settings-embed body:not(#settings-embed-scope) .recommend-fill,
+html.settings-embed body:not(#settings-embed-scope) .recommend-actions a,
+html.settings-embed body:not(#settings-embed-scope) .recommend-actions button {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 6px !important;
+    height: 34px !important;
+    min-height: 34px !important;
+    padding: 0 14px !important;
+    border: 0 !important;
+    border-radius: 8px !important;
+    background: var(--text) !important;
+    color: var(--stage-bg) !important;
+    font-size: 12px !important;
+    font-weight: 600 !important;
+    box-shadow: none !important;
+    text-decoration: none !important;
+}
+html.settings-embed body:not(#settings-embed-scope) .onboarding-save-btn:hover,
+html.settings-embed body:not(#settings-embed-scope) .recommend-guide-save-btn:hover,
+html.settings-embed body:not(#settings-embed-scope) .recommend-register:hover,
+html.settings-embed body:not(#settings-embed-scope) .recommend-fill:hover,
+html.settings-embed body:not(#settings-embed-scope) .recommend-actions a:hover,
+html.settings-embed body:not(#settings-embed-scope) .recommend-actions button:hover {
+    background: var(--text) !important;
+    color: var(--stage-bg) !important;
+    opacity: .88;
+}
+html.settings-embed body:not(#settings-embed-scope) .onboarding-key-field input,
+html.settings-embed body:not(#settings-embed-scope) .onboarding-rh-row-field input,
+html.settings-embed body:not(#settings-embed-scope) .recommend-guide-save input {
+    width: 100% !important;
+    min-width: 0 !important;
+    height: 34px !important;
+    padding: 0 12px !important;
+    border: 0 !important;
+    border-radius: 8px !important;
+    background: var(--bg) !important;
+    color: var(--text) !important;
+    font-size: 13px !important;
+    font-weight: 400 !important;
+    box-shadow: none !important;
+}
+html.settings-embed body:not(#settings-embed-scope) .onboarding-key-field input:focus,
+html.settings-embed body:not(#settings-embed-scope) .onboarding-rh-row-field input:focus,
+html.settings-embed body:not(#settings-embed-scope) .recommend-guide-save input:focus { box-shadow: 0 0 0 3px color-mix(in srgb, var(--strong) 18%, transparent) !important; }
+html.settings-embed body:not(#settings-embed-scope) .onboarding-title {
+    color: var(--text) !important;
+    font-size: 14px !important;
+    font-weight: 700 !important;
+    letter-spacing: 0 !important;
+}
+html.settings-embed body:not(#settings-embed-scope) .onboarding-desc,
+html.settings-embed body:not(#settings-embed-scope) .recommend-key-hint,
+html.settings-embed body:not(#settings-embed-scope) .recommend-key-inline-hint,
+html.settings-embed body:not(#settings-embed-scope) .recommend-api-key-label,
+html.settings-embed body:not(#settings-embed-scope) .onboarding-rh-source-label {
+    color: var(--muted) !important;
+    font-size: 12px !important;
+    font-weight: 400 !important;
+    line-height: 1.5 !important;
+}
+html.settings-embed body:not(#settings-embed-scope) .recommend-note {
+    margin: 0 !important;
+    padding: 14px 16px !important;
+    border: 0 !important;
+    border-radius: 16px !important;
+    background: var(--embed-card) !important;
+    color: var(--muted) !important;
+    font-size: 12px !important;
+    font-weight: 400 !important;
+    line-height: 1.5 !important;
+}
+/* 新手引导里的内容框：底板拍平后它承担内层卡片的角色，规格对齐其它内层框 */
+html.settings-embed body:not(#settings-embed-scope) .onboarding-step-panel {
+    border: 0 !important;
+    border-radius: 12px !important;
+    background: var(--bg) !important;
+    box-shadow: none !important;
+}
+
+/* ── 浮层（推荐API / 模型选择 / 帮助 / RH 工作流编辑器） ── */
+html.settings-embed body:not(#settings-embed-scope) .picker-overlay { background: rgba(0, 0, 0, .28) !important; }
+html.settings-embed body:not(#settings-embed-scope) .picker-modal {
+    border: 0 !important;
+    border-radius: 20px !important;
+    background: color-mix(in srgb, var(--panel) 78%, transparent) !important;
+    backdrop-filter: blur(44px) saturate(190%);
+    -webkit-backdrop-filter: blur(44px) saturate(190%);
+    box-shadow: var(--shadow-xl) !important;
+    overflow: hidden !important;
+}
+html.settings-embed body:not(#settings-embed-scope) .picker-head {
+    padding: 24px 22px 14px !important;
+    background: transparent !important;
+}
+html.settings-embed body:not(#settings-embed-scope) .picker-title {
+    color: var(--text) !important;
+    font-size: 15px !important;
+    font-weight: 800 !important;
+    letter-spacing: 0 !important;
+}
+html.settings-embed body:not(#settings-embed-scope) .picker-count {
+    margin-top: 2px !important;
+    color: var(--muted) !important;
+    font-size: 12px !important;
+    font-weight: 400 !important;
+    line-height: 1.5 !important;
+}
+html.settings-embed body:not(#settings-embed-scope) .picker-close {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 30px !important;
+    height: 30px !important;
+    border: 0 !important;
+    border-radius: 8px !important;
+    background: transparent !important;
+    color: var(--muted) !important;
+}
+html.settings-embed body:not(#settings-embed-scope) .picker-close:hover { background: var(--nav-hover-bg) !important; color: var(--text) !important; }
+html.settings-embed body:not(#settings-embed-scope) .picker-search,
+html.settings-embed body:not(#settings-embed-scope) .picker-toolbar input {
+    height: 36px !important;
+    padding: 0 12px !important;
+    border: 0 !important;
+    border-radius: 8px !important;
+    background: var(--bg) !important;
+    color: var(--muted) !important;
+    font-size: 13px !important;
+    box-shadow: none !important;
+}
+html.settings-embed body:not(#settings-embed-scope) .picker-search:focus,
+html.settings-embed body:not(#settings-embed-scope) .picker-toolbar input:focus { box-shadow: 0 0 0 3px color-mix(in srgb, var(--strong) 18%, transparent) !important; }
+html.settings-embed body:not(#settings-embed-scope) .picker-cat-tab {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+    height: auto !important;
+    padding: 8px 14px !important;
+    border: 0 !important;
+    border-radius: 999px !important;
+    background: var(--stage-bg) !important;
+    color: var(--text) !important;
+    font-size: 13px !important;
+    font-weight: 600 !important;
+    box-shadow: none !important;
+}
+html.settings-embed body:not(#settings-embed-scope) .picker-cat-tab:hover { background: var(--nav-hover-bg) !important; }
+html.settings-embed body:not(#settings-embed-scope) .picker-cat-tab.active {
+    background: var(--text) !important;
+    color: var(--stage-bg) !important;
+}
+/* 计数徽标嵌在黑白反转的分段控件里，必须继承字色，否则黑底黑字/白底白字 */
+html.settings-embed body:not(#settings-embed-scope) .picker-cat-tab .cat-count,
+html.settings-embed body:not(#settings-embed-scope) .picker-type-btn .cat-count,
+html.settings-embed body:not(#settings-embed-scope) .model-cat-tab .cat-count {
+    padding: 0 !important;
+    border: none !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    color: inherit !important;
+    box-shadow: none !important;
+    font-size: 11px !important;
+    font-weight: 600 !important;
+    opacity: .65;
+}
+html.settings-embed body:not(#settings-embed-scope) .picker-foot {
+    padding: 18px 22px 18px !important;
+    background: transparent !important;
+    gap: 8px !important;
+}
+html.settings-embed body:not(#settings-embed-scope) .picker-summary {
+    border: none !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    color: var(--muted) !important;
+    font-size: 12px !important;
+}
+html.settings-embed body:not(#settings-embed-scope) .picker-sum-chip,
+html.settings-embed body:not(#settings-embed-scope) .picker-sum-chip-empty,
+html.settings-embed body:not(#settings-embed-scope) .picker-type-btn {
+    padding: 2px 9px !important;
+    border: 0 !important;
+    border-radius: 999px !important;
+    background: var(--stage-bg) !important;
+    color: var(--muted) !important;
+    box-shadow: none !important;
+    font-size: 11px !important;
+    font-weight: 600 !important;
+}
+html.settings-embed body:not(#settings-embed-scope) .jimeng-help-toolbar { display: flex !important; align-items: center !important; gap: 8px !important; padding: 14px 22px 0 !important; }
+html.settings-embed body:not(#settings-embed-scope) .jimeng-help-output {
+    margin: 12px 22px 18px !important;
+    padding: 12px 14px !important;
+    border: 0 !important;
+    border-radius: 10px !important;
+    background: var(--bg) !important;
+    color: var(--muted) !important;
+    font-family: var(--font-mono) !important;
+    font-size: 11.5px !important;
+}
+html.settings-embed body:not(#settings-embed-scope) .rh-workflow-editor-overlay { background: rgba(0, 0, 0, .28) !important; }
+html.settings-embed body:not(#settings-embed-scope) .rh-workflow-editor-modal {
+    border: 0 !important;
+    border-radius: 20px !important;
+    background: color-mix(in srgb, var(--panel) 78%, transparent) !important;
+    backdrop-filter: blur(44px) saturate(190%);
+    -webkit-backdrop-filter: blur(44px) saturate(190%);
+    box-shadow: var(--shadow-xl) !important;
+    overflow: hidden !important;
+}
+html.settings-embed body:not(#settings-embed-scope) .rh-workflow-editor-head {
+    padding: 22px 22px 12px !important;
+    background: transparent !important;
+}
+html.settings-embed body:not(#settings-embed-scope) .rh-workflow-editor-title {
+    color: var(--text) !important;
+    font-size: 16px !important;
+    font-weight: 800 !important;
+    letter-spacing: 0 !important;
+}
+html.settings-embed body:not(#settings-embed-scope) .rh-workflow-editor-sub {
+    margin-top: 2px !important;
+    color: var(--muted) !important;
+    font-family: var(--font-sans) !important;
+    font-size: 12px !important;
+    font-weight: 400 !important;
+    letter-spacing: 0 !important;
+}
+html.settings-embed body:not(#settings-embed-scope) .rh-workflow-editor-close {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 30px !important;
+    height: 30px !important;
+    border: 0 !important;
+    border-radius: 8px !important;
+    background: transparent !important;
+    color: var(--muted) !important;
+}
+html.settings-embed body:not(#settings-embed-scope) .rh-workflow-editor-close:hover { background: var(--nav-hover-bg) !important; color: var(--text) !important; }
+html.settings-embed body:not(#settings-embed-scope) .rh-workflow-editor-side { background: var(--embed-aside) !important; }
+html.settings-embed body:not(#settings-embed-scope) .rh-editor-field { gap: 6px !important; }
+html.settings-embed body:not(#settings-embed-scope) .rh-editor-field > span { color: var(--muted) !important; font-size: 12px !important; font-weight: 600 !important; }
+html.settings-embed body:not(#settings-embed-scope) .rh-editor-field input,
+html.settings-embed body:not(#settings-embed-scope) .rh-editor-field textarea {
+    padding: 8px 12px !important;
+    border: 0 !important;
+    border-radius: 10px !important;
+    background: var(--bg) !important;
+    color: var(--text) !important;
+    font-size: 13px !important;
+    box-shadow: none !important;
+}
+html.settings-embed body:not(#settings-embed-scope) .rh-editor-field input:focus,
+html.settings-embed body:not(#settings-embed-scope) .rh-editor-field textarea:focus { box-shadow: 0 0 0 3px color-mix(in srgb, var(--strong) 18%, transparent) !important; }
+html.settings-embed body:not(#settings-embed-scope) .rh-editor-node-list,
+html.settings-embed body:not(#settings-embed-scope) .rh-editor-summary {
+    border: 0 !important;
+    border-radius: 12px !important;
+    background: var(--bg) !important;
+    color: var(--muted) !important;
+}
+html.settings-embed body:not(#settings-embed-scope) .rh-editor-graph-wrap,
+html.settings-embed body:not(#settings-embed-scope) .rh-editor-graph-svg { border: none !important; border-radius: 0 !important; background: var(--bg) !important; }
+html.settings-embed body:not(#settings-embed-scope) .rh-editor-graph-controls {
+    border: 0 !important;
+    border-radius: 10px !important;
+    background: var(--stage-bg) !important;
+    box-shadow: none !important;
+    color: var(--muted) !important;
+}
+html.settings-embed body:not(#settings-embed-scope) .rh-editor-graph-controls button { color: var(--muted) !important; }
+html.settings-embed body:not(#settings-embed-scope) .rh-editor-graph-controls button:hover { background: var(--nav-hover-bg) !important; color: var(--text) !important; }
+
+/* ── CLI 面板 / 存储设置 / 校验结果 ── */
+html.settings-embed body:not(#settings-embed-scope) .jimeng-cli-panel {
+    padding: 12px 14px !important;
+    border: 0 !important;
+    border-radius: 12px !important;
+    background: var(--bg) !important;
+    box-shadow: none !important;
+}
+html.settings-embed body:not(#settings-embed-scope) .jimeng-actions { display: flex !important; flex-wrap: wrap !important; gap: 8px !important; }
+html.settings-embed body:not(#settings-embed-scope) .jimeng-credit,
+html.settings-embed body:not(#settings-embed-scope) .jimeng-output { color: var(--muted) !important; font-size: 12px !important; line-height: 1.5 !important; }
+html.settings-embed body:not(#settings-embed-scope) .jimeng-output {
+    padding: 10px 12px !important;
+    border: 0 !important;
+    border-radius: 10px !important;
+    background: var(--stage-bg) !important;
+    font-family: var(--font-mono) !important;
+    font-size: 11.5px !important;
+}
+html.settings-embed body:not(#settings-embed-scope) #verifyResult { font-size: 12px !important; color: var(--muted) !important; }
+html.settings-embed body:not(#settings-embed-scope) input[type="checkbox"] { accent-color: var(--text) !important; }
+
+/* ═══ Modal embed: fill iframe height, content scrolls ═══
+   高度链必须逐级确定（html→body→.page→.wrap→.layout），
+   否则 .layout 会被内容撑高，左栏跟着整页滚走、页头也粘不住。 */
+html.settings-embed,
+html.settings-embed body,
+html.settings-embed body:not(#settings-embed-scope) { height: 100%; }
+html.settings-embed body:not(#settings-embed-scope) .wrap,
+html.settings-embed body:not(#settings-embed-scope) .page { height: 100%; overflow: hidden; }
+html.settings-embed body:not(#settings-embed-scope) .layout {
+    height: 100%;
+    overflow: hidden !important;
+    grid-template-rows: minmax(0, 1fr) !important;
+    align-items: stretch !important;
+}
+html.settings-embed body:not(#settings-embed-scope) .content,
+html.settings-embed body:not(#settings-embed-scope) .sidebar { min-height: 0; }
+html.settings-embed body:not(#settings-embed-scope) .content-head { position: sticky; top: 0; z-index: 5; }
+@media (max-width: 760px) {
+    html.settings-embed body:not(#settings-embed-scope) .layout { grid-template-columns: 1fr !important; }
+    html.settings-embed body:not(#settings-embed-scope) .sidebar { position: static !important; max-height: none !important; width: 100% !important; min-width: 0 !important; }
+}
+/* Close button */
+.settings-close-btn, .modal-close-btn { transition: transform 0.2s ease-out; }
+.settings-close-btn:hover, .modal-close-btn:hover { transform: rotate(90deg) scale(1.1); }
+/* Switch animation */
+input[type="checkbox"].toggle-switch { transition: all 0.2s cubic-bezier(0.22,0.61,0.36,1); }
+.ios-slider, .toggle-track { transition: all 0.2s cubic-bezier(0.22,0.61,0.36,1); }
+</style>
+</head>
+<body>
+    <div class="page">
+        <div class="wrap">
+            <header class="page-head">
+                <div>
+                    <div class="title" data-i18n="api.title">API 设置</div>
+                    <div class="sub" data-i18n="api.subtitle">管理平台地址、模型列表和 Key。Key 写入后端 env，页面不会回显完整内容。</div>
+                </div>
+                <div id="status" class="status"></div>
+            </header>
+
+            <div class="layout">
+                <aside class="sidebar">
+                    <div class="side-section-title" data-i18n="api.providersTitle">平台列表</div>
+                    <div id="providerList" class="provider-list"></div>
+                    <button class="add-btn" type="button" onclick="addProvider()"><i data-lucide="plus" class="w-4 h-4"></i><span data-i18n="api.addProvider">新增平台</span></button>
+                    <button class="api-link-btn" type="button" onclick="openRecommendApi()"><i data-lucide="sparkles" class="w-4 h-4"></i><span data-i18n="api.recommendApi">推荐API</span></button>
+                    <div class="cli-quick-group">
+                        <div class="side-section-title" data-i18n="api.cliSettings">CLI 设置</div>
+                        <div class="cli-quick-list">
+                            <button class="cli-quick-btn" type="button" onclick="addCliProvider('jimeng')"><i data-lucide="image" class="w-3.5 h-3.5"></i><span>即梦 CLI</span></button>
+                            <button class="cli-quick-btn" type="button" onclick="addCliProvider('codex')"><i data-lucide="terminal" class="w-3.5 h-3.5"></i><span>GPT CLI</span></button>
+                            <button class="cli-quick-btn" type="button" onclick="addCliProvider('gemini-cli')"><i data-lucide="sparkles" class="w-3.5 h-3.5"></i><span>Antigravity CLI</span></button>
+                            <div class="cli-quick-note">需要先安装 CLI文件夹中的依赖。</div>
+                        </div>
+                    </div>
+                    <div class="cli-quick-group" style="margin-top:16px;">
+                        <div class="side-section-title">存储设置</div>
+                        <div class="cli-quick-list">
+                            <button id="sidebarStorageBtn" class="cli-quick-btn active" type="button" onclick="showStorageSettings()"><i data-lucide="folder-open" class="w-3.5 h-3.5"></i><span>输出目录</span></button>
+                        </div>
+                    </div>
+                </aside>
+
+                <main id="settingsContent" class="content">
+                    <div class="content-head">
+                        <div>
+                            <div id="editorTitle" class="editor-title" data-i18n="api.provider">平台</div>
+                            <div class="editor-sub" data-i18n="api.editorSub">配置基础信息、API Key 和可用模型</div>
+                        </div>
+                        <div class="content-actions">
+                            <button id="deleteBtn" class="action-btn danger-btn api-page-delete-btn" type="button" onclick="deleteProvider()"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i><span data-i18n="api.delete">删除</span></button>
+                            <button class="action-btn save-btn api-page-save-btn" type="button" data-morph-keep-width onclick="saveProviders()"><i data-lucide="save" class="w-3.5 h-3.5"></i><span data-i18n="api.save">保存</span></button>
+                        </div>
+                    </div>
+
+                    <section id="providerOnboardingCard" class="provider-onboarding-card" hidden></section>
+
+                    <section class="block">
+                        <div class="block-head">
+                            <div>
+                                <div class="block-title" data-i18n="api.basicInfo">基本信息</div>
+                                <div class="block-desc" data-i18n="api.basicHint">平台显示名、唯一 ID 和请求地址</div>
+                            </div>
+                        </div>
+                        <div class="form">
+                            <label class="field full">
+                                <span class="label" data-i18n="api.platformName">平台名称</span>
+                                <div class="field-frame"><input id="nameInput" type="text" placeholder="Comfly"></div>
+                                <span class="hint"><span data-i18n="api.platformIdShown">平台 ID</span>: <span id="idPreview" style="font-family: var(--font-mono);color:var(--text)">—</span></span>
+                                <input id="idInput" type="hidden">
+                            </label>
+                            <label class="field full api-base-url-field">
+                                <span class="label" data-i18n="api.baseUrl">请求地址</span>
+                                <div class="field-frame"><input id="baseInput" type="text" placeholder="https://api.example.com/v1"></div>
+                                <div class="ms-hint">
+                                    <span class="ms-line"><span data-i18n="api.msChinaEndpoint">国内默认请求地址：</span><span class="inline-code">https://api-inference.modelscope.cn/v1</span></span>
+                                    <span class="ms-line"><span data-i18n="api.msGlobalEndpoint">国外使用请求地址：</span><span class="inline-code">https://api-inference.modelscope.ai/v1</span></span>
+                                </div>
+                                <div class="runninghub-hint">
+                                    <span class="ms-line">国外地址：<span class="inline-code">https://www.runninghub.ai</span></span>
+                                </div>
+                                <div class="apimart-hint">
+                                    <span class="ms-line">国内请求地址：<span class="inline-code">https://apib.ai</span></span>
+                                </div>
+                            </label>
+                            <label class="field full api-key-field">
+                                <span class="label api-key-label">API Key</span>
+                                <div class="key-panel api-standard-key-row">
+                                    <div class="key-input-line">
+                                        <div class="field-frame"><input id="keyInput" type="password"></div>
+                                        <div class="key-actions">
+                                            <button class="key-btn" type="button" data-morph onclick="saveKeyOnly()" title="保存 Key" data-i18n-title="api.saveKeyTitle"><i data-lucide="check" class="w-4 h-4"></i></button>
+                                            <button class="key-btn key-clear" type="button" onclick="clearKeyOnly()" title="清除 Key" data-i18n-title="api.clearKeyTitle"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                                        </div>
+                                    </div>
+                                </div>
+                                <span id="keyHint" class="hint"></span>
+                                <div class="rh-key-stack">
+                                    <div class="rh-key-item">
+                                        <div class="rh-key-head">
+                                            <div>
+                                                <div class="rh-key-title" data-i18n="api.rhCoinApiKeyRequired">RH币 API Key · 必填</div>
+                                                <div class="rh-key-desc" data-i18n="api.rhCoinKeyDesc">使用 RH币 接口时填写</div>
+                                            </div>
+                                            <div class="rh-key-links">
+                                                <span data-i18n="api.get">获取</span>
+                                                <a href="https://www.runninghub.cn/enterprise-api/consumerApi?inviteCode=rh-v1331" target="_blank" rel="noopener"><i data-lucide="external-link" class="w-3 h-3"></i><span data-i18n="api.cnKey">国内 Key</span></a>
+                                                <a href="https://www.runninghub.ai/enterprise-api/consumerApi?inviteCode=rh-v1331" target="_blank" rel="noopener"><i data-lucide="external-link" class="w-3 h-3"></i><span data-i18n="api.globalKey">国外 Key</span></a>
+                                            </div>
+                                        </div>
+                                        <div class="key-input-line">
+                                            <div class="field-frame"><input id="rhFreeKeyInput" type="password"></div>
+                                            <div class="key-actions">
+                                                <button class="key-btn" type="button" data-morph onclick="saveRhKeyOnly('free')" title="保存 RH币 Key" data-i18n-title="api.saveRhCoinKeyTitle"><i data-lucide="check" class="w-4 h-4"></i></button>
+                                                <button class="key-btn key-clear" type="button" onclick="clearRhKeyOnly('free')" title="清除 RH币 Key" data-i18n-title="api.clearRhCoinKeyTitle"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                                            </div>
+                                        </div>
+                                        <span id="rhFreeKeyHint" class="hint"></span>
+                                    </div>
+                                    <div class="rh-key-item">
+                                        <div class="rh-key-head">
+                                            <div>
+                                                <div class="rh-key-title" data-i18n="api.rhWalletApiKeyOptional">账户余额 API Key · 可选</div>
+                                                <div class="rh-key-desc" data-i18n="api.rhWalletKeyDesc">使用账户余额接口时填写</div>
+                                            </div>
+                                            <div class="rh-key-links">
+                                                <span data-i18n="api.get">获取</span>
+                                                <a href="https://www.runninghub.cn/enterprise-api/sharedApi?inviteCode=rh-v1331" target="_blank" rel="noopener"><i data-lucide="external-link" class="w-3 h-3"></i><span data-i18n="api.cnKey">国内 Key</span></a>
+                                                <a href="https://www.runninghub.ai/enterprise-api/sharedApi?inviteCode=rh-v1331" target="_blank" rel="noopener"><i data-lucide="external-link" class="w-3 h-3"></i><span data-i18n="api.globalKey">国外 Key</span></a>
+                                            </div>
+                                        </div>
+                                        <div class="key-input-line">
+                                            <div class="field-frame"><input id="rhWalletKeyInput" type="password"></div>
+                                            <div class="key-actions">
+                                                <button class="key-btn" type="button" data-morph onclick="saveRhKeyOnly('wallet')" title="保存账户余额 Key" data-i18n-title="api.saveRhWalletKeyTitle"><i data-lucide="check" class="w-4 h-4"></i></button>
+                                                <button class="key-btn key-clear" type="button" onclick="clearRhKeyOnly('wallet')" title="清除账户余额 Key" data-i18n-title="api.clearRhWalletKeyTitle"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                                            </div>
+                                        </div>
+                                        <span id="rhWalletKeyHint" class="hint"></span>
+                                    </div>
+                                </div>
+                                <div class="ms-hint">
+                                    <span class="ms-line"><span data-i18n="api.msTokenCn">获取 Token · 国内：</span><a href="https://www.modelscope.cn/my/access/token" target="_blank">https://www.modelscope.cn/my/access/token</a></span>
+                                    <span class="ms-line"><span data-i18n="api.msTokenGlobal">获取 Token · 国外：</span><a href="https://www.modelscope.ai/my/access/token" target="_blank">https://www.modelscope.ai/my/access/token</a></span>
+                                </div>
+                                <div class="runninghub-hint">
+                                </div>
+                            </label>
+                            <div id="jimengCliPanel" class="jimeng-cli-panel" hidden>
+                                <div class="jimeng-cli-head">
+                                    <div>
+                                        <div class="rh-key-title">即梦 CLI 账户</div>
+                                        <div class="rh-key-desc">使用本机 dreamina 登录态，无需 API Key。</div>
+                                    </div>
+                                    <div id="jimengCliStatus" class="jimeng-status-pill">未检测</div>
+                                </div>
+                                <div class="jimeng-actions">
+                                    <button class="action-btn primary-btn" type="button" onclick="startJimengLogin()"><i data-lucide="qr-code" class="w-3.5 h-3.5"></i><span>扫码登录</span></button>
+                                    <button class="action-btn" type="button" onclick="refreshJimengCredit()"><i data-lucide="wallet-cards" class="w-3.5 h-3.5"></i><span>查询积分</span></button>
+                                    <button class="action-btn" type="button" onclick="openJimengHelp()"><i data-lucide="terminal" class="w-3.5 h-3.5"></i><span>帮助</span></button>
+                                    <button class="action-btn danger-btn" type="button" onclick="logoutJimeng()"><i data-lucide="log-out" class="w-3.5 h-3.5"></i><span>退出登录</span></button>
+                                </div>
+                                <label class="rh-api-switch" style="margin-top:8px;display:flex;align-items:center;gap:8px;cursor:pointer;">
+                                    <span style="font-size:13px;color:var(--text-secondary);">WSL 模式（Windows CLI 异常时启用）</span>
+                                    <input type="checkbox" id="jimengWslMode" onchange="toggleJimengWsl(this.checked)" style="accent-color:var(--accent);">
+                                </label>
+                                <div id="jimengCredit" class="jimeng-credit"></div>
+                                <div id="jimengLoginBox" class="jimeng-output" hidden></div>
+                            </div>
+                            <div id="codexCliPanel" class="jimeng-cli-panel" hidden>
+                                <div class="jimeng-cli-head">
+                                    <div>
+                                        <div class="rh-key-title">OpenAI CLI 账户</div>
+                                        <div class="rh-key-desc">使用本机 codex 登录态，无需在本项目保存 API Key。</div>
+                                    </div>
+                                    <div id="codexCliStatus" class="jimeng-status-pill">未检测</div>
+                                </div>
+                                <div class="jimeng-actions">
+                                    <button class="action-btn primary-btn" type="button" onclick="refreshCodexStatus()"><i data-lucide="radar" class="w-3.5 h-3.5"></i><span>检测 CLI</span></button>
+                                    <button class="action-btn" type="button" onclick="openCodexHelp()"><i data-lucide="terminal" class="w-3.5 h-3.5"></i><span>帮助</span></button>
+                                </div>
+                                <div id="codexCliInfo" class="jimeng-credit"></div>
+                            </div>
+                            <div id="geminiCliPanel" class="jimeng-cli-panel" hidden>
+                                <div class="jimeng-cli-head">
+                                    <div>
+                                        <div class="rh-key-title">Antigravity CLI 账户</div>
+                                        <div class="rh-key-desc">使用本机 agy 登录态，无需在本项目保存 API Key。</div>
+                                        <div class="jimeng-credit">需要先安装 CLI 文件夹中的依赖。</div>
+                                    </div>
+                                    <div id="geminiCliStatus" class="jimeng-status-pill">未检测</div>
+                                </div>
+                                <div class="jimeng-actions">
+                                    <button class="action-btn primary-btn" type="button" onclick="refreshGeminiCliStatus()"><i data-lucide="radar" class="w-3.5 h-3.5"></i><span>检测 CLI</span></button>
+                                    <button class="action-btn" type="button" onclick="openGeminiCliHelp()"><i data-lucide="terminal" class="w-3.5 h-3.5"></i><span>帮助</span></button>
+                                </div>
+                                <div id="geminiCliInfo" class="jimeng-credit"></div>
+                            </div>
+                            <div id="lovartPanel" class="jimeng-cli-panel" hidden>
+                                <div class="jimeng-cli-head">
+                                    <div>
+                                        <div class="rh-key-title">Lovart 设计代理账户</div>
+                                        <div class="rh-key-desc">到 lovart.ai 登录后点头像 → Settings，复制 access_key 和 secret_key。<a href="https://lovart.notion.site/Lovart-OpenClaw-User-Guide-33da46b16a0f80f6a7fff8e4896b9fca" target="_blank" rel="noopener noreferrer" style="display:inline-flex;align-items:center;gap:3px;color:var(--text);font-weight:800;text-decoration:underline;text-underline-offset:3px;"><i data-lucide="external-link" class="w-3 h-3"></i>查看官方文档</a></div>
+                                    </div>
+                                    <div class="jimeng-actions">
+                                        <button class="action-btn" type="button" onclick="clearLovartKeys()"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i><span>清除已保存密钥</span></button>
+                                    </div>
+                                </div>
+                                <div class="rh-key-item">
+                                    <label class="field">
+                                        <span class="label">Access Key</span>
+                                        <div class="field-frame"><input id="lovartAkInput" type="password" autocomplete="off" placeholder="Access Key"></div>
+                                    </label>
+                                    <label class="field">
+                                        <span class="label">Secret Key</span>
+                                        <div class="field-frame"><input id="lovartSkInput" type="password" autocomplete="off" placeholder="Secret Key"></div>
+                                    </label>
+                                </div>
+                                <div id="lovartKeyHint" class="hint"></div>
+                                <label style="display:flex;align-items:center;gap:8px;cursor:pointer;">
+                                    <input type="checkbox" id="lovartAutoConfirmInput" style="accent-color:var(--accent);">
+                                    <span style="font-size:13px;color:var(--text-secondary);">高成本操作（视频等）自动确认</span>
+                                </label>
+                                <div class="hint">勾选后 Lovart 遇到高成本操作会自动确认并继续执行，会自动消耗账户额度。</div>
+                                <label style="display:flex;align-items:center;gap:8px;cursor:pointer;">
+                                    <input type="checkbox" id="lovartUnlimitedInput" style="accent-color:var(--accent);">
+                                    <span style="font-size:13px;color:var(--text-secondary);">排队模式（不消耗积分，出图更慢）</span>
+                                </label>
+                                <div class="hint">关闭 = 快速模式，会消耗积分。</div>
+                                <div class="jimeng-actions">
+                                    <button id="lovartModeApplyBtn" class="action-btn" type="button" onclick="applyLovartMode()"><i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i><span>应用</span></button>
+                                    <span id="lovartModeHint" class="hint">点『应用』查询/切换</span>
+                                </div>
+                            </div>
+                            <!-- 验证操作行 -->
+                            <div class="verify-action-row">
+                                <button id="testUrlBtn" class="action-btn" type="button" onclick="testConnection()">
+                                    <i data-lucide="check-circle-2" class="w-3.5 h-3.5"></i><span data-i18n="api.testUrl">验证地址</span>
+                                </button>
+                                <button id="probeAsyncBtn" class="action-btn" type="button" onclick="probeAsync()">
+                                    <i data-lucide="radar" class="w-3.5 h-3.5"></i><span>验证协议</span>
+                                </button>
+                                <div class="field-frame protocol-selector-wrap">
+                                    <select id="protocolInput">
+                                        <option value="openai" data-i18n="api.protocolOpenAI">OpenAI 直连</option>
+                                        <option value="apimart" data-i18n="api.protocolApimart">异步协议</option>
+                                        <option value="gemini" data-i18n="api.protocolGemini">Gemini 协议</option>
+                                        <option value="volcengine">方舟/Ark 任务协议</option>
+                                        <option value="runninghub">RunningHub OpenAPI</option>
+                                        <option value="jimeng">即梦 CLI</option>
+                                        <option value="codex">OpenAI Codex CLI</option>
+                                        <option value="gemini-cli">Antigravity CLI</option>
+                                        <option value="lovart">Lovart 设计代理</option>
+                                    </select>
+                                </div>
+                                <div class="field-frame image-request-mode-wrap">
+                                    <select id="imageRequestModeInput" title="图片接口">
+                                        <option value="openai">图片：OpenAI 标准</option>
+                                        <option value="openai-json">图片：OpenAI JSON</option>
+                                        <option value="openai-video-proxy">图片：OpenAI 中转</option>
+                                        <option value="openai-responses">图片：OpenAI RS</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div id="verifyResult" style="display:none;padding:2px 0;grid-column:1/-1"></div>
+                        </div>
+                    </section>
+
+                    <section id="runninghubConfigBlock" class="block runninghub-config-block" hidden>
+                        <div class="block-head">
+                            <div>
+                                <div class="block-title">应用与工作流</div>
+                                <div class="block-desc">粘贴运行路径后，点击右侧创建卡片。</div>
+                            </div>
+                        </div>
+                        <div class="rh-paste-row">
+                            <input id="rhPasteInput" class="rh-paste-input" type="text" placeholder="/run/ai-app/... 或 /run/workflow/...">
+                            <button class="action-btn" type="button" onclick="createRhEntryFromPaste()"><i data-lucide="plus" class="w-3.5 h-3.5"></i><span>创建</span></button>
+                        </div>
+                        <div class="rh-card-columns">
+                            <div class="rh-card-group">
+                                <div class="rh-group-head">
+                                    <div class="rh-group-title">AI 应用</div>
+                                    <div id="rhAppsCount" class="rh-group-count">0</div>
+                                </div>
+                                <div id="rhAppsList" class="rh-card-list"></div>
+                            </div>
+                            <div class="rh-card-group">
+                                <div class="rh-group-head">
+                                    <div class="rh-group-title">工作流</div>
+                                    <div id="rhWorkflowsCount" class="rh-group-count">0</div>
+                                </div>
+                                <div id="rhWorkflowsList" class="rh-card-list"></div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <div id="modelsHead" class="block models-toolbar">
+                        <div class="models-toolbar-main">
+                            <div>
+                                <div class="block-title" data-i18n="api.modelsTitle">模型列表</div>
+                                <div class="block-desc" data-i18n="api.modelsDesc">从上游 API 自动拉取所有可用模型并按类型分类（image / chat / video）</div>
+                            </div>
+                            <div class="models-toolbar-actions">
+                                <button id="fetchModelsBtn" class="action-btn primary-btn" type="button" onclick="fetchModels()">
+                                    <i data-lucide="download-cloud" class="w-3.5 h-3.5"></i><span data-i18n="api.fetchModels">拉取模型</span>
+                                </button>
+                                <button id="openPickerBtn" class="action-btn" type="button" onclick="openModelPicker()" disabled style="opacity:.5">
+                                    <i data-lucide="list-checks" class="w-3.5 h-3.5"></i><span data-i18n="api.selectModels">选择模型</span>
+                                </button>
+                            </div>
+                        </div>
+                        <div id="modelsFetchHint" class="models-fetch-hint" hidden></div>
+                        <div class="model-cat-tabs" id="modelCatTabs" role="tablist" aria-label="模型分类">
+                            <button class="model-cat-tab active" data-cat="all" role="tab" aria-selected="true" type="button" onclick="selectModelGroup('all')">全部 <span class="cat-count" id="catCountAll">0</span></button>
+                            <button class="model-cat-tab" data-cat="image" role="tab" aria-selected="false" type="button" onclick="selectModelGroup('image')">图像 <span class="cat-count" id="catCountImage">0</span></button>
+                            <button class="model-cat-tab" data-cat="chat" role="tab" aria-selected="false" type="button" onclick="selectModelGroup('chat')">对话 <span class="cat-count" id="catCountChat">0</span></button>
+                            <button class="model-cat-tab" data-cat="video" role="tab" aria-selected="false" type="button" onclick="selectModelGroup('video')">视频 <span class="cat-count" id="catCountVideo">0</span></button>
+                        </div>
+                    </div>
+                    <div class="model-grid" id="modelGrid">
+                        <section class="block" id="imageModelBlock">
+                            <div class="block-head">
+                                <div>
+                                    <div class="block-title" data-i18n="api.imageModels">生图模型</div>
+                                    <div class="block-desc" data-i18n="api.imageHint">在线生图和无限画布 API 生成使用</div>
+                                    <div class="ms-hint">
+                                        <span class="ms-line"><span data-i18n="api.msModelExample">模型名称示意：</span><span class="inline-code">Tongyi-MAI/Z-Image-Turbo</span></span>
+                                    </div>
+                                </div>
+                                <button class="ghost-btn" type="button" onclick="addModel('image')"><i data-lucide="plus" class="w-3.5 h-3.5"></i><span data-i18n="api.model">模型</span></button>
+                            </div>
+                            <div id="imageModelList" class="model-list"></div>
+                        </section>
+
+                        <section class="block" id="chatModelBlock">
+                            <div class="block-head">
+                                <div>
+                                    <div class="block-title" data-i18n="api.chatModels">聊天模型</div>
+                                    <div class="block-desc" data-i18n="api.chatHint">GPT 对话和 LLM 节点使用</div>
+                                </div>
+                                <button class="ghost-btn" type="button" onclick="addModel('chat')"><i data-lucide="plus" class="w-3.5 h-3.5"></i><span data-i18n="api.model">模型</span></button>
+                        </div>
+                        <div id="chatModelList" class="model-list"></div>
+                    </section>
+
+                        <section class="block" id="videoModelBlock">
+                            <div class="block-head">
+                                <div>
+                                    <div class="block-title" data-i18n="api.videoModels">视频模型</div>
+                                    <div class="block-desc" data-i18n="api.videoHint">无限画布视频生成节点使用</div>
+                                </div>
+                                <button class="ghost-btn" type="button" onclick="addModel('video')"><i data-lucide="plus" class="w-3.5 h-3.5"></i><span data-i18n="api.model">模型</span></button>
+                            </div>
+                            <div id="videoModelList" class="model-list"></div>
+                        </section>
+
+                        <section id="msLoraBlock" class="block ms-lora-block">
+                            <div class="block-head">
+                                <div>
+                                    <div class="block-title" data-i18n="api.loraManager">LoRA 管理</div>
+                                    <div class="block-desc" data-i18n="api.loraManagerDesc">为 ModelScope 生图模型绑定可用 LoRA。无限画布 MS 节点会按当前模型自动筛选。</div>
+                                    <div class="ms-hint">
+                                        <span class="ms-line"><span data-i18n="api.msCnModels">中文模型库：</span><a href="https://www.modelscope.cn/aigc/models" target="_blank">https://www.modelscope.cn/aigc/models</a></span>
+                                        <span class="ms-line"><span data-i18n="api.msEnModels">英文模型库：</span><a href="https://www.modelscope.ai/civision/models" target="_blank">https://www.modelscope.ai/civision/models</a></span>
+                                    </div>
+                                </div>
+                                <button class="ghost-btn" type="button" onclick="addMsLora()"><i data-lucide="plus" class="w-3.5 h-3.5"></i><span>LoRA</span></button>
+                            </div>
+                            <div id="msLoraList" class="lora-list"></div>
+                        </section>
+                </div>
+
+                <!-- 存储设置 - 自定义输出目录 -->
+                <div id="storageSettingsBlock" class="settings-hidden">
+                    <div class="content-head">
+                        <div>
+                            <div class="editor-title">输出目录</div>
+                            <div class="editor-sub">自定义生成的图片、视频保存位置（不影响 API 配置和画布数据）</div>
+                        </div>
+                        <div class="content-actions">
+                            <button class="action-btn save-btn api-page-save-btn" type="button" onclick="saveOutputDir()"><i data-lucide="save" class="w-3.5 h-3.5"></i><span>保存</span></button>
+                        </div>
+                    </div>
+                    <section class="block">
+                        <div class="block-head">
+                            <div>
+                                <div class="block-title">生成文件存放路径</div>
+                                <div class="block-desc">修改后需重启应用生效。留空恢复默认路径（%APPDATA%\MGStudio\output）</div>
+                            </div>
+                        </div>
+                        <div class="form">
+                            <label class="field full">
+                                <span class="label">自定义目录</span>
+                                <div class="field-frame" style="display:flex;gap:8px;">
+                                    <input id="outputDirInput" type="text" placeholder="例如 D:\MGStudio\图片输出" style="flex:1;">
+                                    <button class="action-btn" type="button" onclick="browseOutputDir()" style="white-space:nowrap;">
+                                        <i data-lucide="folder-search" class="w-3.5 h-3.5"></i><span>浏览</span>
+                                    </button>
+                                    <button class="action-btn" type="button" onclick="resetOutputDir()" style="white-space:nowrap;">
+                                        <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i><span>默认</span>
+                                    </button>
+                                </div>
+                            </label>
+                            <div id="outputDirStatus" class="field-hint" style="margin-top:8px;font-size:12px;color:var(--muted);"></div>
+                        </div>
+                    </section>
+                </div>
+
+            </main>
+                <main id="recommendContent" class="content recommend-content" hidden>
+                    <div class="content-head">
+                        <div>
+                            <div class="editor-title" data-i18n="api.recommendPanelTitle">推荐平台</div>
+                            <div class="editor-sub" data-i18n="api.recommendPanelSub">获取 Key 后保存，右侧会切换到刚保存的平台配置。</div>
+                        </div>
+                    </div>
+                    <section id="recommendPanel" class="provider-onboarding-card recommend-inline-card"></section>
+                </main>
+        </div>
+        </div>
+    </div>
+
+    <!-- 模型选择浮层 -->
+    <div id="recommendApiOverlay" class="picker-overlay">
+        <div class="picker-modal">
+            <div class="picker-head">
+                <div>
+                    <div class="picker-title" data-i18n="api.recommendApi">推荐API</div>
+                    <div class="picker-count" data-i18n="api.recommendApiDesc">选择平台后可以一键填写请求地址和协议。</div>
+                </div>
+                <div class="picker-close" onclick="closeRecommendApi()"><i data-lucide="x" class="w-4 h-4"></i></div>
+            </div>
+            <div id="recommendApiList" class="recommend-api-body"></div>
+            <div class="recommend-note" data-i18n="api.recommendApiNote">提示：账户内需要至少 0.05 元余额，才能验证地址并拉取模型。</div>
+        </div>
+    </div>
+
+    <div id="modelPickerOverlay" class="picker-overlay">
+        <div class="picker-modal">
+            <div class="picker-head">
+                <div>
+                    <div class="picker-title">从上游拉取的模型清单</div>
+                    <div id="pickerCount" class="picker-count">—</div>
+                </div>
+                <div class="picker-close" onclick="closeModelPicker()"><i data-lucide="x" class="w-4 h-4"></i></div>
+            </div>
+            <div class="picker-toolbar">
+                <input id="pickerFilter" class="picker-search" type="text" placeholder="按名称搜索模型…" oninput="renderModelPicker()">
+                <div class="picker-cat-tabs">
+                    <button class="picker-cat-tab active" data-cat="all" onclick="selectPickerCat('all')">全部 <span class="cat-count">0</span></button>
+                    <button class="picker-cat-tab" data-cat="image" onclick="selectPickerCat('image')">生图 <span class="cat-count">0</span></button>
+                    <button class="picker-cat-tab" data-cat="chat" onclick="selectPickerCat('chat')">LLM <span class="cat-count">0</span></button>
+                    <button class="picker-cat-tab" data-cat="video" onclick="selectPickerCat('video')">视频 <span class="cat-count">0</span></button>
+                </div>
+            </div>
+            <div id="pickerList" class="picker-body"></div>
+            <div id="pickerSummary" class="picker-summary">
+                <span class="picker-summary-title">将应用：</span>
+                <span id="sumImage" class="picker-sum-chip picker-sum-chip-empty">生图 0</span>
+                <span id="sumChat" class="picker-sum-chip picker-sum-chip-empty">聊天 0</span>
+                <span id="sumVideo" class="picker-sum-chip picker-sum-chip-empty">视频 0</span>
+                <span id="sumUnsel" style="margin-left:auto;color:var(--faint)">未选 0</span>
+            </div>
+            <div class="picker-foot">
+                <button class="action-btn" type="button" onclick="closeModelPicker()">取消</button>
+                <button class="action-btn save-btn" type="button" onclick="applyModelPicker()">应用到模型列表</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="jimengHelpOverlay" class="picker-overlay">
+        <div class="picker-modal jimeng-help-modal">
+            <div class="picker-head">
+                <div>
+                    <div class="picker-title">即梦 CLI 帮助</div>
+                    <div class="picker-count">查看 dreamina 官方命令帮助输出</div>
+                </div>
+                <div class="picker-close" onclick="closeJimengHelp()"><i data-lucide="x" class="w-4 h-4"></i></div>
+            </div>
+            <div class="jimeng-help-toolbar">
+                <select id="jimengHelpCommand">
+                    <option value="">dreamina</option>
+                    <option value="login">login</option>
+                    <option value="logout">logout</option>
+                    <option value="user_credit">user_credit</option>
+                    <option value="text2image">text2image</option>
+                    <option value="image2image">image2image</option>
+                    <option value="image_upscale">image_upscale</option>
+                    <option value="text2video">text2video</option>
+                    <option value="image2video">image2video</option>
+                    <option value="multimodal2video">multimodal2video</option>
+                    <option value="frames2video">frames2video</option>
+                    <option value="multiframe2video">multiframe2video</option>
+                    <option value="list_task">list_task</option>
+                    <option value="query_result">query_result</option>
+                </select>
+                <button class="action-btn primary-btn" type="button" onclick="loadJimengHelp()"><i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i><span>刷新</span></button>
+            </div>
+            <pre id="jimengHelpOutput" class="jimeng-help-output"></pre>
+        </div>
+    </div>
+
+    <div id="codexHelpOverlay" class="picker-overlay">
+        <div class="picker-modal jimeng-help-modal">
+            <div class="picker-head">
+                <div>
+                    <div class="picker-title">OpenAI Codex CLI 帮助</div>
+                    <div class="picker-count">查看 codex 官方命令帮助输出</div>
+                </div>
+                <div class="picker-close" onclick="closeCodexHelp()"><i data-lucide="x" class="w-4 h-4"></i></div>
+            </div>
+            <div class="jimeng-help-toolbar">
+                <select id="codexHelpCommand">
+                    <option value="">codex</option>
+                    <option value="exec">exec</option>
+                    <option value="login">login</option>
+                    <option value="logout">logout</option>
+                    <option value="doctor">doctor</option>
+                    <option value="mcp">mcp</option>
+                    <option value="app">app</option>
+                    <option value="update">update</option>
+                </select>
+                <button class="action-btn primary-btn" type="button" onclick="loadCodexHelp()"><i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i><span>刷新</span></button>
+            </div>
+            <pre id="codexHelpOutput" class="jimeng-help-output"></pre>
+        </div>
+    </div>
+
+    <div id="geminiCliHelpOverlay" class="picker-overlay">
+        <div class="picker-modal jimeng-help-modal">
+            <div class="picker-head">
+                <div>
+                    <div class="picker-title">Antigravity CLI 帮助</div>
+                    <div class="picker-count">查看 gemini 官方命令帮助输出</div>
+                </div>
+                <div class="picker-close" onclick="closeGeminiCliHelp()"><i data-lucide="x" class="w-4 h-4"></i></div>
+            </div>
+            <div class="jimeng-help-toolbar">
+                <select id="geminiCliHelpCommand">
+                    <option value="">gemini</option>
+                    <option value="help">help</option>
+                    <option value="mcp">mcp</option>
+                    <option value="extensions">extensions</option>
+                </select>
+                <button class="action-btn primary-btn" type="button" onclick="loadGeminiCliHelp()"><i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i><span>刷新</span></button>
+            </div>
+            <pre id="geminiCliHelpOutput" class="jimeng-help-output"></pre>
+        </div>
+    </div>
+
+    <div id="rhWorkflowEditorOverlay" class="rh-workflow-editor-overlay">
+        <div class="rh-workflow-editor-modal">
+            <div class="rh-workflow-editor-head">
+                <div class="rh-workflow-editor-title-wrap">
+                    <div id="rhWorkflowEditorTitle" class="rh-workflow-editor-title">RunningHub 工作流</div>
+                    <div id="rhWorkflowEditorSub" class="rh-workflow-editor-sub">选择要暴露到画布的输入参数</div>
+                </div>
+                <div class="rh-workflow-editor-actions">
+                    <button class="action-btn" type="button" onclick="fetchRhWorkflowEditor(true)"><i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i><span>重新拉取</span></button>
+                    <button id="rhWorkflowSaveBtn" class="action-btn save-btn" type="button" data-morph-keep-width onclick="saveRhWorkflowEditor()"><i data-lucide="save" class="w-3.5 h-3.5"></i><span>保存</span></button>
+                    <button class="rh-workflow-editor-close" type="button" onclick="closeRhWorkflowEditor()"><i data-lucide="x" class="w-4 h-4"></i></button>
+                </div>
+            </div>
+            <div class="rh-workflow-editor-body">
+                <aside class="rh-workflow-editor-side">
+                    <label class="rh-editor-field">
+                        <span>名称</span>
+                        <input id="rhWorkflowEditName" type="text" oninput="updateRhWorkflowEditorMeta('title', this.value)">
+                    </label>
+                    <label class="rh-editor-field">
+                        <span>备注</span>
+                        <textarea id="rhWorkflowEditNote" oninput="updateRhWorkflowEditorMeta('description', this.value)"></textarea>
+                    </label>
+                    <div id="rhWorkflowEditorSummary" class="rh-editor-summary"></div>
+                    <div id="rhWorkflowEditorNodeList" class="rh-editor-node-list"></div>
+                </aside>
+                <section class="rh-workflow-editor-canvas">
+                    <div id="rhWorkflowEditorGraphWrap" class="rh-editor-graph-wrap">
+                        <svg id="rhWorkflowEditorGraphSvg" class="rh-editor-graph-svg"></svg>
+                        <div class="rh-editor-graph-controls">
+                            <button type="button" onclick="rhEditorGraphZoom(-1)" title="缩小"><i data-lucide="zoom-out" class="w-4 h-4"></i></button>
+                            <span id="rhWorkflowEditorZoom">100%</span>
+                            <button type="button" onclick="rhEditorGraphZoom(1)" title="放大"><i data-lucide="zoom-in" class="w-4 h-4"></i></button>
+                            <button type="button" onclick="rhEditorGraphFit()" title="适应窗口"><i data-lucide="maximize" class="w-4 h-4"></i></button>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </div>
+    </div>
+
+    <script src="/static/js/api-settings.js?v=1.0.0.1790512746"></script>
+    <script>
+        // 保存类按钮多为动态渲染（推荐卡片/新手引导/RH 编辑器），渲染后需要重扫
+        (function () {
+            if (!window.NovaMorphButton) return;
+            NovaMorphButton.autoBind(document);
+            NovaMorphButton.observe(document.body);
+        })();
+    </script>
+    <script>
+        // 浮层开合上报父页：让 iframe 外的设置界面（左栏/标题）一起模糊压暗，避免接缝
+        (function () {
+            var OVERLAY_IDS = ['recommendApiOverlay', 'modelPickerOverlay', 'jimengHelpOverlay', 'codexHelpOverlay', 'geminiCliHelpOverlay', 'rhWorkflowEditorOverlay'];
+            var lastOpen = null;
+            function isOpen(el) {
+                if (!el || el.hidden) return false;
+                var cs = window.getComputedStyle(el);
+                return cs.display !== 'none' && cs.visibility !== 'hidden';
+            }
+            function syncOverlayState() {
+                var open = OVERLAY_IDS.some(function (id) { return isOpen(document.getElementById(id)); });
+                if (open === lastOpen) return;
+                lastOpen = open;
+                try { window.parent && window.parent.postMessage({ type: 'settings-iframe-overlay', open: open }, '*'); } catch (e) {}
+            }
+            var observer = new MutationObserver(syncOverlayState);
+            OVERLAY_IDS.forEach(function (id) {
+                var el = document.getElementById(id);
+                if (el) observer.observe(el, { attributes: true, attributeFilter: ['style', 'class', 'hidden'] });
+            });
+            window.addEventListener('load', syncOverlayState);
+            syncOverlayState();
+        })();
+    </script>
+</body>
+</html>

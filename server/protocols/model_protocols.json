@@ -1,0 +1,1288 @@
+{
+  "format": "mgstudio-model-protocols/v1",
+  "protocols": [
+    {
+      "id": "openai-image",
+      "label": "OpenAI 兼容图片",
+      "version": 1,
+      "kind": "model",
+      "capabilities": [
+        "image.generate",
+        "image.edit"
+      ],
+      "match": {
+        "provider_protocols": [
+          "openai"
+        ]
+      },
+      "inputs": {
+        "images": {
+          "min": 0,
+          "max": 9,
+          "roles": [
+            "reference_image"
+          ],
+          "maxBytes": 10485760,
+          "mimeTypes": [
+            "image/png",
+            "image/jpeg",
+            "image/webp"
+          ]
+        },
+        "videos": {
+          "min": 0,
+          "max": 0,
+          "roles": [],
+          "maxBytes": 0,
+          "mimeTypes": []
+        },
+        "audios": {
+          "min": 0,
+          "max": 0,
+          "roles": [],
+          "maxBytes": 0,
+          "mimeTypes": []
+        },
+        "files": {
+          "min": 0,
+          "max": 0,
+          "roles": [],
+          "maxBytes": 0,
+          "mimeTypes": []
+        }
+      },
+      "defaults": {
+        "size": "1024x1024",
+        "quality": "auto",
+        "n": 1
+      },
+      "limits": {
+        "n": {
+          "min": 1,
+          "max": 4
+        }
+      },
+      "param_engine": "api",
+      "docs": []
+    },
+    {
+      "id": "openai-chat",
+      "label": "OpenAI 兼容对话",
+      "version": 1,
+      "kind": "model",
+      "capabilities": [
+        "llm.chat",
+        "llm.chat.vision",
+        "llm.tools",
+        "llm.structured_output"
+      ],
+      "match": {
+        "provider_protocols": [
+          "openai"
+        ]
+      },
+      "inputs": {
+        "images": {
+          "min": 0,
+          "max": 9,
+          "roles": [
+            "reference_image"
+          ],
+          "maxBytes": 10485760,
+          "mimeTypes": [
+            "image/png",
+            "image/jpeg",
+            "image/webp"
+          ]
+        },
+        "videos": {
+          "min": 0,
+          "max": 0,
+          "roles": [],
+          "maxBytes": 0,
+          "mimeTypes": []
+        },
+        "audios": {
+          "min": 0,
+          "max": 0,
+          "roles": [],
+          "maxBytes": 0,
+          "mimeTypes": []
+        },
+        "files": {
+          "min": 0,
+          "max": 0,
+          "roles": [],
+          "maxBytes": 0,
+          "mimeTypes": []
+        }
+      },
+      "defaults": {},
+      "limits": {},
+      "param_engine": "api",
+      "docs": []
+    },
+    {
+      "id": "modelscope-image",
+      "label": "ModelScope 图片",
+      "version": 1,
+      "kind": "model",
+      "capabilities": [
+        "image.generate",
+        "image.edit"
+      ],
+      "match": {
+        "provider_ids": [
+          "modelscope"
+        ]
+      },
+      "inputs": {
+        "images": {
+          "min": 0,
+          "max": 9,
+          "roles": [
+            "reference_image"
+          ],
+          "maxBytes": 10485760,
+          "mimeTypes": [
+            "image/png",
+            "image/jpeg",
+            "image/webp"
+          ]
+        },
+        "videos": {
+          "min": 0,
+          "max": 0,
+          "roles": [],
+          "maxBytes": 0,
+          "mimeTypes": []
+        },
+        "audios": {
+          "min": 0,
+          "max": 0,
+          "roles": [],
+          "maxBytes": 0,
+          "mimeTypes": []
+        },
+        "files": {
+          "min": 0,
+          "max": 0,
+          "roles": [],
+          "maxBytes": 0,
+          "mimeTypes": []
+        }
+      },
+      "defaults": {
+        "size": "1024x1024",
+        "quality": "auto",
+        "n": 1
+      },
+      "limits": {
+        "n": {
+          "min": 1,
+          "max": 4
+        }
+      },
+      "param_engine": "modelscope",
+      "docs": []
+    },
+    {
+      "id": "modelscope-chat",
+      "label": "ModelScope 对话",
+      "version": 1,
+      "kind": "model",
+      "capabilities": [
+        "llm.chat",
+        "llm.chat.vision",
+        "llm.structured_output"
+      ],
+      "match": {
+        "provider_ids": [
+          "modelscope"
+        ]
+      },
+      "inputs": {
+        "images": {
+          "min": 0,
+          "max": 9,
+          "roles": [
+            "reference_image"
+          ],
+          "maxBytes": 10485760,
+          "mimeTypes": [
+            "image/png",
+            "image/jpeg",
+            "image/webp"
+          ]
+        },
+        "videos": {
+          "min": 0,
+          "max": 0,
+          "roles": [],
+          "maxBytes": 0,
+          "mimeTypes": []
+        },
+        "audios": {
+          "min": 0,
+          "max": 0,
+          "roles": [],
+          "maxBytes": 0,
+          "mimeTypes": []
+        },
+        "files": {
+          "min": 0,
+          "max": 0,
+          "roles": [],
+          "maxBytes": 0,
+          "mimeTypes": []
+        }
+      },
+      "defaults": {},
+      "limits": {},
+      "param_engine": "modelscope",
+      "docs": []
+    },
+    {
+      "id": "apimart-image",
+      "label": "APIMart 图片",
+      "version": 1,
+      "kind": "model",
+      "capabilities": [
+        "image.generate",
+        "image.edit"
+      ],
+      "match": {
+        "provider_protocols": [
+          "apimart"
+        ]
+      },
+      "inputs": {
+        "images": {
+          "min": 0,
+          "max": 9,
+          "roles": [
+            "reference_image"
+          ],
+          "maxBytes": 10485760,
+          "mimeTypes": [
+            "image/png",
+            "image/jpeg",
+            "image/webp"
+          ]
+        },
+        "videos": {
+          "min": 0,
+          "max": 0,
+          "roles": [],
+          "maxBytes": 0,
+          "mimeTypes": []
+        },
+        "audios": {
+          "min": 0,
+          "max": 0,
+          "roles": [],
+          "maxBytes": 0,
+          "mimeTypes": []
+        },
+        "files": {
+          "min": 0,
+          "max": 0,
+          "roles": [],
+          "maxBytes": 0,
+          "mimeTypes": []
+        }
+      },
+      "defaults": {
+        "size": "1024x1024",
+        "quality": "auto",
+        "n": 1
+      },
+      "limits": {
+        "n": {
+          "min": 1,
+          "max": 4
+        }
+      },
+      "param_engine": "api",
+      "docs": []
+    },
+    {
+      "id": "apimart-video",
+      "label": "APIMart 视频",
+      "version": 1,
+      "kind": "model",
+      "capabilities": [
+        "video.generate",
+        "video.text_to_video",
+        "video.image_to_video",
+        "video.first_last_frame",
+        "video.multi_reference"
+      ],
+      "match": {
+        "provider_protocols": [
+          "apimart"
+        ]
+      },
+      "inputs": {
+        "images": {
+          "min": 0,
+          "max": 4,
+          "roles": [
+            "first_frame",
+            "last_frame",
+            "reference_image"
+          ],
+          "maxBytes": 10485760,
+          "mimeTypes": [
+            "image/png",
+            "image/jpeg",
+            "image/webp"
+          ]
+        },
+        "videos": {
+          "min": 0,
+          "max": 3,
+          "roles": [
+            "reference_video",
+            "edit_target"
+          ],
+          "maxBytes": 104857600,
+          "mimeTypes": [
+            "video/mp4"
+          ]
+        },
+        "audios": {
+          "min": 0,
+          "max": 1,
+          "roles": [
+            "reference_audio"
+          ],
+          "maxBytes": 52428800,
+          "mimeTypes": [
+            "audio/mpeg",
+            "audio/wav"
+          ]
+        },
+        "files": {
+          "min": 0,
+          "max": 0,
+          "roles": [],
+          "maxBytes": 0,
+          "mimeTypes": []
+        }
+      },
+      "defaults": {
+        "duration": 5,
+        "aspect_ratio": "16:9"
+      },
+      "limits": {
+        "duration": {
+          "min": 1,
+          "max": 15
+        }
+      },
+      "param_engine": "api",
+      "docs": []
+    },
+    {
+      "id": "volcengine-image",
+      "label": "火山方舟图片",
+      "version": 1,
+      "kind": "model",
+      "capabilities": [
+        "image.generate",
+        "image.edit"
+      ],
+      "match": {
+        "provider_protocols": [
+          "volcengine"
+        ]
+      },
+      "inputs": {
+        "images": {
+          "min": 0,
+          "max": 9,
+          "roles": [
+            "reference_image"
+          ],
+          "maxBytes": 10485760,
+          "mimeTypes": [
+            "image/png",
+            "image/jpeg",
+            "image/webp"
+          ]
+        },
+        "videos": {
+          "min": 0,
+          "max": 0,
+          "roles": [],
+          "maxBytes": 0,
+          "mimeTypes": []
+        },
+        "audios": {
+          "min": 0,
+          "max": 0,
+          "roles": [],
+          "maxBytes": 0,
+          "mimeTypes": []
+        },
+        "files": {
+          "min": 0,
+          "max": 0,
+          "roles": [],
+          "maxBytes": 0,
+          "mimeTypes": []
+        }
+      },
+      "defaults": {
+        "size": "1024x1024",
+        "quality": "auto",
+        "n": 1
+      },
+      "limits": {
+        "n": {
+          "min": 1,
+          "max": 4
+        }
+      },
+      "param_engine": "volcengine",
+      "docs": []
+    },
+    {
+      "id": "volcengine-video",
+      "label": "火山方舟视频",
+      "version": 1,
+      "kind": "model",
+      "capabilities": [
+        "video.generate",
+        "video.text_to_video",
+        "video.image_to_video",
+        "video.first_last_frame",
+        "video.multi_reference"
+      ],
+      "match": {
+        "provider_protocols": [
+          "volcengine"
+        ]
+      },
+      "inputs": {
+        "images": {
+          "min": 0,
+          "max": 4,
+          "roles": [
+            "first_frame",
+            "last_frame",
+            "reference_image"
+          ],
+          "maxBytes": 10485760,
+          "mimeTypes": [
+            "image/png",
+            "image/jpeg",
+            "image/webp"
+          ]
+        },
+        "videos": {
+          "min": 0,
+          "max": 3,
+          "roles": [
+            "reference_video",
+            "edit_target"
+          ],
+          "maxBytes": 104857600,
+          "mimeTypes": [
+            "video/mp4"
+          ]
+        },
+        "audios": {
+          "min": 0,
+          "max": 1,
+          "roles": [
+            "reference_audio"
+          ],
+          "maxBytes": 52428800,
+          "mimeTypes": [
+            "audio/mpeg",
+            "audio/wav"
+          ]
+        },
+        "files": {
+          "min": 0,
+          "max": 0,
+          "roles": [],
+          "maxBytes": 0,
+          "mimeTypes": []
+        }
+      },
+      "defaults": {
+        "duration": 5,
+        "aspect_ratio": "16:9"
+      },
+      "limits": {
+        "duration": {
+          "min": 1,
+          "max": 15
+        }
+      },
+      "param_engine": "volcengine",
+      "docs": []
+    },
+    {
+      "id": "runninghub-workflow",
+      "label": "RunningHub 工作流",
+      "version": 1,
+      "kind": "model",
+      "capabilities": [
+        "image.generate",
+        "image.edit",
+        "video.generate",
+        "video.image_to_video"
+      ],
+      "match": {
+        "provider_protocols": [
+          "runninghub"
+        ]
+      },
+      "inputs": {
+        "images": {
+          "min": 0,
+          "max": 4,
+          "roles": [
+            "first_frame",
+            "last_frame",
+            "reference_image"
+          ],
+          "maxBytes": 10485760,
+          "mimeTypes": [
+            "image/png",
+            "image/jpeg",
+            "image/webp"
+          ]
+        },
+        "videos": {
+          "min": 0,
+          "max": 3,
+          "roles": [
+            "reference_video",
+            "edit_target"
+          ],
+          "maxBytes": 104857600,
+          "mimeTypes": [
+            "video/mp4"
+          ]
+        },
+        "audios": {
+          "min": 0,
+          "max": 1,
+          "roles": [
+            "reference_audio"
+          ],
+          "maxBytes": 52428800,
+          "mimeTypes": [
+            "audio/mpeg",
+            "audio/wav"
+          ]
+        },
+        "files": {
+          "min": 0,
+          "max": 0,
+          "roles": [],
+          "maxBytes": 0,
+          "mimeTypes": []
+        }
+      },
+      "defaults": {},
+      "limits": {},
+      "param_engine": "runninghub",
+      "docs": []
+    },
+    {
+      "id": "cli-image",
+      "label": "CLI 图片生成",
+      "version": 1,
+      "kind": "model",
+      "capabilities": [
+        "image.generate",
+        "image.edit",
+        "image.upscale"
+      ],
+      "match": {
+        "provider_protocols": [
+          "codex",
+          "gemini-cli"
+        ]
+      },
+      "inputs": {
+        "images": {
+          "min": 0,
+          "max": 9,
+          "roles": [
+            "reference_image"
+          ],
+          "maxBytes": 10485760,
+          "mimeTypes": [
+            "image/png",
+            "image/jpeg",
+            "image/webp"
+          ]
+        },
+        "videos": {
+          "min": 0,
+          "max": 0,
+          "roles": [],
+          "maxBytes": 0,
+          "mimeTypes": []
+        },
+        "audios": {
+          "min": 0,
+          "max": 0,
+          "roles": [],
+          "maxBytes": 0,
+          "mimeTypes": []
+        },
+        "files": {
+          "min": 0,
+          "max": 0,
+          "roles": [],
+          "maxBytes": 0,
+          "mimeTypes": []
+        }
+      },
+      "defaults": {
+        "size": "1024x1024",
+        "n": 1
+      },
+      "limits": {
+        "n": {
+          "min": 1,
+          "max": 4
+        }
+      },
+      "param_engine": "api",
+      "docs": []
+    },
+    {
+      "id": "lingjing-image",
+      "label": "灵境 API 图片",
+      "version": 1,
+      "kind": "model",
+      "capabilities": [
+        "image.generate",
+        "image.edit"
+      ],
+      "match": {
+        "provider_ids": [
+          "lingjing"
+        ]
+      },
+      "inputs": {
+        "images": {
+          "min": 0,
+          "max": 9,
+          "roles": [
+            "reference_image"
+          ],
+          "maxBytes": 10485760,
+          "mimeTypes": [
+            "image/png",
+            "image/jpeg",
+            "image/webp"
+          ]
+        },
+        "videos": {
+          "min": 0,
+          "max": 0,
+          "roles": [],
+          "maxBytes": 0,
+          "mimeTypes": []
+        },
+        "audios": {
+          "min": 0,
+          "max": 0,
+          "roles": [],
+          "maxBytes": 0,
+          "mimeTypes": []
+        },
+        "files": {
+          "min": 0,
+          "max": 0,
+          "roles": [],
+          "maxBytes": 0,
+          "mimeTypes": []
+        }
+      },
+      "defaults": {
+        "size": "1024x1024",
+        "quality": "auto",
+        "n": 1
+      },
+      "limits": {
+        "n": {
+          "min": 1,
+          "max": 4
+        }
+      },
+      "param_engine": "api",
+      "docs": []
+    },
+    {
+      "id": "lingjing-chat",
+      "label": "灵境 API 对话",
+      "version": 1,
+      "kind": "model",
+      "capabilities": [
+        "llm.chat",
+        "llm.chat.vision",
+        "llm.tools",
+        "llm.structured_output"
+      ],
+      "match": {
+        "provider_ids": [
+          "lingjing"
+        ]
+      },
+      "inputs": {
+        "images": {
+          "min": 0,
+          "max": 9,
+          "roles": [
+            "reference_image"
+          ],
+          "maxBytes": 10485760,
+          "mimeTypes": [
+            "image/png",
+            "image/jpeg",
+            "image/webp"
+          ]
+        },
+        "videos": {
+          "min": 0,
+          "max": 0,
+          "roles": [],
+          "maxBytes": 0,
+          "mimeTypes": []
+        },
+        "audios": {
+          "min": 0,
+          "max": 0,
+          "roles": [],
+          "maxBytes": 0,
+          "mimeTypes": []
+        },
+        "files": {
+          "min": 0,
+          "max": 0,
+          "roles": [],
+          "maxBytes": 0,
+          "mimeTypes": []
+        }
+      },
+      "defaults": {},
+      "limits": {},
+      "param_engine": "api",
+      "docs": []
+    },
+    {
+      "id": "lingjing-video",
+      "label": "灵境 API 视频",
+      "version": 1,
+      "kind": "model",
+      "capabilities": [
+        "video.generate",
+        "video.text_to_video",
+        "video.image_to_video",
+        "video.first_last_frame",
+        "video.multi_reference"
+      ],
+      "match": {
+        "provider_ids": [
+          "lingjing"
+        ]
+      },
+      "inputs": {
+        "images": {
+          "min": 0,
+          "max": 3,
+          "roles": [
+            "first_frame",
+            "last_frame",
+            "reference_image"
+          ],
+          "maxBytes": 10485760,
+          "mimeTypes": [
+            "image/png",
+            "image/jpeg",
+            "image/webp"
+          ]
+        },
+        "videos": {
+          "min": 0,
+          "max": 0,
+          "roles": [],
+          "maxBytes": 0,
+          "mimeTypes": []
+        },
+        "audios": {
+          "min": 0,
+          "max": 0,
+          "roles": [],
+          "maxBytes": 0,
+          "mimeTypes": []
+        },
+        "files": {
+          "min": 0,
+          "max": 0,
+          "roles": [],
+          "maxBytes": 0,
+          "mimeTypes": []
+        }
+      },
+      "defaults": {
+        "duration": 8,
+        "aspect_ratio": "16:9"
+      },
+      "limits": {
+        "duration": {
+          "min": 1,
+          "max": 8
+        }
+      },
+      "param_engine": "api",
+      "docs": []
+    },
+    {
+      "id": "agnes-ai-image",
+      "label": "Agnes AI 图片",
+      "version": 1,
+      "kind": "model",
+      "capabilities": [
+        "image.generate",
+        "image.edit"
+      ],
+      "match": {
+        "provider_ids": [
+          "agnes-ai"
+        ]
+      },
+      "inputs": {
+        "images": {
+          "min": 0,
+          "max": 9,
+          "roles": [
+            "reference_image"
+          ],
+          "maxBytes": 10485760,
+          "mimeTypes": [
+            "image/png",
+            "image/jpeg",
+            "image/webp"
+          ]
+        },
+        "videos": {
+          "min": 0,
+          "max": 0,
+          "roles": [],
+          "maxBytes": 0,
+          "mimeTypes": []
+        },
+        "audios": {
+          "min": 0,
+          "max": 0,
+          "roles": [],
+          "maxBytes": 0,
+          "mimeTypes": []
+        },
+        "files": {
+          "min": 0,
+          "max": 0,
+          "roles": [],
+          "maxBytes": 0,
+          "mimeTypes": []
+        }
+      },
+      "defaults": {
+        "size": "1024x1024",
+        "quality": "auto",
+        "n": 1
+      },
+      "limits": {
+        "n": {
+          "min": 1,
+          "max": 4
+        }
+      },
+      "param_engine": "api",
+      "docs": []
+    },
+    {
+      "id": "agnes-ai-chat",
+      "label": "Agnes AI 对话",
+      "version": 1,
+      "kind": "model",
+      "capabilities": [
+        "llm.chat",
+        "llm.chat.vision",
+        "llm.tools",
+        "llm.structured_output"
+      ],
+      "match": {
+        "provider_ids": [
+          "agnes-ai"
+        ]
+      },
+      "inputs": {
+        "images": {
+          "min": 0,
+          "max": 9,
+          "roles": [
+            "reference_image"
+          ],
+          "maxBytes": 10485760,
+          "mimeTypes": [
+            "image/png",
+            "image/jpeg",
+            "image/webp"
+          ]
+        },
+        "videos": {
+          "min": 0,
+          "max": 0,
+          "roles": [],
+          "maxBytes": 0,
+          "mimeTypes": []
+        },
+        "audios": {
+          "min": 0,
+          "max": 0,
+          "roles": [],
+          "maxBytes": 0,
+          "mimeTypes": []
+        },
+        "files": {
+          "min": 0,
+          "max": 0,
+          "roles": [],
+          "maxBytes": 0,
+          "mimeTypes": []
+        }
+      },
+      "defaults": {},
+      "limits": {},
+      "param_engine": "api",
+      "docs": []
+    },
+    {
+      "id": "agnes-video",
+      "label": "Agnes AI 视频",
+      "version": 1,
+      "kind": "model",
+      "capabilities": [
+        "video.generate",
+        "video.text_to_video",
+        "video.image_to_video",
+        "video.first_last_frame",
+        "video.multi_reference"
+      ],
+      "match": {
+        "provider_ids": [
+          "agnes-ai"
+        ]
+      },
+      "inputs": {
+        "images": {
+          "min": 0,
+          "max": 4,
+          "roles": [
+            "first_frame",
+            "last_frame",
+            "reference_image"
+          ],
+          "maxBytes": 10485760,
+          "mimeTypes": [
+            "image/png",
+            "image/jpeg",
+            "image/webp"
+          ]
+        },
+        "videos": {
+          "min": 0,
+          "max": 0,
+          "roles": [],
+          "maxBytes": 0,
+          "mimeTypes": []
+        },
+        "audios": {
+          "min": 0,
+          "max": 0,
+          "roles": [],
+          "maxBytes": 0,
+          "mimeTypes": []
+        },
+        "files": {
+          "min": 0,
+          "max": 0,
+          "roles": [],
+          "maxBytes": 0,
+          "mimeTypes": []
+        }
+      },
+      "defaults": {
+        "duration": 5,
+        "aspect_ratio": "16:9"
+      },
+      "limits": {
+        "duration": {
+          "min": 1,
+          "max": 15
+        }
+      },
+      "param_engine": "api",
+      "docs": []
+    },
+    {
+      "id": "lovart-gpt-image",
+      "label": "Lovart GPT Image 工具",
+      "version": 1,
+      "kind": "model",
+      "capabilities": [
+        "image.generate",
+        "image.edit"
+      ],
+      "match": {
+        "provider_ids": [
+          "lovart"
+        ],
+        "model_patterns": [
+          "gpt_image"
+        ]
+      },
+      "inputs": {
+        "images": {
+          "min": 0,
+          "max": 9,
+          "roles": [
+            "reference_image"
+          ],
+          "maxBytes": 10485760,
+          "mimeTypes": [
+            "image/png",
+            "image/jpeg",
+            "image/webp"
+          ]
+        },
+        "videos": {
+          "min": 0,
+          "max": 0,
+          "roles": [],
+          "maxBytes": 0,
+          "mimeTypes": []
+        },
+        "audios": {
+          "min": 0,
+          "max": 0,
+          "roles": [],
+          "maxBytes": 0,
+          "mimeTypes": []
+        },
+        "files": {
+          "min": 0,
+          "max": 0,
+          "roles": [],
+          "maxBytes": 0,
+          "mimeTypes": []
+        }
+      },
+      "defaults": {
+        "size": "auto",
+        "quality": "auto",
+        "n": 1
+      },
+      "limits": {
+        "n": {
+          "min": 1,
+          "max": 4
+        }
+      },
+      "size": {
+        "mode": "free",
+        "hintOnly": true,
+        "autoSize": true,
+        "defaultLevel": "4k",
+        "maxEdge": 0,
+        "maxPixels": 0,
+        "minPixels": 0,
+        "multipleOf": 0
+      },
+      "param_engine": "api",
+      "docs": []
+    },
+    {
+      "id": "lovart-image",
+      "label": "Lovart 设计代理图片",
+      "version": 1,
+      "kind": "model",
+      "capabilities": [
+        "image.generate",
+        "image.edit"
+      ],
+      "match": {
+        "provider_protocols": [
+          "lovart"
+        ]
+      },
+      "inputs": {
+        "images": {
+          "min": 0,
+          "max": 9,
+          "roles": [
+            "reference_image"
+          ],
+          "maxBytes": 10485760,
+          "mimeTypes": [
+            "image/png",
+            "image/jpeg",
+            "image/webp"
+          ]
+        },
+        "videos": {
+          "min": 0,
+          "max": 0,
+          "roles": [],
+          "maxBytes": 0,
+          "mimeTypes": []
+        },
+        "audios": {
+          "min": 0,
+          "max": 0,
+          "roles": [],
+          "maxBytes": 0,
+          "mimeTypes": []
+        },
+        "files": {
+          "min": 0,
+          "max": 0,
+          "roles": [],
+          "maxBytes": 0,
+          "mimeTypes": []
+        }
+      },
+      "defaults": {
+        "size": "auto",
+        "quality": "auto",
+        "n": 1
+      },
+      "limits": {
+        "n": {
+          "min": 1,
+          "max": 4
+        }
+      },
+      "size": {
+        "mode": "free",
+        "hintOnly": true,
+        "autoSize": false,
+        "defaultLevel": "",
+        "maxEdge": 0,
+        "maxPixels": 0,
+        "minPixels": 0,
+        "multipleOf": 0
+      },
+      "param_engine": "api",
+      "docs": []
+    },
+    {
+      "id": "gpt-image-2-family",
+      "label": "GPT Image 2 系列尺寸族",
+      "version": 1,
+      "kind": "model",
+      "capabilities": [
+        "image.generate",
+        "image.edit"
+      ],
+      "match": {
+        "model_patterns": [
+          "gpt-image-2"
+        ]
+      },
+      "size": {
+        "mode": "enum",
+        "autoSize": true,
+        "options": [
+          "auto",
+          "1024x1024",
+          "1536x1024",
+          "1024x1536",
+          "2048x2048",
+          "2048x1152",
+          "3840x2160",
+          "2160x3840"
+        ],
+        "maxEdge": 3840,
+        "maxPixels": 8294400,
+        "minPixels": 655360,
+        "multipleOf": 16,
+        "prefer": "ratio",
+        "tiers": [
+          {
+            "id": "1k",
+            "maxPixels": 1572864
+          },
+          {
+            "id": "2k",
+            "maxPixels": 4194304
+          },
+          {
+            "id": "4k",
+            "maxPixels": 8294400
+          }
+        ]
+      },
+      "param_engine": "api",
+      "docs": []
+    },
+    {
+      "id": "gpt-image-1-family",
+      "label": "GPT Image 1 系列尺寸族",
+      "version": 1,
+      "kind": "model",
+      "capabilities": [
+        "image.generate",
+        "image.edit"
+      ],
+      "match": {
+        "model_patterns": [
+          "gpt-image-1"
+        ]
+      },
+      "size": {
+        "mode": "enum",
+        "autoSize": true,
+        "options": [
+          "1024x1024",
+          "1536x1024",
+          "1024x1536"
+        ],
+        "maxEdge": 3840,
+        "maxPixels": 8294400,
+        "minPixels": 655360,
+        "multipleOf": 16,
+        "prefer": "ratio",
+        "tiers": [
+          {
+            "id": "1k",
+            "maxPixels": 1572864
+          },
+          {
+            "id": "2k",
+            "maxPixels": 4194304
+          },
+          {
+            "id": "4k",
+            "maxPixels": 8294400
+          }
+        ]
+      },
+      "param_engine": "api",
+      "docs": []
+    }
+  ]
+}

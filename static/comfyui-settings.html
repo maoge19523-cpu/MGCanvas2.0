@@ -1,0 +1,1333 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>工作流设置</title>
+    <script>(function(){try{var t=localStorage.getItem("studio_theme")||localStorage.getItem("canvas_theme")||"light";if(t==="dark"){document.documentElement.classList.add("studio-theme-dark");document.documentElement.classList.add("theme-dark");}}catch(e){}})();</script>
+    <script>
+        // 检测是否在设置弹窗内嵌展示
+        (function(){
+            if (location.search.indexOf('embed=1') !== -1) {
+                document.documentElement.classList.add('settings-embed');
+            }
+        })();
+    </script>
+    <script src="/static/vendor/js/tailwindcss-cdn.js?v=1.0.0.1790512746"></script>
+    <script src="/static/vendor/js/lucide-subset.js?v=1.0.0.1790512746"></script>
+    <script src="/static/js/shared/icons.js?v=1.0.0.1791308700"></script>
+    <script src="/static/js/theme.js?v=1.0.0.1790512746"></script>
+    <script src="/static/js/shared/utils.js?v=1.0.0.1791308700"></script>
+    <script src="/static/js/i18n.js?v=1.0.0.1790512746"></script>
+    <link rel="stylesheet" href="/static/css/comfyui-settings.css?v=1.0.0.1790512746">
+    <link rel="stylesheet" href="/static/css/theme.css?v=1.0.0.1791308700">
+
+<link rel="stylesheet" href="/static/vendor/css/fonts.css?v=1.0.0.1790512746">
+<link rel="stylesheet" href="/static/css/marvis-shared.css?v=1.0.0.1791309025">
+<style>
+/* --- 页面特定 Marvis 覆盖 --- */
+body { background: transparent !important; color: var(--text) !important; }
+/* --- Marvis 增强覆盖 (comfyui-settings.html) --- */
+header { background: var(--sidebar-bg) !important; backdrop-filter: blur(28px) !important; }
+.card { background: var(--stage-bg) !important; border-radius: var(--radius-lg) !important; }
+.side-card { background: transparent !important; border-radius: var(--radius-lg) !important; }
+.graph-card { background: transparent !important; border-radius: var(--radius-lg) !important; }
+button.primary { background: var(--text) !important; color: var(--bg) !important; border-radius: var(--radius-md) !important; }
+input, select { background-color: var(--stage-bg) !important; border-radius: var(--radius-sm) !important; color: var(--text) !important; }
+/* ═══ 设置弹窗内嵌模式（?embed=1）— 与通用/外观/关于面板同一套设计语言 ═══
+   扁平 / 半透明 / 无描边 / 柔和投影；唯一强调 = 黑白反转
+   所有规则都挂在 html.settings-embed 下，不带 embed=1 打开时观感不变 */
+html.settings-embed {
+    --embed-canvas: #ffffff;
+    --embed-aside: #F5F5F6;
+    --embed-card: rgba(255, 255, 255, .45);
+    --embed-line: rgba(0, 0, 0, .06);
+    --embed-line-btn: rgba(0, 0, 0, .08);
+    --text: #1c1c1e;
+    --text-2: #656569;
+    --text-3: #8a8a8a;
+    --muted: #656569;
+    --faint: #8a8a8a;
+    --bg: #f5f5f7;
+    --stage-bg: #ffffff;
+    --surface: #ffffff;
+    --surface-2: #fafafa;
+    --panel: #ffffff;
+    --panel-bg: #ffffff;
+    --soft: rgba(0, 0, 0, .04);
+    --nav-hover-bg: rgba(0, 0, 0, .04);
+    --border: rgba(0, 0, 0, .06);
+    --border-2: rgba(0, 0, 0, .10);
+    --line: rgba(0, 0, 0, .06);
+    --line-strong: rgba(0, 0, 0, .08);
+    background: var(--embed-canvas) !important;
+    color: var(--text) !important;
+    font-family: var(--font-sans) !important;
+}
+html.settings-embed.theme-dark,
+html.settings-embed.studio-theme-dark,
+html.settings-embed.theme-dark body,
+html.settings-embed.studio-theme-dark body {
+    --embed-canvas: #141416;
+    --embed-aside: #222326;
+    --embed-card: rgba(255, 255, 255, .04);
+    --embed-line: rgba(255, 255, 255, .07);
+    --embed-line-btn: rgba(255, 255, 255, .10);
+    --text: #f5f5f7;
+    --text-2: #96969a;
+    --text-3: #8a8a8a;
+    --muted: #96969a;
+    --faint: #8a8a8a;
+    --bg: #0c0c0c;
+    --stage-bg: #141416;
+    --surface: #141416;
+    --surface-2: #1c1c1e;
+    --panel: #141416;
+    --panel-bg: #141416;
+    --soft: rgba(255, 255, 255, .05);
+    --nav-hover-bg: rgba(255, 255, 255, .05);
+    --border: rgba(255, 255, 255, .07);
+    --border-2: rgba(255, 255, 255, .10);
+    --line: rgba(255, 255, 255, .07);
+    --line-strong: rgba(255, 255, 255, .10);
+}
+html.settings-embed body { background: transparent !important; font-family: var(--font-sans) !important; }
+html.settings-embed,
+html.settings-embed * {
+    scrollbar-width: none !important;
+    -ms-overflow-style: none !important;
+}
+html.settings-embed::-webkit-scrollbar,
+html.settings-embed *::-webkit-scrollbar {
+    width: 0 !important;
+    height: 0 !important;
+    display: none !important;
+}
+/* 填满 iframe，内部各自滚动 */
+html.settings-embed,
+html.settings-embed body { height: 100%; overflow: hidden; }
+html.settings-embed .wrap,
+html.settings-embed .page { height: 100%; overflow: hidden; }
+html.settings-embed .page { padding: 18px 24px 22px; min-height: auto; background: transparent !important; }
+html.settings-embed .wrap { max-width: none; }
+html.settings-embed .page-head { display: none; }
+html.settings-embed .layout {
+    display: grid;
+    grid-template-columns: 264px minmax(0, 1fr);
+    grid-auto-rows: 100%;
+    gap: 16px;
+    height: 100%;
+    overflow: hidden;
+    align-items: stretch;
+}
+html.settings-embed .content { overflow-y: auto; gap: 16px; padding-bottom: 24px; }
+html.settings-embed .sidebar {
+    position: static;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    width: 264px;
+    min-width: 264px;
+    max-height: none;
+    flex-shrink: 0;
+    overflow-y: auto;
+    padding: 22px 14px;
+    border: none !important;
+    border-radius: 24px !important;
+    background: var(--embed-aside) !important;
+}
+
+/* ── 左栏：栏内不再套白卡，全部平铺 ── */
+html.settings-embed .side-card {
+    padding: 0 !important;
+    border: none !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    gap: 10px !important;
+}
+html.settings-embed .side-title {
+    padding: 0 12px !important;
+    color: var(--muted) !important;
+    font-size: 12px !important;
+    font-weight: 700 !important;
+    letter-spacing: .02em !important;
+    text-transform: none !important;
+}
+html.settings-embed .workflow-list { gap: 2px !important; max-height: 230px; }
+html.settings-embed .workflow-card {
+    min-height: 0 !important;
+    gap: 10px !important;
+    padding: 10px 12px !important;
+    border: none !important;
+    border-radius: 10px !important;
+    background: transparent !important;
+    color: var(--muted) !important;
+    transition: background .2s ease, color .2s ease !important;
+}
+html.settings-embed .workflow-card:hover,
+html.settings-embed .workflow-card.active {
+    background: var(--nav-hover-bg) !important;
+    color: var(--text) !important;
+}
+html.settings-embed .workflow-icon,
+html.settings-embed .workflow-card.active .workflow-icon {
+    width: 18px !important;
+    height: 18px !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    color: inherit !important;
+}
+html.settings-embed .workflow-icon svg { width: 18px !important; height: 18px !important; }
+html.settings-embed .workflow-name { font-size: 14px !important; font-weight: 600 !important; }
+html.settings-embed .workflow-meta {
+    margin-top: 2px !important;
+    color: var(--muted) !important;
+    font-size: 11.5px !important;
+    font-weight: 400 !important;
+}
+html.settings-embed .builtin-badge,
+html.settings-embed .workflow-card.active .builtin-badge {
+    margin-left: auto !important;
+    padding: 2px 8px !important;
+    border: 0 !important;
+    border-radius: 999px !important;
+    background: var(--nav-hover-bg) !important;
+    color: var(--muted) !important;
+    font-size: 10px !important;
+    font-weight: 600 !important;
+    letter-spacing: 0 !important;
+}
+/* 后端地址行（行式条目，内联样式需要 !important 覆盖） */
+html.settings-embed #comfyInstancesList { gap: 2px !important; }
+html.settings-embed #comfyInstancesList > div {
+    padding: 6px 8px !important;
+    border-radius: 10px !important;
+    background: transparent !important;
+    transition: background .2s ease !important;
+}
+html.settings-embed #comfyInstancesList > div:hover { background: var(--nav-hover-bg) !important; }
+html.settings-embed #comfyInstancesList > div > span {
+    color: var(--muted) !important;
+    font-size: 11px !important;
+    font-weight: 600 !important;
+}
+html.settings-embed #comfyInstancesList .small-input {
+    height: 32px !important;
+    padding: 0 10px !important;
+    border: 0 !important;
+    border-radius: 8px !important;
+    background: var(--stage-bg) !important;
+    font-size: 12.5px !important;
+}
+html.settings-embed #comfyInstancesList .small-input:focus { box-shadow: 0 0 0 3px color-mix(in srgb, var(--strong) 18%, transparent) !important; }
+/* 格式提示（唯一的 inline 样式小字）：字号收紧 + 微字距，保证窄栏里单行不折断 */
+html.settings-embed .workflow-panel-comfy > div[style*="10.5px"] {
+    padding: 0 12px !important;
+    color: var(--muted) !important;
+    font-size: 10.5px !important;
+    font-weight: 400 !important;
+    letter-spacing: -.01em !important;
+    line-height: 1.5 !important;
+    white-space: nowrap !important;
+}
+
+/* ── 次级按钮语言（虚线框一律取消） ── */
+html.settings-embed .upload-btn,
+html.settings-embed .ghost-btn {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 6px !important;
+    height: auto !important;
+    min-height: 34px !important;
+    padding: 7px 14px !important;
+    border: 0 !important;
+    border-radius: 8px !important;
+    background: var(--nav-hover-bg) !important;
+    color: var(--muted) !important;
+    font-size: 12px !important;
+    font-weight: 600 !important;
+    box-shadow: none !important;
+    transform: none !important;
+    transition: background .2s ease, color .2s ease !important;
+}
+html.settings-embed .upload-btn { width: 100% !important; }
+html.settings-embed .upload-btn:hover,
+html.settings-embed .ghost-btn:hover {
+    background: var(--border-2) !important;
+    color: var(--text) !important;
+    box-shadow: none !important;
+    transform: none !important;
+}
+html.settings-embed .upload-btn svg,
+html.settings-embed .ghost-btn svg { width: 15px !important; height: 15px !important; }
+
+/* ── 画布节点预览（左栏第三段） ── */
+html.settings-embed .preview-title-row { gap: 8px; }
+html.settings-embed .preview-title-row svg { width: 16px; height: 16px; color: var(--muted); }
+html.settings-embed .preview-title {
+    color: var(--text) !important;
+    font-size: 12px !important;
+    font-weight: 700 !important;
+    letter-spacing: .02em !important;
+}
+html.settings-embed .preview-pill {
+    padding: 2px 8px !important;
+    border: 0 !important;
+    border-radius: 999px !important;
+    background: var(--nav-hover-bg) !important;
+    color: var(--muted) !important;
+    font-size: 10px !important;
+    font-weight: 600 !important;
+    letter-spacing: 0 !important;
+}
+html.settings-embed .preview-desc {
+    color: var(--muted) !important;
+    font-size: 11.5px !important;
+    font-weight: 400 !important;
+    line-height: 1.5 !important;
+}
+html.settings-embed #previewContent { gap: 10px; padding-top: 4px; }
+html.settings-embed .preview-empty {
+    padding: 20px 12px !important;
+    border: 0 !important;
+    border-radius: 10px !important;
+    background: var(--soft) !important;
+    color: var(--muted) !important;
+    font-size: 11.5px !important;
+    font-weight: 400 !important;
+    line-height: 1.6 !important;
+}
+
+/* ── 右列标题行：纯标题，无卡片底/边框 ── */
+html.settings-embed .graph-card {
+    padding: 18px 20px !important;
+    border: 0 !important;
+    border-radius: 16px !important;
+    background: var(--embed-card) !important;
+    box-shadow: var(--shadow-md) !important;
+}
+html.settings-embed .graph-head { gap: 12px !important; margin-bottom: 16px !important; }
+html.settings-embed .graph-title-row { gap: 16px !important; }
+html.settings-embed .title-edit-row { gap: 8px !important; margin-bottom: 4px !important; }
+html.settings-embed .workflow-title-input {
+    width: 100% !important;
+    height: 34px !important;
+    padding: 0 10px !important;
+    border: 0 !important;
+    border-radius: 8px !important;
+    background: transparent !important;
+    color: var(--text) !important;
+    font-size: 15px !important;
+    font-weight: 700 !important;
+    letter-spacing: 0 !important;
+    line-height: 1.3 !important;
+    text-overflow: ellipsis !important;
+    transition: background .2s ease, box-shadow .2s ease !important;
+}
+html.settings-embed .workflow-title-input:hover { background: var(--nav-hover-bg) !important; }
+html.settings-embed .workflow-title-input:focus {
+    background: var(--bg) !important;
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--strong) 18%, transparent) !important;
+}
+html.settings-embed .workflow-title-input::placeholder { color: var(--muted) !important; opacity: .75; }
+html.settings-embed .graph-head .editor-sub {
+    margin-top: 0 !important;
+    color: var(--muted) !important;
+    font-size: 12px !important;
+    font-weight: 400 !important;
+    line-height: 1.5 !important;
+}
+html.settings-embed .content-actions { gap: 8px !important; }
+
+/* ── 主/次级按钮：黑白反转是唯一强调 ── */
+html.settings-embed .action-btn {
+    height: auto !important;
+    min-height: 34px !important;
+    padding: 7px 14px !important;
+    border: 0 !important;
+    border-radius: 8px !important;
+    background: var(--nav-hover-bg) !important;
+    color: var(--text) !important;
+    font-size: 12px !important;
+    font-weight: 600 !important;
+    box-shadow: none !important;
+    transform: none !important;
+    transition: background .2s ease, color .2s ease !important;
+}
+html.settings-embed .action-btn:hover {
+    background: var(--border-2) !important;
+    color: var(--text) !important;
+    box-shadow: none !important;
+    transform: none !important;
+}
+html.settings-embed .action-btn.save-btn {
+    background: var(--text) !important;
+    color: var(--stage-bg) !important;
+}
+html.settings-embed .action-btn.save-btn:hover {
+    background: var(--text) !important;
+    color: var(--stage-bg) !important;
+    opacity: .88;
+}
+html.settings-embed .action-btn.danger-btn {
+    background: var(--nav-hover-bg) !important;
+    color: var(--danger-text, var(--danger)) !important;
+}
+html.settings-embed .action-btn.danger-btn:hover {
+    background: var(--danger-bg) !important;
+    color: var(--danger-text, var(--danger)) !important;
+}
+html.settings-embed .action-btn svg { width: 15px !important; height: 15px !important; }
+
+/* ── 分段 tab = pill 选项组 ── */
+html.settings-embed .workspace-mode-tabs {
+    display: inline-flex !important;
+    gap: 8px !important;
+    width: auto !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: none !important;
+    background: transparent !important;
+}
+html.settings-embed .workspace-mode-tabs button {
+    height: auto !important;
+    min-height: 0 !important;
+    min-width: 0 !important;
+    padding: 7px 14px !important;
+    border: 0 !important;
+    border-radius: 999px !important;
+    background: var(--nav-hover-bg) !important;
+    color: var(--text) !important;
+    font-size: 13px !important;
+    font-weight: 600 !important;
+    box-shadow: none !important;
+    transition: background .2s ease, color .2s ease !important;
+}
+html.settings-embed .workspace-mode-tabs button:hover { background: var(--border-2) !important; }
+html.settings-embed .workspace-mode-tabs button.active {
+    background: var(--text) !important;
+    color: var(--stage-bg) !important;
+    box-shadow: none !important;
+}
+
+/* ── 图画布区（外框卡片语言，画布本身保留中性底） ── */
+html.settings-embed .graph-svg-wrap {
+    height: 760px;
+    border: 0 !important;
+    border-radius: 14px !important;
+    background: var(--bg) !important;
+}
+html.settings-embed .graph-controls { top: 10px; right: 10px; gap: 6px; }
+html.settings-embed .graph-ctrl-btn,
+html.settings-embed .graph-zoom-pill {
+    height: 30px !important;
+    padding: 0 9px !important;
+    border: 0 !important;
+    border-radius: 8px !important;
+    background: var(--stage-bg) !important;
+    color: var(--muted) !important;
+    font-size: 11.5px !important;
+    font-weight: 600 !important;
+    box-shadow: none !important;
+    transition: background .2s ease, color .2s ease !important;
+}
+html.settings-embed .graph-ctrl-btn { width: 30px !important; min-width: 30px !important; }
+html.settings-embed .graph-zoom-pill { border-radius: 999px !important; }
+html.settings-embed .graph-ctrl-btn:hover { background: var(--nav-hover-bg) !important; color: var(--text) !important; }
+
+/* ── 测试画布（mini canvas） ── */
+html.settings-embed .mini-canvas {
+    height: 420px;
+    border: 0 !important;
+    border-radius: 14px !important;
+    background-color: var(--bg) !important;
+}
+html.settings-embed .mini-canvas.large { height: 760px; }
+html.settings-embed .mini-tool {
+    height: 30px !important;
+    padding: 0 10px !important;
+    border: 0 !important;
+    border-radius: 999px !important;
+    background: var(--stage-bg) !important;
+    color: var(--muted) !important;
+    font-size: 11.5px !important;
+    font-weight: 600 !important;
+    box-shadow: none !important;
+}
+html.settings-embed .mini-tool:hover { color: var(--text) !important; }
+html.settings-embed .mini-card {
+    border: 0 !important;
+    border-radius: 12px !important;
+    background: var(--stage-bg) !important;
+    box-shadow: var(--shadow-md) !important;
+}
+html.settings-embed .mini-card-head {
+    background: var(--soft) !important;
+    font-size: 11.5px !important;
+    font-weight: 600 !important;
+}
+html.settings-embed .mini-textarea,
+html.settings-embed .mini-input {
+    border: 0 !important;
+    border-radius: 10px !important;
+    background: var(--bg) !important;
+    font-size: 12.5px !important;
+    font-weight: 400 !important;
+}
+html.settings-embed .mini-image-drop {
+    border: 0 !important;
+    border-radius: 10px !important;
+    background: var(--bg) !important;
+    color: var(--muted) !important;
+    font-size: 11.5px !important;
+    font-weight: 400 !important;
+}
+html.settings-embed .mini-line { background: var(--border-2) !important; }
+html.settings-embed .mini-card .uppercase {
+    color: var(--muted) !important;
+    font-size: 11px !important;
+    font-weight: 600 !important;
+    letter-spacing: .02em !important;
+    text-transform: none !important;
+}
+
+/* ── 表单控件 ── */
+html.settings-embed .pfield { gap: 6px !important; }
+html.settings-embed .pfield-label {
+    color: var(--muted) !important;
+    font-size: 11.5px !important;
+    font-weight: 600 !important;
+    letter-spacing: .01em !important;
+}
+html.settings-embed .pfield-input,
+html.settings-embed .pfield-select,
+html.settings-embed .small-input,
+html.settings-embed .small-select {
+    width: 100%;
+    height: 34px !important;
+    padding: 0 10px !important;
+    border: 0 !important;
+    border-radius: 10px !important;
+    background: var(--bg) !important;
+    color: var(--text) !important;
+    font-size: 13px !important;
+    font-weight: 400 !important;
+    outline: none !important;
+    box-shadow: none !important;
+    transition: background .2s ease, box-shadow .2s ease !important;
+}
+html.settings-embed .pfield-select,
+html.settings-embed .small-select {
+    appearance: none !important;
+    -webkit-appearance: none !important;
+    padding-right: 24px !important;
+    background-image:var(--select-caret) !important;
+    background-position:calc(100% - 8px) 50% !important;
+    background-size:10px 10px !important;
+    background-repeat:no-repeat !important;
+}
+html.settings-embed .pfield-textarea,
+html.settings-embed .extras-row textarea {
+    padding: 9px 10px !important;
+    border: 0 !important;
+    border-radius: 10px !important;
+    background: var(--bg) !important;
+    color: var(--text) !important;
+    font-size: 13px !important;
+    font-weight: 400 !important;
+    line-height: 1.5 !important;
+    outline: none !important;
+    box-shadow: none !important;
+}
+html.settings-embed .pfield-textarea { min-height: 76px; resize: vertical; }
+html.settings-embed .pfield-input:focus,
+html.settings-embed .pfield-select:focus,
+html.settings-embed .pfield-textarea:focus,
+html.settings-embed .small-input:focus,
+html.settings-embed .small-select:focus,
+html.settings-embed .extras-row textarea:focus { box-shadow: 0 0 0 3px color-mix(in srgb, var(--strong) 18%, transparent) !important; }
+html.settings-embed .small-input:disabled,
+html.settings-embed .small-select:disabled { opacity: .6 !important; }
+/* theme.css 暗色下用 !important 把 input/textarea/select 的底色/边框强制为 --bg/--border-strong，
+   这里用更高优先级把内嵌模式拉回本设计语言（软底，聚焦只加柔光聚焦环） */
+html.settings-embed.theme-dark body input:not(.group-title-input),
+html.settings-embed.studio-theme-dark body input:not(.group-title-input),
+html.settings-embed.theme-dark body select,
+html.settings-embed.studio-theme-dark body select,
+html.settings-embed.theme-dark body textarea,
+html.settings-embed.studio-theme-dark body textarea {
+    background-color: var(--bg) !important;
+}
+html.settings-embed.theme-dark body input.workflow-title-input,
+html.settings-embed.studio-theme-dark body input.workflow-title-input,
+html.settings-embed.theme-dark body .dropdown-opt-row input.small-input,
+html.settings-embed.studio-theme-dark body .dropdown-opt-row input.small-input {
+    background-color: transparent !important;
+}
+html.settings-embed.theme-dark body #comfyInstancesList .small-input,
+html.settings-embed.studio-theme-dark body #comfyInstancesList .small-input {
+    background-color: var(--stage-bg) !important;
+}
+html.settings-embed.theme-dark body input:not(.group-title-input):focus,
+html.settings-embed.studio-theme-dark body input:not(.group-title-input):focus,
+html.settings-embed.theme-dark body select:focus,
+html.settings-embed.studio-theme-dark body select:focus,
+html.settings-embed.theme-dark body textarea:focus,
+html.settings-embed.studio-theme-dark body textarea:focus {
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--strong) 18%, transparent) !important;
+}
+html.settings-embed.theme-dark body .workflow-title-input:focus,
+html.settings-embed.studio-theme-dark body .workflow-title-input:focus {
+    background-color: var(--bg) !important;
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--strong) 18%, transparent) !important;
+}
+html.settings-embed .pfield-slider-val { font-size: 12.5px !important; font-weight: 600 !important; }
+html.settings-embed .random-btn {
+    border: 0 !important;
+    border-radius: 10px !important;
+    background: var(--nav-hover-bg) !important;
+    color: var(--muted) !important;
+}
+html.settings-embed .random-btn:hover {
+    background: var(--border-2) !important;
+    color: var(--text) !important;
+}
+html.settings-embed .random-btn.active {
+    background: var(--text) !important;
+    color: var(--stage-bg) !important;
+}
+html.settings-embed .random-toggle {
+    height: 32px !important;
+    padding: 0 10px !important;
+    border: 0 !important;
+    border-radius: 10px !important;
+    background: var(--bg) !important;
+    color: var(--muted) !important;
+    font-size: 11.5px !important;
+    font-weight: 600 !important;
+}
+html.settings-embed .random-toggle input { accent-color: var(--text); }
+html.settings-embed .pfield-image-drop {
+    padding: 16px !important;
+    border: 0 !important;
+    border-radius: 10px !important;
+    background: var(--bg) !important;
+    color: var(--muted) !important;
+    font-size: 11.5px !important;
+    font-weight: 400 !important;
+}
+html.settings-embed .pfield-image-drop.has-image { padding: 0 !important; }
+html.settings-embed .pfield-image-drop:hover { color: var(--text) !important; }
+html.settings-embed .media-file-name { font-size: 11.5px !important; font-weight: 600 !important; }
+
+/* ── 开关：44×26 / 滑块 20px / 选中底 var(--text) ── */
+html.settings-embed .pfield-bool-track {
+    width: 44px !important;
+    height: 26px !important;
+    border-radius: 999px !important;
+    background: rgba(0, 0, 0, .15) !important;
+    transition: background .25s ease !important;
+}
+html.settings-embed .pfield-bool-track.on { background: var(--text) !important; }
+html.settings-embed .pfield-bool-thumb {
+    top: 3px !important;
+    left: 3px !important;
+    width: 20px !important;
+    height: 20px !important;
+    background: #fff !important;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, .15) !important;
+    transition: transform .25s ease !important;
+}
+html.settings-embed .pfield-bool-track.on .pfield-bool-thumb { transform: translateX(18px) !important; }
+html.settings-embed.theme-dark .pfield-bool-track,
+html.settings-embed.studio-theme-dark .pfield-bool-track { background: rgba(255, 255, 255, .16) !important; }
+html.settings-embed.theme-dark .pfield-bool-track.on,
+html.settings-embed.studio-theme-dark .pfield-bool-track.on { background: var(--text) !important; }
+/* 勾选：同等克制的软底小控件，选中黑白反转（保留 .checked 状态类） */
+html.settings-embed .check-toggle {
+    width: 20px !important;
+    height: 20px !important;
+    border: 0 !important;
+    border-radius: 6px !important;
+    background: var(--nav-hover-bg) !important;
+    color: var(--muted) !important;
+    box-shadow: none !important;
+    transition: background .2s ease, color .2s ease !important;
+}
+html.settings-embed .check-toggle:hover { background: var(--border-2) !important; color: var(--text) !important; }
+html.settings-embed .check-toggle.checked {
+    background: var(--text) !important;
+    color: var(--stage-bg) !important;
+}
+
+/* ── 节点卡 / 输入行 ── */
+html.settings-embed .node-list { gap: 10px !important; }
+html.settings-embed .node-card {
+    border: 0 !important;
+    border-radius: 12px !important;
+    background: var(--embed-card) !important;
+    box-shadow: var(--shadow-md) !important;
+}
+html.settings-embed .node-card-head { padding: 12px 14px !important; background: var(--soft) !important; }
+html.settings-embed .node-card-head:hover { background: var(--border-2) !important; }
+html.settings-embed .node-class { font-size: 13.5px !important; font-weight: 700 !important; letter-spacing: 0 !important; }
+html.settings-embed .node-id { color: var(--muted) !important; font-size: 11.5px !important; font-weight: 400 !important; letter-spacing: 0 !important; }
+html.settings-embed .node-stats { color: var(--muted) !important; font-size: 11.5px !important; font-weight: 600 !important; letter-spacing: 0 !important; }
+html.settings-embed .node-chev { color: var(--muted) !important; }
+html.settings-embed .node-inputs { padding: 10px 12px 12px !important; gap: 6px !important; }
+html.settings-embed .input-row {
+    gap: 10px !important;
+    padding: 8px !important;
+    border: none !important;
+    border-radius: 10px !important;
+    background: transparent !important;
+}
+html.settings-embed .node-inputs .input-row { grid-template-columns: 20px minmax(0, 1fr) 110px 120px !important; }
+html.settings-embed .popup-body .input-row { grid-template-columns: 20px minmax(0, 1fr) !important; }
+html.settings-embed .input-row.is-active { background: var(--nav-hover-bg) !important; }
+html.settings-embed .input-key { font-size: 13px !important; font-weight: 600 !important; }
+html.settings-embed .input-orig { color: var(--muted) !important; font-size: 11.5px !important; font-weight: 400 !important; }
+html.settings-embed .extras-row {
+    gap: 8px !important;
+    padding-top: 10px !important;
+}
+html.settings-embed .extra-pair { color: var(--muted) !important; font-size: 11.5px !important; font-weight: 600 !important; }
+html.settings-embed .dropdown-opt-row {
+    padding: 4px 6px !important;
+    border: 0 !important;
+    border-radius: 10px !important;
+    background: var(--bg) !important;
+}
+html.settings-embed .dropdown-opt-row .opt-index { color: var(--muted) !important; font-size: 11px !important; font-weight: 600 !important; }
+html.settings-embed .dropdown-opt-row .small-input {
+    height: 30px !important;
+    background: transparent !important;
+}
+html.settings-embed .opt-type-tag,
+html.settings-embed .opt-type-tag.is-num {
+    padding: 2px 8px !important;
+    border: 0 !important;
+    border-radius: 999px !important;
+    background: var(--nav-hover-bg) !important;
+    color: var(--muted) !important;
+    font-size: 10px !important;
+    font-weight: 600 !important;
+    letter-spacing: 0 !important;
+}
+/* 本页按钮带 !important，优先级高于模块的 .nv-morph[data-nv-morph-state]，显式让位给状态色 */
+html.settings-embed .nv-morph.nv-morph[data-nv-morph-state="success"] { background: #10b981 !important; color: #fff !important; }
+html.settings-embed .nv-morph.nv-morph[data-nv-morph-state="error"] { background: #f43f5e !important; color: #fff !important; }
+html.settings-embed .opt-del { border-radius: 6px !important; color: var(--muted) !important; }
+html.settings-embed .opt-del:hover { color: var(--danger-text, var(--danger)) !important; background: var(--nav-hover-bg) !important; }
+html.settings-embed .nodes-toggle {
+    min-height: 0 !important;
+    padding: 11px 14px !important;
+    border: 0 !important;
+    border-radius: 10px !important;
+    background: var(--nav-hover-bg) !important;
+    color: var(--muted) !important;
+    font-size: 12px !important;
+    font-weight: 600 !important;
+    box-shadow: none !important;
+}
+html.settings-embed .nodes-toggle:hover { background: var(--border-2) !important; color: var(--text) !important; }
+
+/* ── 运行按钮 / 运行结果 ── */
+html.settings-embed .run-btn {
+    height: 36px !important;
+    min-height: 0 !important;
+    padding: 0 14px !important;
+    border: 0 !important;
+    border-radius: 10px !important;
+    background: var(--text) !important;
+    color: var(--stage-bg) !important;
+    font-size: 12.5px !important;
+    font-weight: 600 !important;
+    box-shadow: none !important;
+    transform: none !important;
+}
+html.settings-embed .run-btn:hover { opacity: .88; box-shadow: none !important; transform: none !important; }
+html.settings-embed .run-btn:disabled { opacity: .5; }
+html.settings-embed .run-result {
+    padding: 12px !important;
+    border: 0 !important;
+    border-radius: 12px !important;
+    background: var(--soft) !important;
+}
+html.settings-embed .run-status { color: var(--muted) !important; font-size: 11.5px !important; font-weight: 400 !important; }
+
+/* ── 浮层：参数浮窗 / 确认弹窗 / Toast / 灯箱 ── */
+html.settings-embed .popup-backdrop { border-radius: 14px !important; }
+html.settings-embed .popup-panel {
+    width: 400px;
+    border: 0 !important;
+    border-radius: 20px !important;
+    background: color-mix(in srgb, var(--panel) 78%, transparent) !important;
+    backdrop-filter: blur(44px) saturate(190%) !important;
+    -webkit-backdrop-filter: blur(44px) saturate(190%) !important;
+    box-shadow: var(--shadow-xl) !important;
+}
+html.settings-embed .popup-head {
+    padding: 14px 16px !important;
+    background: transparent !important;
+}
+html.settings-embed .popup-title { font-size: 14px !important; font-weight: 700 !important; letter-spacing: 0 !important; }
+html.settings-embed .popup-sub { color: var(--muted) !important; font-size: 11px !important; font-weight: 600 !important; letter-spacing: 0 !important; }
+html.settings-embed .popup-close { border-radius: 8px !important; color: var(--muted) !important; }
+html.settings-embed .popup-close:hover { background: var(--nav-hover-bg) !important; color: var(--text) !important; }
+html.settings-embed .popup-body { padding: 12px !important; gap: 8px !important; }
+html.settings-embed .popup-empty { padding: 24px 12px !important; color: var(--muted) !important; font-size: 11.5px !important; font-weight: 400 !important; }
+html.settings-embed .image-lightbox img {
+    border: 0;
+    border-radius: 20px !important;
+    background: var(--stage-bg);
+    box-shadow: var(--shadow-xl) !important;
+}
+html.settings-embed .wf-confirm-panel {
+    border: 0 !important;
+    border-radius: 20px !important;
+    background: color-mix(in srgb, var(--panel) 78%, transparent) !important;
+    backdrop-filter: blur(44px) saturate(190%) !important;
+    -webkit-backdrop-filter: blur(44px) saturate(190%) !important;
+    box-shadow: var(--shadow-xl) !important;
+}
+html.settings-embed.theme-dark .popup-panel,
+html.settings-embed.studio-theme-dark .popup-panel,
+html.settings-embed.theme-dark .wf-confirm-panel,
+html.settings-embed.studio-theme-dark .wf-confirm-panel {
+    background: color-mix(in srgb, var(--panel) 70%, transparent) !important;
+}
+html.settings-embed .wf-confirm-title { font-size: 15px !important; font-weight: 800 !important; }
+html.settings-embed .wf-confirm-desc { color: var(--muted) !important; font-size: 12.5px !important; font-weight: 400 !important; line-height: 1.6 !important; }
+html.settings-embed .wf-confirm-btn {
+    height: 34px !important;
+    min-height: 34px !important;
+    padding: 0 14px !important;
+    border: 0 !important;
+    border-radius: 8px !important;
+    background: var(--nav-hover-bg) !important;
+    color: var(--text) !important;
+    font-size: 12px !important;
+    font-weight: 600 !important;
+}
+html.settings-embed .wf-confirm-btn:hover { background: var(--border-2) !important; }
+html.settings-embed .wf-confirm-btn.danger {
+    background: var(--danger-bg) !important;
+    color: var(--danger-text, var(--danger)) !important;
+}
+html.settings-embed .wf-confirm-btn.danger:hover {
+    background: color-mix(in srgb, var(--danger) 20%, transparent) !important;
+    color: var(--danger-text, var(--danger)) !important;
+    filter: none !important;
+}
+html.settings-embed .wf-toast {
+    padding: 10px 14px !important;
+    border: 0 !important;
+    border-radius: 12px !important;
+    background: var(--stage-bg) !important;
+    color: var(--text) !important;
+    font-size: 12.5px !important;
+    font-weight: 600 !important;
+    box-shadow: var(--shadow-xl) !important;
+}
+html.settings-embed .wf-toast.error {
+    background: var(--danger-bg) !important;
+    color: var(--danger-text, var(--danger)) !important;
+}
+@media (max-width: 720px) {
+    html.settings-embed .layout { grid-template-columns: 1fr; grid-auto-rows: auto; overflow-y: auto; }
+    html.settings-embed .sidebar { position: relative; width: auto; min-width: 0; max-height: none; overflow-y: visible; }
+    html.settings-embed .graph-svg-wrap { height: 420px; }
+}
+
+/* Hover 微弱反馈补强 + 键盘 focus 可见环 */
+button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible, [role="button"]:focus-visible { outline: none; box-shadow: 0 0 0 3px color-mix(in srgb, var(--strong) 18%, transparent); }
+/* 异步操作中的按钮 loading 态 */
+.action-btn.is-loading, .upload-btn.is-loading { opacity: .55; pointer-events: none; }
+/* 校验失败的输入高亮（错误就近） */
+.wf-invalid { background: var(--danger-bg) !important; box-shadow: 0 0 0 3px color-mix(in srgb, var(--danger) 18%, transparent) !important; }
+/* ═══ R5 轻量 Toast 反馈（自动消失） ═══ */
+.wf-toast-host { position: fixed; left: 50%; bottom: 28px; transform: translateX(-50%); z-index: 140; display: flex; flex-direction: column; align-items: center; gap: 8px; pointer-events: none; }
+.wf-toast { display: flex; align-items: center; gap: 8px; max-width: min(460px, calc(100vw - 48px)); padding: 10px 16px; border-radius: 12px; background: var(--text); color: var(--bg); font-size: 12.5px; font-weight: 700; line-height: 1.45; box-shadow: 0 12px 32px rgba(0,0,0,.18); opacity: 0; transform: translateY(12px); transition: opacity .2s ease-out, transform .2s ease-out; pointer-events: auto; cursor: pointer; }
+.wf-toast.show { opacity: 1; transform: translateY(0); }
+.wf-toast.error { background: var(--danger); color: #fff; }
+.wf-toast-icon { display: flex; flex: 0 0 auto; }
+.wf-spin { animation: wf-spin 1s linear infinite; }
+@keyframes wf-spin { to { transform: rotate(360deg); } }
+/* ═══ R5 二次确认弹窗 ═══ */
+.wf-confirm-backdrop { position: fixed; inset: 0; z-index: 130; display: flex; align-items: center; justify-content: center; padding: 24px; background: rgba(28,28,28,.42); backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px); opacity: 0; transition: opacity .18s ease-out; }
+body.studio-theme-dark .wf-confirm-backdrop { background: rgba(0,0,0,.55); }
+.wf-confirm-backdrop.show { opacity: 1; }
+.wf-confirm-panel { width: min(400px, 100%); background: var(--panel); border-radius: 20px; padding: 22px; box-shadow: 0 24px 60px var(--shadow-color-lg, rgba(0,0,0,.16)); transform: scale(.96) translateY(8px); transition: transform .18s ease-out; }
+.wf-confirm-backdrop.show .wf-confirm-panel { transform: none; }
+.wf-confirm-title { font-size: 15px; font-weight: 850; color: var(--text); letter-spacing: -.01em; }
+.wf-confirm-desc { margin-top: 8px; font-size: 12.5px; font-weight: 600; line-height: 1.6; color: var(--muted); }
+.wf-confirm-actions { margin-top: 18px; display: flex; justify-content: flex-end; gap: 8px; }
+.wf-confirm-btn { min-height: 44px; padding: 0 18px; border-radius: 12px; font-size: 12.5px; font-weight: 800; background: var(--soft); color: var(--text); transition: all .15s ease; }
+.wf-confirm-btn:hover { background: var(--line); }
+.wf-confirm-btn.danger { background: var(--danger); color: #fff; }
+.wf-confirm-btn.danger:hover { background: var(--danger); filter: brightness(1.1); }
+/* 页面级 R5 规则（非 embed 专属，原文保留，避免影响不带 embed=1 的老页面） */
+.settings-close-btn, .modal-close-btn { transition: transform 0.2s ease-out; }
+.settings-close-btn:hover, .modal-close-btn:hover { transform: rotate(90deg) scale(1.1); }
+input[type="checkbox"].toggle-switch { transition: all 0.2s cubic-bezier(0.22,0.61,0.36,1); }
+.ios-slider, .toggle-track { transition: all 0.2s cubic-bezier(0.22,0.61,0.36,1); }
+.content > * { max-width: 760px; width: 100%; margin-left: auto; margin-right: auto; }
+/* 触控目标：桌面用紧凑密度，粗指针（触摸）设备保留 ≥44px */
+@media (pointer: coarse) {
+    .upload-btn { min-height: 44px; }
+    .action-btn { min-height: 44px; padding: 0 18px; }
+    .run-btn { min-height: 44px; }
+    .workflow-card { min-height: 44px; }
+    .nodes-toggle { min-height: 44px; }
+    .workspace-mode-tabs button { min-height: 36px; }
+    .pfield-input, .pfield-select { min-height: 40px; }
+    .small-input, .small-select { min-height: 36px; }
+    html.settings-embed .upload-btn,
+    html.settings-embed .action-btn,
+    html.settings-embed .nodes-toggle,
+    html.settings-embed .workflow-card { min-height: 44px !important; }
+    html.settings-embed .run-btn { height: 44px !important; min-height: 44px !important; }
+    html.settings-embed .pfield-input,
+    html.settings-embed .pfield-select,
+    html.settings-embed .small-input,
+    html.settings-embed .small-select { height: 40px !important; min-height: 40px !important; }
+    html.settings-embed .workspace-mode-tabs button { min-height: 36px !important; }
+}
+</style>
+</head>
+<body>
+    <div class="page">
+        <div class="wrap">
+            <header class="page-head">
+                <div>
+                    <div class="title" data-i18n="comfy.title">工作流设置</div>
+                    <div class="sub" data-i18n="comfy.subtitle">选择本地 ComfyUI 工作流，配置可暴露到画布的输入参数。</div>
+                </div>
+                <div id="status" class="status"></div>
+            </header>
+
+            <div class="layout">
+                <aside class="sidebar">
+                    <div class="side-card workflow-panel workflow-panel-comfy">
+                        <div class="side-title">ComfyUI 后端地址</div>
+                        <div id="comfyInstancesList" style="display:flex;flex-direction:column;gap:6px"></div>
+                        <button class="upload-btn" type="button" onclick="addComfyInstance()">
+                            <i data-lucide="plus" class="w-3.5 h-3.5"></i><span>添加后端</span>
+                        </button>
+                        <div style="display:flex;gap:6px">
+                            <button class="upload-btn" id="comfySaveBtn" type="button" onclick="saveComfyInstances()" style="flex:1;background:var(--panel);color:var(--text)">
+                                <i data-lucide="save" class="w-3.5 h-3.5"></i><span>保存</span>
+                            </button>
+                        </div>
+                        <div style="font-size:10.5px;color:var(--faint);line-height:1.55;font-weight:600">格式：<span style="font-family:var(--font-mono)">host:port</span>（如 <span style="font-family:var(--font-mono)">127.0.0.1:8188</span>）</div>
+                    </div>
+
+                    <div class="side-card workflow-panel workflow-panel-comfy">
+                        <div class="side-title" data-i18n="comfy.workflowList">工作流列表</div>
+                        <div id="workflowList" class="workflow-list"></div>
+                        <button class="upload-btn" id="uploadBtn" type="button" onclick="document.getElementById('uploadInput').click()">
+                            <i data-lucide="upload" class="w-3.5 h-3.5"></i><span data-i18n="comfy.uploadWorkflow">上传工作流</span>
+                        </button>
+                        <input id="uploadInput" type="file" accept="application/json" style="display:none" onchange="onUpload(event)">
+                    </div>
+
+                    <div class="side-card" id="previewCard">
+                        <div class="preview-title-row">
+                            <i data-lucide="eye" class="w-4 h-4" style="color:var(--muted)"></i>
+                            <div class="preview-title" data-i18n="comfy.nodePreview">画布节点预览</div>
+                            <div class="preview-pill" data-i18n="comfy.live">实时</div>
+                        </div>
+                        <div class="preview-desc" data-i18n="comfy.previewDesc">这个工作流在画布 Comfy 节点上将显示出的控件，可直接填写并点击「运行测试」。</div>
+                        <div id="previewContent">
+                            <div class="preview-empty" data-i18n="comfy.previewEmpty">勾选节点输入字段后<br>预览将出现在这里</div>
+                        </div>
+                    </div>
+                </aside>
+
+                <main class="content">
+                    <div id="graphCard" class="graph-card" style="display:none">
+                        <div class="graph-head">
+                            <div class="graph-title-row">
+                                <div style="min-width:0;flex:1">
+                                    <div class="title-edit-row">
+                                        <input id="workflowTitleInput" class="workflow-title-input" type="text" placeholder="工作流名称" aria-label="工作流名称" data-i18n-placeholder="comfy.workflowName" oninput="updateWorkflowTitle(this.value)">
+                                    </div>
+                                    <div id="editorSub" class="editor-sub" data-i18n="comfy.editorSubDefault">从左侧列表选择，或上传新的 API 工作流</div>
+                                </div>
+                                <div class="content-actions">
+                                    <button id="deleteBtn" class="action-btn danger-btn" type="button" onclick="onDelete()" style="display:none">
+                                        <i data-lucide="trash-2" class="w-3.5 h-3.5"></i><span data-i18n="common.delete">删除</span>
+                                    </button>
+                                    <button id="saveBtn" class="action-btn save-btn" type="button" onclick="onSave()" style="display:none">
+                                        <i data-lucide="save" class="w-3.5 h-3.5"></i><span data-i18n="comfy.saveConfig">保存配置</span>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="workspace-mode-tabs">
+                                <button id="workspaceGraphTab" type="button" class="active" onclick="setWorkspaceMode('graph')" data-i18n="comfy.workflow">工作流</button>
+                                <button id="workspaceCanvasTab" type="button" onclick="setWorkspaceMode('canvas')" data-i18n="comfy.testCanvas">测试画布</button>
+                            </div>
+                        </div>
+                        <div class="graph-svg-wrap" style="position:relative">
+                            <svg id="graphSvg" class="graph-svg"></svg>
+                            <div class="graph-controls">
+                                <div class="graph-ctrl-btn" role="button" tabindex="0" onclick="graphZoom(-1)" title="缩小" aria-label="缩小" data-i18n-title="canvas.decrease"><i data-lucide="zoom-out" class="w-4 h-4"></i></div>
+                                <div id="zoomPill" class="graph-zoom-pill">100%</div>
+                                <div class="graph-ctrl-btn" role="button" tabindex="0" onclick="graphZoom(1)" title="放大" aria-label="放大" data-i18n-title="canvas.increase"><i data-lucide="zoom-in" class="w-4 h-4"></i></div>
+                                <div class="graph-ctrl-btn" role="button" tabindex="0" onclick="graphFit()" title="适应窗口" aria-label="适应窗口"><i data-lucide="maximize" class="w-4 h-4"></i></div>
+                            </div>
+                            <div id="popupBackdrop" class="popup-backdrop" style="display:none" onclick="closeNodePopup()"></div>
+                            <div id="nodePopup" class="popup-panel" style="display:none"></div>
+                        </div>
+                        <div id="miniCanvasHost" style="display:none"></div>
+                    </div>
+                    <div id="nodesToggle" class="nodes-toggle" style="display:none" role="button" tabindex="0" onclick="toggleNodeList()">
+                        <i data-lucide="list" class="w-3.5 h-3.5"></i>
+                        <span id="nodesToggleText" data-i18n="comfy.showNodeList">显示完整节点列表</span>
+                    </div>
+                    <div id="nodeList" class="node-list hidden"></div>
+                </main>
+
+            </div>
+        </div>
+    </div>
+    <div id="imageLightbox" class="image-lightbox" onclick="closeImagePreview()">
+        <img id="imageLightboxImg" src="" alt="preview" onclick="event.stopPropagation()">
+    </div>
+
+    <script defer src="/static/js/comfyui-settings.js?v=1.0.0.1790512746"></script>
+    <script>
+    /* ═══ R5 交互反馈：轻量 Toast + 二次确认 + 保存/上传/删除反馈包装 ═══ */
+    (function(){
+        'use strict';
+        var TOAST_MS = 3500;
+        function pick(zh, en){
+            try { if(window.StudioI18n && StudioI18n.lang && StudioI18n.lang() === 'en') return en; } catch(e){}
+            return zh;
+        }
+        function tr(key, def){
+            try {
+                var v = window.NovaUtils ? NovaUtils.tr(key) : (window.StudioI18n ? StudioI18n.t(key) : '');
+                return (v && v !== key) ? v : def;
+            } catch(e){ return def; }
+        }
+        function trf(key, vars, def){
+            try {
+                if(window.NovaUtils && NovaUtils.trf) return NovaUtils.trf(key, vars);
+            } catch(e){}
+            var s = tr(key, def || key);
+            Object.keys(vars || {}).forEach(function(k){ s = s.replaceAll('{' + k + '}', vars[k]); });
+            return s;
+        }
+        var ICONS = {
+            success: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>',
+            error: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 8v4"/><path d="M12 16h.01"/></svg>',
+            info: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>',
+            loading: '<svg class="wf-spin" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>'
+        };
+        function toastHost(){
+            var host = document.querySelector('.wf-toast-host');
+            if(!host){
+                host = document.createElement('div');
+                host.className = 'wf-toast-host';
+                host.setAttribute('aria-live', 'polite');
+                document.body.appendChild(host);
+            }
+            return host;
+        }
+        function wfToast(msg, type, opts){
+            opts = opts || {};
+            type = type || 'info';
+            var el = document.createElement('div');
+            el.className = 'wf-toast ' + type;
+            if(type === 'error') el.setAttribute('role', 'alert');
+            el.innerHTML = '<span class="wf-toast-icon">' + (ICONS[type] || ICONS.info) + '</span><span class="wf-toast-msg"></span>';
+            el.querySelector('.wf-toast-msg').textContent = msg;
+            toastHost().appendChild(el);
+            requestAnimationFrame(function(){ el.classList.add('show'); });
+            var timer = null;
+            function close(){
+                if(timer) { clearTimeout(timer); timer = null; }
+                el.classList.remove('show');
+                setTimeout(function(){ el.remove(); }, 220);
+            }
+            el.addEventListener('click', close);
+            if(!opts.sticky) timer = setTimeout(close, TOAST_MS);
+            return { close: close };
+        }
+        /* —— 二次确认弹窗（Promise 风格，页面同款毛玻璃） —— */
+        function wfConfirm(opts){
+            opts = opts || {};
+            return new Promise(function(resolve){
+                var backdrop = document.createElement('div');
+                backdrop.className = 'wf-confirm-backdrop';
+                backdrop.innerHTML =
+                    '<div class="wf-confirm-panel" role="alertdialog" aria-modal="true" aria-labelledby="wfConfirmTitle" aria-describedby="wfConfirmDesc">' +
+                        '<div class="wf-confirm-title" id="wfConfirmTitle"></div>' +
+                        '<div class="wf-confirm-desc" id="wfConfirmDesc"></div>' +
+                        '<div class="wf-confirm-actions">' +
+                            '<button type="button" class="wf-confirm-btn cancel"></button>' +
+                            '<button type="button" class="wf-confirm-btn danger"></button>' +
+                        '</div>' +
+                    '</div>';
+                var descEl = backdrop.querySelector('.wf-confirm-desc');
+                var cancelBtn = backdrop.querySelector('.cancel');
+                var okBtn = backdrop.querySelector('.danger');
+                backdrop.querySelector('.wf-confirm-title').textContent = opts.title || pick('确认操作', 'Confirm');
+                descEl.textContent = opts.desc || '';
+                if(!opts.desc) descEl.style.display = 'none';
+                cancelBtn.textContent = tr('common.cancel', pick('取消', 'Cancel'));
+                okBtn.textContent = opts.confirmText || tr('common.delete', pick('删除', 'Delete'));
+                document.body.appendChild(backdrop);
+                requestAnimationFrame(function(){ backdrop.classList.add('show'); });
+                function done(val){
+                    document.removeEventListener('keydown', onKey, true);
+                    backdrop.classList.remove('show');
+                    setTimeout(function(){ backdrop.remove(); }, 200);
+                    resolve(val);
+                }
+                function onKey(e){
+                    if(e.key === 'Escape'){ e.stopPropagation(); done(false); }
+                }
+                document.addEventListener('keydown', onKey, true);
+                cancelBtn.addEventListener('click', function(){ done(false); });
+                okBtn.addEventListener('click', function(){ done(true); });
+                backdrop.addEventListener('mousedown', function(e){ if(e.target === backdrop) done(false); });
+                cancelBtn.focus();
+            });
+        }
+        /* —— alert 接管：失败提示就近化为错误 toast —— */
+        var alertFired = false;
+        window.alert = function(msg){ alertFired = true; wfToast(String(msg), 'error'); };
+        /* —— 包装原页面函数：loading 态 + 成功/失败 toast + 可选二次确认 —— */
+        function wrapMutation(name, options){
+            var orig = window[name];
+            if(typeof orig !== 'function') return;
+            window[name] = async function(){
+                var args = arguments;
+                var btn = options.btn ? document.querySelector(options.btn) : null;
+                if(btn && btn.classList.contains('is-loading')) return;
+                if(options.prevalidate && !options.prevalidate()) return;
+                if(options.confirm){
+                    var conf = typeof options.confirm === 'function' ? options.confirm() : options.confirm;
+                    if(!(await wfConfirm(conf))) return;
+                }
+                alertFired = false;
+                var restore = options.before ? options.before() : null;
+                if(btn) btn.classList.add('is-loading');
+                try { await orig.apply(null, args); }
+                catch(e){
+                    alertFired = true;
+                    wfToast((e && e.message) ? String(e.message) : pick('操作失败', 'Operation failed'), 'error');
+                }
+                finally {
+                    if(restore) restore();
+                    if(btn) btn.classList.remove('is-loading');
+                }
+                var cancelled = options.wasCancelled ? options.wasCancelled() : false;
+                if(!alertFired && !cancelled && options.okText) wfToast(options.okText, 'success');
+            };
+        }
+        /* —— role="button" 的 div 支持 Enter/Space 触发 —— */
+        document.addEventListener('keydown', function(e){
+            if((e.key === 'Enter' || e.key === ' ') && e.target && e.target.matches && e.target.matches('[role="button"]')){
+                e.preventDefault();
+                e.target.click();
+            }
+        });
+        document.addEventListener('input', function(e){
+            if(e.target && e.target.classList) e.target.classList.remove('wf-invalid');
+        });
+        document.addEventListener('DOMContentLoaded', function(){
+            wrapMutation('onSave', {
+                btn: '#saveBtn',
+                okText: tr('comfy.saved', pick('配置已保存', 'Config saved'))
+            });
+            wrapMutation('saveComfyInstances', {
+                btn: '#comfySaveBtn',
+                prevalidate: function(){
+                    var inputs = document.querySelectorAll('#comfyInstancesList input');
+                    var hasValue = Array.prototype.some.call(inputs, function(i){ return i.value.trim(); });
+                    if(hasValue) return true;
+                    if(inputs[0]){ inputs[0].classList.add('wf-invalid'); inputs[0].focus(); }
+                    wfToast(pick('请至少填一个 ComfyUI 后端地址', 'Add at least one ComfyUI backend address'), 'error');
+                    return false;
+                },
+                okText: pick('ComfyUI 后端地址已保存', 'ComfyUI backends saved')
+            });
+            wrapMutation('onDelete', {
+                btn: '#deleteBtn',
+                confirm: function(){
+                    var name = (document.getElementById('workflowTitleInput') || {}).value || '';
+                    return {
+                        title: tr('common.delete', pick('删除', 'Delete')) + pick('工作流', ' workflow'),
+                        desc: trf('comfy.deleteConfirm', { name: name }, pick('确认删除该工作流？此操作不可恢复。', 'Delete this workflow? This cannot be undone.')),
+                        confirmText: tr('common.delete', pick('删除', 'Delete'))
+                    };
+                },
+                before: function(){
+                    var c = window.confirm;
+                    window.confirm = function(){ return true; };
+                    return function(){ window.confirm = c; };
+                },
+                okText: pick('工作流已删除', 'Workflow deleted')
+            });
+            wrapMutation('removeComfyInstance', {
+                confirm: {
+                    title: pick('删除后端地址', 'Delete backend'),
+                    desc: pick('确定从列表删除该 ComfyUI 后端地址吗？删除后需点击「保存」生效。', 'Remove this ComfyUI backend from the list? Click Save to apply.'),
+                    confirmText: tr('common.delete', pick('删除', 'Delete'))
+                },
+                okText: pick('已从列表移除，保存后生效', 'Removed — save to apply')
+            });
+            var promptCancelled = false;
+            var origPrompt = window.prompt;
+            wrapMutation('onUpload', {
+                btn: '#uploadBtn',
+                before: function(){
+                    promptCancelled = false;
+                    window.prompt = function(){
+                        var v = origPrompt.apply(window, arguments);
+                        if(v === null || v === '') promptCancelled = true;
+                        return v;
+                    };
+                    return function(){ window.prompt = origPrompt; };
+                },
+                wasCancelled: function(){ return promptCancelled; },
+                okText: pick('工作流已上传', 'Workflow uploaded')
+            });
+        });
+    })();
+    </script>
+    <script>
+    /* ═══ 浮层状态转发：任一浮层打开时通知父页，把设置弹窗 iframe 之外的界面一起模糊 ═══
+       只旁听 .wf-confirm-backdrop / #nodePopup / #imageLightbox 的开合，不改它们的逻辑与样式 */
+    (function(){
+        'use strict';
+        var last = null;
+        var pending = 0;
+        function overlayOpen(){
+            try {
+                if(document.querySelector('.wf-confirm-backdrop.show')) return true;
+                var popup = document.getElementById('nodePopup');
+                if(popup && getComputedStyle(popup).display !== 'none') return true;
+                var box = document.getElementById('imageLightbox');
+                if(box && box.classList.contains('open')) return true;
+            } catch(e){}
+            return false;
+        }
+        function sync(){
+            pending = 0;
+            try {
+                var open = overlayOpen();
+                if(open === last) return;
+                last = open;
+                if(window.parent && window.parent !== window){
+                    window.parent.postMessage({ type: 'settings-iframe-overlay', open: open }, '*');
+                }
+            } catch(e){}
+        }
+        function schedule(){
+            if(pending) return;
+            pending = setTimeout(sync, 0);
+        }
+        function start(){
+            sync();
+            try {
+                new MutationObserver(schedule).observe(document.body, {
+                    childList: true, subtree: true, attributes: true, attributeFilter: ['class', 'style']
+                });
+            } catch(e){}
+        }
+        if(document.body) start();
+        else document.addEventListener('DOMContentLoaded', start);
+    })();
+    </script>
+    <script src="/static/js/shared/morph-button.js?v=1.0.0.1791308700"></script>
+    <script>
+    /* ═══ Morph Button 接入：保存/确定按钮的点击状态动效（只旁挂状态，不改原有点击逻辑） ═══ */
+    (function(){
+        'use strict';
+        var hookedBackdrops = typeof WeakSet === 'function' ? new WeakSet() : null;
+        var bindTries = 0;
+
+        function api(){ return window.NovaMorphButton || null; }
+
+        function hasBackend(){
+            var inputs = document.querySelectorAll('#comfyInstancesList input');
+            return Array.prototype.some.call(inputs, function(i){ return i.value.trim(); });
+        }
+        // 校验失败时 R5 包装脚本只弹 toast 且 promise 正常 resolve，这里让它按失败收尾，避免画成绿勾
+        function comfySaveAction(){
+            var ret = window.saveComfyInstances.apply(this, arguments);
+            if(hasBackend()) return ret;
+            var p = Promise.resolve(ret).then(function(){ throw new Error('comfy-no-backend'); });
+            p.catch(function(){});   // 自行消费，避免 unhandledrejection；模块仍按 failure 处理
+            return p;
+        }
+        function bindSaveButtons(){
+            var m = api();
+            if(!m) return;
+            var save = document.getElementById('saveBtn');
+            if(save) m.attach(save, { keepWidth: true, action: function(){ return window.onSave.apply(this, arguments); } });
+            var comfySave = document.getElementById('comfySaveBtn');
+            if(comfySave) m.attach(comfySave, { keepWidth: true, action: comfySaveAction });
+        }
+        /* 二次确认是 Promise 风格：按钮先 loading→success，再把点击放行给原本的 done(true) */
+        function hookConfirm(){
+            var m = api();
+            if(!m) return;
+            var list = document.querySelectorAll('.wf-confirm-backdrop');
+            Array.prototype.forEach.call(list, function(bd){
+                if(hookedBackdrops && hookedBackdrops.has(bd)) return;
+                if(hookedBackdrops) hookedBackdrops.add(bd);
+                var ok = bd.querySelector('.wf-confirm-btn.danger');
+                if(!ok) return;
+                m.attach(ok, { keepWidth: true });   // 无 onclick，只建立状态层，由这里手动驱动
+                var release = false;
+                bd.addEventListener('click', function(e){
+                    var btn = e.target && e.target.closest ? e.target.closest('.wf-confirm-btn') : null;
+                    if(btn !== ok || release) return;
+                    e.stopPropagation();
+                    e.preventDefault();
+                    release = true;
+                    m.setState(ok, 'loading');
+                    setTimeout(function(){
+                        if(!ok.isConnected) return;
+                        m.setState(ok, 'success');
+                        setTimeout(function(){
+                            if(!ok.isConnected) return;
+                            m.setState(ok, 'idle');   // 模块会拦掉非 idle 状态的点击，先回 idle 才放行
+                            ok.click();
+                        }, 450);
+                    }, 300);
+                }, true);
+            });
+        }
+        function bindAll(){
+            try { bindSaveButtons(); } catch(e){}
+            try { hookConfirm(); } catch(e){}
+        }
+        function start(){
+            bindAll();
+            try {
+                new MutationObserver(function(){
+                    if(document.querySelector('.wf-confirm-backdrop')) bindAll();
+                }).observe(document.body, { childList: true, subtree: true });
+            } catch(e){}
+            // 模块由别的执行岗并行开发，未就绪时轮询重试
+            var wait = setInterval(function(){
+                bindTries++;
+                if(api() || bindTries > 40){ clearInterval(wait); bindAll(); }
+            }, 250);
+        }
+        if(document.body) start();
+        else document.addEventListener('DOMContentLoaded', start);
+        window.addEventListener('load', bindAll);
+    })();
+    </script>
+</body>
+</html>

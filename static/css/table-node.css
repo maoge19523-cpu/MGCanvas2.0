@@ -1,0 +1,1156 @@
+/* ═══════════════════════════════════════════════════════════════════════
+   多维表格节点 —— 结构/尺寸/交互照搬 DX OS builtin.table，
+   配色、圆角、字体一律取 marvis-shared.css 的设计令牌，无硬编码颜色。
+   规范来源：docs/v2/DXOS_TABLE_SPEC.md
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* 用户手动拉高节点时：表格区填满节点可用高度，多出来的高度用来多显示几行，
+   而不是把行数硬顶在一个固定值上、下面留白或逼人滚动。 */
+.node.sized.table-node .node-body {
+    overflow: hidden;
+}
+
+.node.sized.table-node .table-node {
+    height: 100%;
+    min-height: 0;
+}
+
+.table-node {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    width: 100%;
+    min-height: 0;
+    color: var(--text);
+    font-family: var(--font-sans);
+    font-size: 12px;
+}
+
+.table-node-missing {
+    padding: 12px;
+    color: var(--danger);
+    font-size: 12px;
+}
+
+/* ── 顶部信息条：列/行计数、已选行数、新增列/行 ── */
+.table-node-meta {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 22px;
+    font-size: 11px;
+    color: var(--text-3);
+}
+
+.table-node-count {
+    color: var(--text-2);
+    font-variant-numeric: tabular-nums;
+}
+
+.table-node-picked {
+    padding: 1px 6px;
+    border-radius: 999px;
+    background: var(--nav-hover-bg);
+    color: var(--text-2);
+}
+
+.table-node-spacer { flex: 1 1 auto; }
+
+.table-node-action {
+    height: 22px;
+    padding: 0 8px;
+    border: 0;
+    border-radius: 6px;
+    background: var(--surface);
+    color: var(--text-2);
+    font-family: inherit;
+    font-size: 11px;
+    line-height: 1;
+    cursor: pointer;
+    transition: background .18s var(--fluid-ease, ease), color .18s var(--fluid-ease, ease);
+}
+
+.table-node-action:hover {
+    background: var(--nav-hover-bg);
+    color: var(--text);
+}
+
+/* ── 表格容器：固定列宽 + 超高时内部滚动 ── */
+.table-node-grid {
+    /* 节点随内容高时自然贴内容；节点被拉高时填满可用高度、多显示几行。
+       不设 max-height：行数全部自然显示，不硬顶一个固定行数。 */
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow: auto;
+    border: 0;
+    border-radius: 8px;
+    background: var(--surface);
+}
+
+.table-node-table {
+    width: max-content;
+    min-width: 100%;
+    border-collapse: separate;
+    border-spacing: 0 6px;
+    table-layout: fixed;
+}
+
+.table-node-table col.table-actions-column { width: 44px; }
+.table-node-table col.table-data-column { width: 132px; }
+
+/* 默认全部居中；只有长文本列（提示词/画面描述）左对齐，长句居中没法读。
+   纵向也居中：行高被同行的图片撑高时，短值（时长/运镜）不会贴在格子顶上。 */
+.table-node-table th,
+.table-node-table td {
+    position: relative;
+    padding: 0 8px;
+    overflow: hidden;
+    text-align: center;
+    vertical-align: middle;
+}
+
+.table-node-table th.is-text-column,
+.table-node-table td.is-text-column { text-align: left; }
+
+.table-node-table th:last-child,
+
+.table-node-table tbody tr:nth-child(even) td { background: color-mix(in srgb, var(--soft) 60%, transparent); }
+
+/* 表头吸顶，纵向滚动时列名不消失 */
+.table-node-table thead th {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+}
+
+/* ── 表头单元格 ── */
+.table-head-cell {
+    height: 38px;
+    padding: 0 6px;
+    background: var(--surface-2);
+    color: var(--text-2);
+    font-size: 11px;
+    font-weight: 600;
+    white-space: nowrap;
+    vertical-align: middle;
+}
+
+.table-head-cell.is-editing { background: var(--surface); }
+
+/* 表头右侧的删除列按钮：和删行按钮同一套（图标 + 悬停变红），默认淡、不藏。 */
+.table-head-cell { position: relative; }
+
+.table-head-delete {
+    position: absolute;
+    top: 50%;
+    right: 2px;
+    transform: translateY(-50%);
+    width: 20px;
+    height: 20px;
+    padding: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 0;
+    border-radius: 5px;
+    background: transparent;
+    color: var(--text-3);
+    opacity: .5;
+    line-height: 1;
+    cursor: pointer;
+    transition: opacity .15s ease, background .15s ease, color .15s ease;
+}
+
+.table-head-cell:hover .table-head-delete,
+.table-head-cell:focus-within .table-head-delete { opacity: 1; }
+.table-head-delete:hover { background: var(--danger-bg); color: var(--danger-text); }
+.table-head-delete svg { width: 12px !important; height: 12px !important; }
+
+.table-head-label {
+    display: block;
+    padding-right: 20px;   /* 给右上角的删除列按钮让位 */
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.table-head-editor {
+    box-sizing: border-box;
+    width: 100%;
+    height: 24px;
+    padding: 0 4px;
+    border: 0;
+    border-radius: 5px;
+    background: var(--soft);
+    color: var(--text);
+    font-family: inherit;
+    font-size: 11px;
+    outline: none;
+}
+
+.table-head-editor:focus { box-shadow: 0 0 0 3px color-mix(in srgb, var(--strong) 18%, transparent); }
+.table-actions-cell {
+    text-align: center;
+    vertical-align: middle;
+}
+
+/* ── 数据单元格：默认只读，双击进入编辑 ── */
+.table-node-table tbody td {
+    color: var(--text);
+    font-size: 11px;
+    line-height: 15px;
+}
+
+.table-cell-view {
+    display: block;
+    padding: 5px 0;
+    overflow: hidden;
+    white-space: pre-wrap;
+    word-break: break-word;
+}
+
+.table-cell.is-editing { padding: 0; }
+
+.table-cell-editor {
+    box-sizing: border-box;
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    padding: 5px 8px;
+    border: 0;
+    border-radius: 0;
+    background: var(--soft);
+    color: var(--text);
+    font-family: inherit;
+    font-size: 11px;
+    line-height: 15px;
+    outline: none;
+    resize: none;
+}
+
+
+.table-node-table tbody tr:hover td,
+.table-node-table tbody tr.is-selected td { background: var(--nav-hover-bg); }
+
+/* ── 选择框与删除行按钮 ── */
+.table-checkbox {
+    width: 14px;
+    height: 14px;
+    margin: 0;
+    vertical-align: middle;
+    accent-color: var(--accent);
+    cursor: pointer;
+}
+
+/* 删行图标按钮：常显的垃圾桶（Lucide trash-2），悬停变红。
+   之前是个裸 × 字符 + opacity:0（不悬停整行根本看不见）。 */
+.table-row-delete {
+    width: 26px;
+    height: 26px;
+    padding: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    vertical-align: middle;
+    border: 0;
+    border-radius: 6px;
+    background: transparent;
+    color: var(--text-3);
+    line-height: 1;
+    cursor: pointer;
+    transition: background .15s ease, color .15s ease;
+}
+
+.table-row-delete:hover {
+    background: var(--danger-bg);
+    color: var(--danger-text);
+}
+
+.table-row-delete svg { width: 14px; height: 14px; }
+
+/* ── 格子的上传 / 替换（只给用户自己新建的空白表用）───────────────
+   LLM 生成的多维表格一个图标都不放：有图/视频双击看大图，提示词格双击改文字。 */
+.table-cell-add {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 0;
+    background: transparent;
+    color: var(--text-3);
+    cursor: pointer;
+    transition: color .15s ease, background .15s ease;
+}
+
+.table-cell-add:hover { color: var(--text); background: var(--nav-hover-bg); }
+.table-cell-add svg { width: 15px !important; height: 15px !important; }
+
+/* 右上角的「···」：点开小菜单（替换 / 新增），双击看大图 */
+.table-cell-more-wrap { position: absolute; top: 2px; right: 2px; z-index: 4; }
+
+.table-cell-menu {
+    display: none;
+    position: fixed;
+    left: 0;
+    top: 0;
+    z-index: 40;
+    min-width: 84px;
+    padding: 4px;
+    border-radius: var(--radius-md);
+    border: 0;
+    background: color-mix(in srgb, var(--panel) 78%, transparent);
+    box-shadow: var(--shadow-lg), 0 6px 18px var(--shadow);
+    backdrop-filter: blur(44px) saturate(190%);
+    -webkit-backdrop-filter: blur(44px) saturate(190%);
+}
+
+.table-cell-menu.is-open { display: block; }
+
+.table-cell-menu-del {
+    margin-left: auto;
+    width: 18px;
+    height: 18px;
+    padding: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 0;
+    border-radius: 4px;
+    background: transparent;
+    color: var(--text-3);
+    font-size: 11px;
+    line-height: 1;
+    cursor: pointer;
+}
+
+.table-cell-menu-del:hover { background: var(--danger-bg); color: var(--danger-text); }
+.table-cell-menu { min-width: 124px; }
+.table-cell-menu .menu-btn { height: 30px; font-size: 10.5px; gap: 7px; white-space: nowrap; }
+.table-cell-menu .menu-btn span { white-space: nowrap; }
+.table-cell-menu .table-media-thumb { width: 22px; height: 22px; flex: 0 0 22px; border-radius: 4px; }
+.table-cell-menu .table-media-thumb img,
+.table-cell-menu .table-media-thumb video { width: 100%; height: 100%; max-width: 22px; max-height: 22px; object-fit: cover; }
+
+.table-cell-more {
+    min-width: 22px;
+    height: 18px;
+    padding: 0 5px;
+    border: 0;
+    border-radius: 9px;
+    background: var(--surface);
+    color: var(--text-3);
+    font-family: inherit;
+    font-size: 12px;
+    font-weight: 800;
+    line-height: 16px;
+    letter-spacing: .5px;
+    cursor: pointer;
+    transition: background .15s ease, color .15s ease;
+}
+
+.table-cell-more:hover {
+    background: var(--nav-hover-bg);
+    color: var(--text);
+}
+
+/* ── 空表提示 ── */
+.table-node-table td.table-empty-cell {
+    padding: 18px 12px;
+    color: var(--text-3);
+    font-size: 11px;
+    text-align: center;
+    vertical-align: middle;
+}
+
+/* ═══ 输入列（DX OS §3：.table-input-column 112px / .table-media-cell）═══ */
+
+.table-node-table col.table-input-column { width: 112px; }
+
+.table-input-head {
+    padding: 0 22px 0 6px;   /* 右侧给删除列按钮让位 */
+    color: var(--text-2);
+    white-space: nowrap;
+}
+
+.table-input-label {
+    font-size: 10px;
+    font-weight: 600;
+}
+
+.table-input-mode {
+    display: inline-block;
+    margin-left: 4px;
+    padding: 0 4px;
+    border: 0;
+    border-radius: 4px;
+    background: var(--surface);
+    color: var(--text-3);
+    font-family: inherit;
+    font-size: 9px;
+    line-height: 14px;
+    vertical-align: middle;
+    cursor: pointer;
+    transition: background .15s ease, color .15s ease;
+}
+
+.table-input-mode:hover {
+    background: var(--nav-hover-bg);
+    color: var(--text);
+}
+
+.table-input-count {
+    margin-left: 3px;
+    color: var(--text-3);
+    font-size: 9px;
+    font-variant-numeric: tabular-nums;
+}
+
+/* 空输入格淡一档，让「这里可以接素材」看得出来 */
+.table-node-table td.table-media-cell.is-empty { background: var(--surface-2); }
+
+.table-node-table td.table-media-cell {
+    padding: 3px;
+    text-align: center;
+    vertical-align: middle;
+}
+
+/* 缩略图保持原始比例：只给上下限，宽高都 auto，浏览器等比缩放。
+   之前是 width:100% + object-fit:cover + max-height:60px —— 竖图会被裁掉上下。 */
+.table-media-thumb {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    border-radius: 5px;
+    background: var(--surface-2);
+}
+
+.table-media-thumb img,
+.table-media-thumb video {
+    display: block;
+    width: auto;
+    height: auto;
+    max-width: 100%;
+    max-height: 120px;
+    object-fit: contain;
+}
+
+/* 「全部」模式的通道一行会有多张，换行排开 */
+.table-media-stack {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2px;
+    align-items: flex-start;
+}
+
+.table-media-stack .table-media-thumb {
+    flex: 1 1 44%;
+    min-width: 40px;
+}
+
+/* 一行多张时每张更小，上限收紧一点免得整格太高 */
+.table-media-stack .table-media-thumb img,
+.table-media-stack .table-media-thumb video { max-height: 64px; }
+
+.table-media-stack .table-media-text,
+.table-media-stack .table-media-missing { flex: 1 1 100%; }
+
+/* 空数据格里的说明：告诉用户这里写文字、@ 能引用本行素材 */
+.table-cell-hint {
+    display: block;
+    color: var(--text-3);
+    opacity: .75;
+    font-size: 10px;
+    line-height: 13px;
+}
+
+/* 编辑器里打 @ 弹出的本行素材选择条（点一下插入 @图片N） */
+/* 编辑器右上角的「引用素材」按钮（不用打 @ 也能弹选择条） */
+.table-cell-mention-trigger {
+    position: absolute;
+    top: 2px;
+    right: 2px;
+    z-index: 6;
+    width: 20px;
+    height: 20px;
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
+    background: var(--surface);
+    color: var(--text-3);
+    font-family: inherit;
+    font-size: 12px;
+    font-weight: 800;
+    line-height: 1;
+    cursor: pointer;
+}
+
+.table-cell-mention-trigger:hover { color: var(--text); background: var(--nav-hover-bg); }
+
+.table-cell-mention-picker {
+    position: absolute;
+    left: 2px;
+    right: 2px;
+    bottom: 2px;
+    z-index: 5;
+    display: none;
+    gap: 4px;
+    padding: 3px;
+    overflow-x: auto;
+    border-radius: 6px;
+    background: color-mix(in srgb, var(--panel) 78%, transparent);
+    box-shadow: var(--shadow-md), 0 6px 16px var(--shadow);
+    backdrop-filter: blur(44px) saturate(190%);
+    -webkit-backdrop-filter: blur(44px) saturate(190%);
+}
+
+.table-cell-mention-picker.is-open { display: flex; }
+
+.table-cell-mention-tip { padding: 4px 2px; color: var(--text-3); font-size: 10px; line-height: 13px; }
+.table-cell-mention-item.is-active { background: var(--nav-hover-bg); color: var(--accent); }
+
+.table-cell-mention-item {
+    flex: 0 0 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1px;
+    padding: 2px;
+    border: 0;
+    border-radius: 5px;
+    background: transparent;
+    color: var(--text-3);
+    font-family: inherit;
+    font-size: 9px;
+    line-height: 11px;
+    cursor: pointer;
+}
+
+.table-cell-mention-item:hover { background: var(--nav-hover-bg); color: var(--text); }
+.table-cell-mention-item .table-media-thumb { width: 34px; height: 34px; border-radius: 5px; }
+.table-cell-mention-item .table-media-thumb img,
+.table-cell-mention-item .table-media-thumb video { width: 100%; height: 100%; max-width: 26px; max-height: 26px; object-fit: cover; }
+
+/* ── LLM 三选一药丸（文本输出 / 多维表格 / 视频分镜表）──
+   经典画布这边在 canvas.css 里就有；智能画布只加载 table-node.css，
+   所以这里用 .llm-output-mode 作用域再写一份，不影响经典画布。 */
+.llm-output-mode { background:var(--surface-2); border:0; border-radius:var(--radius-full); padding:3px; display:flex; gap:2px; margin-bottom:6px; }
+.llm-output-mode button { height:28px; border-radius:var(--radius-full); padding:0 10px; color:var(--text-2); border:0; background:transparent; font-size:10px; font-weight:700; font-family:inherit; cursor:pointer; }
+.llm-output-mode button:hover { color:var(--text); }
+.llm-output-mode button.active { background:var(--strong); color:var(--strong-text); box-shadow:var(--shadow-sm); }
+
+/* 智能画布：表格 / 批量生成节点的卡片必须包住内容。
+   那边的布局是按 node.images 算尺寸的，这两种节点没有图片 → 会算出 133px 高的卡片，
+   而表格内容有 390+px → 内容溢出、外框看不见、连标题栏都被盖住点不到（拖不动）。
+   经典画布的表格节点是 .node.table-node，不受这条影响。 */
+.image-node:has(> .node-body > .table-node-host):not(.size-user-set),
+.image-node:has(> .node-body > .table-batch-host):not(.size-user-set) {
+    width: auto !important;
+    height: auto !important;
+    min-width: 280px;
+}
+/* 用户拖过缩放把手后听他的尺寸；宽度始终自适应到至少能装下内容 */
+.image-node.size-user-set:has(> .node-body > .table-node-host),
+.image-node.size-user-set:has(> .node-body > .table-batch-host) {
+    min-width: 220px;
+    min-height: 120px;
+    /* 不能 overflow:hidden：左右两侧的连接端口是定位在节点框外 30px 的兄弟元素，
+       一裁就把「加号+圆圈」整个裁掉（用户报的「看不到端口 / 连不上」）。 */
+    overflow: visible;
+}
+
+/* 智能画布 prompt 节点布局：中间一排工具（模板库/分隔符/LLM/启用系统提示词/反推），
+   底下一排左边是输出形式药丸、右边是运行。 */
+.prompt-node-tools { flex-wrap: wrap; }
+/* 底部这排：左边三药丸、右边运行。容器窄的时候**允许换行**，
+   之前设 nowrap 导致药丸被压在一起互相重叠（用户截图）。 */
+.prompt-node-run-row { display: flex; align-items: center; gap: 6px; margin-top: 6px; flex-wrap: wrap; }
+.prompt-node-run-row .llm-output-mode { flex: 1 1 auto; min-width: 0; flex-wrap: wrap; margin-bottom: 0; padding: 2px; }
+.prompt-node-run-row .llm-output-mode button { flex: 0 0 auto; white-space: nowrap; height: 26px; padding: 0 9px; }
+.prompt-node-run-row .prompt-node-run { margin-left: auto; flex: 0 0 auto; }
+
+/* 智能画布：表格 / 批量生成节点的磨砂玻璃外框（含空表格、空批量节点）。
+   边框粗细/圆角/内边距可以用 CSS 变量调：
+     --table-frame-w（边框粗细，默认 0 = 不发丝线）、--table-frame-r（圆角，默认 14px）、--table-frame-p（内边距，默认 10px）
+   在 .image-node 上加 style="--table-frame-w:2px" 之类就能自定义。 */
+.image-node:has(> .node-body > .table-node-host),
+.image-node:has(> .node-body > .table-batch-host) {
+    background: var(--table-frame-bg, rgba(255, 255, 255, .72)) !important;
+    -webkit-backdrop-filter: blur(14px) saturate(1.25) !important;
+    backdrop-filter: blur(14px) saturate(1.25) !important;
+    border: var(--table-frame-w, 0) solid var(--table-frame-line, rgba(0, 0, 0, .12)) !important;
+    border-radius: var(--table-frame-r, 14px) !important;
+    box-shadow: none !important;
+    padding: var(--table-frame-p, 10px) !important;
+    /* 同上：外框不裁，端口（框外 30px）才看得见、点得到。内容本来就在 padding 以内，不会被圆角切到。 */
+    overflow: visible;
+}
+
+/* 手动拉过尺寸后：表格内容必须跟着框走 —— 撑开的框里真的多显示几行，
+   而不是"只有底框变大、表格纹丝不动"（用户报的）。
+   这一套和经典画布 .node.sized.table-node 完全一致，只是选择器换成智能画布的 .image-node。 */
+.image-node.size-user-set:has(> .node-body > .table-node-host) .node-body {
+    height: 100% !important;
+    min-height: 0;
+    align-items: stretch;
+    justify-content: stretch;
+    overflow: hidden;
+}
+.image-node.size-user-set:has(> .node-body > .table-node-host) .table-node-host {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    height: 100%;
+    min-height: 0;
+}
+.image-node.size-user-set:has(> .node-body > .table-node-host) .table-node-host .table-node {
+    flex: 1 1 auto;
+    min-height: 0;
+}
+/* 批量节点同理：手动尺寸下面板铺满，内容多了自己滚 */
+.image-node.size-user-set:has(> .node-body > .table-batch-host) .node-body {
+    height: 100% !important;
+    min-height: 0;
+    align-items: stretch;
+    justify-content: stretch;
+}
+.image-node.size-user-set:has(> .node-body > .table-batch-host) .table-batch-host {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    height: 100%;
+    min-height: 0;
+}
+.image-node.size-user-set:has(> .node-body > .table-batch-host) .table-batch-panel {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow: auto;
+}
+
+.theme-dark .image-node:has(> .node-body > .table-node-host),
+.theme-dark .image-node:has(> .node-body > .table-batch-host),
+.studio-theme-dark .image-node:has(> .node-body > .table-node-host),
+.studio-theme-dark .image-node:has(> .node-body > .table-batch-host) {
+    --table-frame-bg: rgba(22, 22, 22, .72);
+    --table-frame-line: rgba(255, 255, 255, .14);
+}
+
+/* 智能画布 prompt 节点的 LLM 区：本来是个 flex 行容器（工具排 + 缩略图会横排），
+   我新加的 Input/Output 分区标签、输出框、供应商/模型行被当成行内项 → 布局全乱。
+   这里强制成竖排：每一块独占一行、占满宽度。 */
+.prompt-node-llm {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+}
+.prompt-node-llm > .llm-pane-label,
+.prompt-node-llm > .llm-output-wrap,
+.prompt-node-llm > .prompt-llm-model-row,
+.prompt-node-llm > .prompt-llm-instruction-wrap,
+.prompt-node-llm > .prompt-node-run-row,
+.prompt-node-llm > .prompt-node-upstream-list,
+.prompt-node-llm > textarea,
+.prompt-node-llm > .prompt-node-input-thumbs {
+    width: 100%;
+    flex: 0 0 auto;
+}
+.llm-pane-label { display: block; }
+
+/* 智能画布 LLM 模式的提示词节点：内容多了（tabs 排 / 分栏 / 输出区 / 底部药丸+运行），
+   而节点尺寸还是画布按老公式算的 → 底下那排被挤到卡片外面。让卡片跟着内容走。 */
+/* 没拖过才自适应；拖过之后听画布写进来的尺寸（否则缩放图/连线都变了、只有卡片被按在原地） */
+/* 没手动拖过：LLM 节点跟着内容自适应（历史行为，不改）。 */
+.image-node:has(.prompt-node-llm):not(.size-user-set) {
+    height: auto !important;
+    min-height: 300px;
+    overflow: visible;
+}
+/* 拖过右下角把手（node.sizeUserSet）才听手动宽高；高度由画布内联样式写进来，
+   内容区改成 flex 自适应：输入框/输出框按比例吃掉多余高度，装不下时内部滚动而不是裁掉运行按钮。 */
+/* 不能 overflow:hidden：左右两个「加号+圆圈」端口是定位在节点框**外** 30px 的兄弟元素，
+   一裁就整个看不见（用户报的「LLM 节点的加号+圆圈没了」）。内容溢出自有 .node-body 的 overflow:auto 兜住。 */
+.image-node:has(.prompt-node-llm).size-user-set { min-height: 340px; overflow: visible; }
+.image-node:has(.prompt-node-llm).size-user-set .node-body { height: 100% !important; overflow: auto; }
+.image-node:has(.prompt-node-llm).size-user-set .prompt-node-card { height: 100%; display: flex; flex-direction: column; }
+.image-node:has(.prompt-node-llm).size-user-set .prompt-llm-instruction-wrap { flex: 1 1 45%; min-height: 90px; }
+.image-node:has(.prompt-node-llm).size-user-set .prompt-llm-instruction { height: 100% !important; }
+.image-node:has(.prompt-node-llm).size-user-set .llm-output-wrap { flex: 1 1 45%; min-height: 70px; }
+.image-node:has(.prompt-node-llm).size-user-set .llm-output { height: 100%; max-height: none; }
+/* 手动尺寸时让 LLM 区撑满卡片：否则节点被拉高后内容还缩在上面，运行按钮下方留一大块空白 */
+.image-node:has(.prompt-node-llm).size-user-set .prompt-node-llm { flex: 1 1 auto; min-height: 0; }
+/* 聊天 tab 同理：pane 吃掉剩余高度，聊天记录填满 pane 并内部滚动（解除基础规则的 max-height:190px），
+   输入框/发送按钮不参与伸缩、固定贴底；min-height 沿用 smart-canvas.css 的 96px 防止塌陷。 */
+.image-node:has(.prompt-node-llm).size-user-set .llm-chat-pane { flex: 1 1 auto; min-height: 0; }
+.image-node:has(.prompt-node-llm).size-user-set .llm-chat-log { flex: 1 1 auto; max-height: none; }
+.image-node:has(.prompt-node-llm).size-user-set .llm-chat-input,
+.image-node:has(.prompt-node-llm).size-user-set .llm-chat-send { flex: 0 0 auto; }
+/* 聊天输入框拖高时：全局禁选文字、强制 ns-resize，并让文本框/聊天记录暂时不接收指针，
+   否则上拉时光标滑到文本框会被它抢走（与指令框的 body.smart-llm-instr-resize 同一套做法）。 */
+body.smart-chat-input-resize { cursor:ns-resize !important; }
+body.smart-chat-input-resize, body.smart-chat-input-resize * { user-select:none !important; -webkit-user-select:none !important; }
+body.smart-chat-input-resize .prompt-node-llm textarea,
+body.smart-chat-input-resize .llm-chat-log,
+body.smart-chat-input-resize .prompt-node-llm select { pointer-events:none !important; }
+.image-node:has(.prompt-node-llm) .node-body {
+    height: auto !important;
+    overflow: visible;
+}
+.image-node:has(.prompt-node-llm) .prompt-node-llm {
+    width: 100%;
+    min-width: 0;
+}
+
+/* 照搬经典画布 LLM 节点顶部那一排：节点 / 聊天 / System / 反推 */
+.llm-tabs { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 6px; }
+.llm-tab {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    height: 28px;
+    padding: 0 11px;
+    border: 0;
+    border-radius: 999px;
+    background: var(--soft);
+    color: var(--text-2);
+    font-family: inherit;
+    font-size: 11px;
+    font-weight: 700;
+    cursor: pointer;
+}
+.llm-tab:hover { color: var(--text); background: var(--card); }
+.llm-tab.is-active { background: var(--strong); color: var(--strong-text); }
+.llm-tab svg { width: 13px; height: 13px; }
+
+/* 上下分栏把手（照搬经典画布的 llm-pane-resizer） */
+.llm-pane-resizer {
+    position: relative;
+    height: 12px;
+    margin: 2px 0 0;
+    cursor: row-resize;
+    flex: 0 0 12px;
+}
+.llm-pane-resizer::after {
+    content: "";
+    position: absolute;
+    left: 50%;
+    top: 5px;
+    transform: translateX(-50%);
+    width: 34px;
+    height: 3px;
+    border-radius: 999px;
+    background: var(--line-2, rgba(0,0,0,.14));
+}
+.llm-pane-resizer:hover::after { background: var(--accent); }
+
+/* 供应商 / 模型一排（照搬经典画布 LLM 节点：放在 Input 分区上方） */
+.prompt-llm-model-row { display: flex; gap: 6px; margin-bottom: 2px; }
+.prompt-llm-model-row select { flex: 1 1 0; min-width: 0; }
+
+/* 智能画布 LLM 节点的 Input / Output 分区（照搬经典画布外观，样式原本只在 canvas.css 里） */
+.llm-pane-label {
+    flex: 0 0 auto;
+    margin: 6px 0 3px;
+    color: var(--text-3);
+    font-size: 10px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: .4px;
+}
+.llm-output-wrap { position: relative; min-height: 70px; flex: 0 0 auto; }
+.llm-output {
+    width: 100%;
+    min-height: 70px;
+    max-height: 170px;
+    overflow: auto;
+    padding: 7px 9px;
+    border: 0;
+    border-radius: var(--radius-md);
+    background: var(--soft);
+    color: var(--text);
+    font-size: 11.5px;
+    line-height: 1.55;
+    white-space: pre-wrap;
+    word-break: break-word;
+}
+.llm-copy-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 22px;
+    border: none;
+    border-radius: var(--radius-sm);
+    background: transparent;
+    color: var(--text-3);
+    cursor: pointer;
+}
+.llm-copy-btn:hover { color: var(--text); background: var(--surface-2); }
+.llm-output-copy { position: absolute; top: 4px; right: 5px; z-index: 2; }
+.llm-copy-btn svg { width: 13px; height: 13px; }
+
+/* 空状态批量节点：和生成列表同款外框，只放一句提示 */
+.table-batch-panel.is-empty {
+    min-height: 96px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    background: transparent;
+}
+.table-batch-panel.is-empty .table-batch-empty-tip {
+    padding: 0;
+    text-align: center;
+    font-size: 10.5px;
+    font-weight: 400;
+    color: var(--text-3);
+}
+
+/* LLM 节点的缩放我接不上（画布不给提示词节点绑 resize，我自己挂的 mousedown 也没触发），
+   所以按用户给的兜底方案：把提示词输入框**默认拉高**，让提示词看得更清楚。 */
+.image-node:has(.prompt-node-llm) .prompt-llm-instruction-wrap { min-height: 132px; }
+.image-node:has(.prompt-node-llm) .prompt-llm-instruction { min-height: 128px; }
+
+/* 智能画布的拖拽把手 + 批量节点收起态摘要 */
+.table-node-drag-bar {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    height: 20px;
+    padding: 0 4px;
+    margin-bottom: 2px;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: .3px;
+    color: var(--text-3);
+    cursor: move;
+    user-select: none;
+}
+.table-node-drag-bar:hover { color: var(--text); }
+.table-node-drag-bar.is-toggle { cursor: pointer; }
+
+.table-batch-collapsed {
+    padding: 6px 4px;
+    font-size: 10.5px;
+    line-height: 1.5;
+    color: var(--text-3);
+    word-break: break-all;
+}
+
+/* 批量生成节点：跑完的素材按行标在面板下面 */
+.table-batch-results { display:flex; flex-wrap:wrap; gap:6px; margin-top:8px; }
+.table-batch-result { width:56px; height:56px; border:0; border-radius:6px; overflow:hidden; background:var(--surface); flex:0 0 56px; }
+.table-batch-result img,
+.table-batch-result video { width:100%; height:100%; object-fit:cover; display:block; }
+
+/* 输入列格子角上的引用写法（@图片1）：让用户知道在提示词里怎么写 */
+.table-cell-ref-token {
+    position: absolute;
+    left: 3px;
+    bottom: 2px;
+    z-index: 3;
+    padding: 0 4px;
+    border-radius: 4px;
+    background: var(--surface);
+    color: var(--text-3);
+    font-size: 9px;
+    font-weight: 700;
+    line-height: 14px;
+    pointer-events: none;
+}
+
+/* 单元格文本里指向本行素材的 @图片N：换成一个小缩略图 */
+.table-cell-mention {
+    display: inline-flex;
+    align-items: center;
+    vertical-align: middle;
+    margin: 0 2px;
+}
+
+.table-cell-mention .table-media-thumb {
+    width: 18px;
+    height: 18px;
+    min-width: 18px;
+    border-radius: 4px;
+}
+
+.table-cell-mention .table-media-thumb img,
+.table-cell-mention .table-media-thumb video {
+    width: 100%;
+    height: 100%;
+    max-width: 18px;
+    max-height: 18px;
+    object-fit: cover;
+}
+
+.table-media-text {
+    display: block;
+    padding: 3px 4px;
+    color: var(--text-2);
+    font-size: 10px;
+    line-height: 13px;
+    text-align: left;
+    word-break: break-word;
+}
+
+.table-media-missing {
+    color: var(--danger);
+    font-size: 10px;
+}
+
+/* 选择列：只放勾选框，挤进 44px */
+.table-node-table th.table-actions-cell,
+.table-node-table td.table-actions-cell { padding: 0 3px; }
+
+/* 删除列：独立一列，单元格里就是一个「删除行」文字按钮。
+   宽度必须和 JS 里的 TABLE_DELETE_COLUMN_WIDTH 一致。 */
+.table-delete-column { width: 60px; }
+
+.table-node-table th.table-delete-cell,
+.table-node-table td.table-delete-cell { padding: 0 4px; white-space: nowrap; }
+
+.table-node-inputs { color: var(--text-3); }
+
+.table-row-actions { white-space: nowrap; }
+
+/* ═══ 批量生成面板（挂在生成节点上，DX OS §10）═══ */
+
+.table-batch-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-top: 10px;
+    padding: 8px;
+    border: 0;
+    border-radius: 8px;
+    background: var(--surface-2);
+    font-family: var(--font-sans);
+}
+
+.table-batch-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 8px;
+}
+
+.table-batch-title {
+    color: var(--text);
+    font-size: 11px;
+    font-weight: 600;
+}
+
+.table-batch-controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.table-batch-field {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    color: var(--text-3);
+    font-size: 10px;
+}
+
+.table-batch-input {
+    height: 22px;
+    padding: 0 4px;
+    border: 0;
+    border-radius: 5px;
+    background: var(--soft);
+    color: var(--text);
+    font-family: inherit;
+    font-size: 10px;
+    outline: none;
+}
+
+.table-batch-input:focus { background: var(--card); box-shadow: 0 0 0 3px color-mix(in srgb, var(--strong) 18%, transparent); }
+
+input.table-batch-input { width: 48px; }
+
+.table-batch-manual {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--text-2);
+    font-size: 10px;
+}
+
+/* 独立运行开关：在 flex 行里别被压缩 */
+.table-batch-manual-box {
+    flex: 0 0 auto;
+    margin: 0;
+}
+
+.table-batch-actions {
+    display: flex;
+    gap: 6px;
+}
+
+/* 「依次生成」是模式开关：选中态给个明显底色，和一次性点跑的按钮区分开 */
+.table-batch-actions .table-node-action.is-active {
+    background: var(--strong, #111);
+    color: var(--strong-text, #fff);
+}
+.table-batch-actions .table-node-action.is-active:hover {
+    background: var(--strong, #111);
+    color: var(--strong-text, #fff);
+}
+/* 状态行上的「依次生成」标注 */
+.table-batch-status-seq {
+    padding: 1px 6px;
+    border-radius: 999px;
+    background: var(--soft);
+    color: var(--text);
+    font-weight: 800;
+}
+
+/* 主按钮位：接了多维表格时拆成「批量生成」+「单张生成」两个并排（列方向堆叠） */
+.table-batch-run-btn {
+    flex: 0 0 40px;
+    width: 100%;
+    height: 40px;
+    margin-top: 0;
+    border: none;
+    border-radius: var(--radius-lg);
+    background: var(--accent);
+    color: var(--text-on-accent);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    font-family: inherit;
+    font-size: 11px;
+    font-weight: 800;
+    cursor: pointer;
+    transition: opacity .15s ease;
+}
+
+.table-batch-run-btn:hover { opacity: .88; }
+.table-batch-run-btn:disabled { background: var(--surface-2); color: var(--text-3); cursor: not-allowed; }
+
+/* 单张生成＝次级按钮。table-node.css 在 canvas.css 之后加载，同权重下这条生效 */
+.gen-btn-secondary {
+    background: var(--surface);
+    color: var(--text);
+    border: 0;
+}
+
+.gen-btn-secondary:hover { background: var(--nav-hover-bg); }
+
+/* ── 生成输入的行列表（DX OS §10：行号 / 参考图 / 提示词）── */
+.table-batch-source { color: var(--text-3); font-size: 10px; }
+
+.table-batch-status {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    color: var(--text-3);
+    font-size: 10px;
+    font-variant-numeric: tabular-nums;
+}
+
+.table-batch-status-progress { color: var(--text-2); }
+
+.table-batch-list {
+    display: grid;
+    gap: 6px;
+    max-height: 300px;
+    overflow: auto;
+    padding-right: 2px;
+}
+
+/* 自定义过窗口大小时：列表吃掉面板的剩余高度，行数不够就让每行自己拉高 ——
+   这样窗口是铺满的，不会底部空一大片。 */
+.node.sized.generator-node .table-batch-list,
+.node.sized.video-node .table-batch-list { flex:1 1 auto; min-height:0; max-height:none; grid-auto-rows:minmax(54px, 1fr); }
+.node.sized.generator-node .table-batch-panel,
+.node.sized.video-node .table-batch-panel { min-height:0; }
+
+.table-batch-row {
+    display: grid;
+    grid-template-columns: 20px minmax(58px, 28%) minmax(0, 1fr) 16px;
+    align-items: center;
+    gap: 7px;
+    min-height: 54px;
+    padding: 6px;
+    box-sizing: border-box;
+    border: 0;
+    border-radius: 10px;
+    background: var(--surface-2);
+    cursor: pointer;
+    transition: background .14s ease;
+}
+
+.table-batch-row:hover { background: var(--nav-hover-bg); }
+.table-batch-row.is-selected { background: color-mix(in srgb, var(--accent) 10%, transparent); }
+
+.table-batch-row-num {
+    display: grid;
+    width: 18px;
+    height: 18px;
+    place-items: center;
+    border-radius: 6px;
+    background: var(--accent);
+    color: var(--surface);
+    font-size: 8px;
+    line-height: 1;
+}
+
+.table-batch-row-media {
+    display: flex;
+    gap: 3px;
+    min-width: 0;
+    overflow-x: auto;
+}
+
+.table-batch-row-media > span {
+    width: 42px;
+    height: 42px;
+    flex: 0 0 42px;
+    display: grid;
+    place-items: center;
+    overflow: hidden;
+    border-radius: 8px;
+    background: var(--surface);
+}
+
+.table-batch-row-media > span.is-empty {
+    width: auto;
+    flex: 1 1 auto;
+    color: var(--text-3);
+    font-size: 9px;
+}
+
+.table-batch-row-media img,
+.table-batch-row-media video { width: 100%; height: 100%; object-fit: cover; }
+
+.table-batch-row > p {
+    min-width: 0;
+    max-height: 48px;
+    margin: 0;
+    overflow: hidden;
+    color: var(--text-2);
+    font-size: 9px;
+    line-height: 1.45;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+}
+
+.table-batch-note {
+    color: var(--text-3);
+    font-size: 10px;
+    line-height: 1.4;
+    word-break: break-word;
+}
+

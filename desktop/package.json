@@ -1,0 +1,118 @@
+{
+  "name": "mgstudio-desktop",
+  "version": "1.0.0",
+  "description": "猫歌映画 无限画布 AI 创作平台 — 桌面客户端 (Electron)",
+  "main": "main.js",
+  "homepage": "https://github.com/maoge19523-cpu/MGCanvas2.0",
+  "author": {
+    "name": "MGStudio",
+    "email": "maoge19523-cpu@users.noreply.github.com"
+  },
+  "license": "SEE LICENSE IN ../LICENSE",
+  "scripts": {
+    "start": "electron .",
+    "dev": "electron . --dev",
+    "pack": "electron-builder --dir",
+    "dist": "electron-builder",
+    "dist:mac": "electron-builder --mac",
+    "dist:win": "electron-builder --win",
+    "dist:linux": "electron-builder --linux",
+    "dist:publish": "electron-builder --publish always"
+  },
+  "dependencies": {
+    "electron-updater": "^6.8.9"
+  },
+  "build": {
+    "appId": "com.mgstudio.desktop",
+    "productName": "MGStudio",
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "main.js",
+      "preload.js",
+      "package.json",
+      "icons/**"
+    ],
+    "extraResources": [
+      {
+        "from": "../main.py",
+        "to": "backend/main.py"
+      },
+      {
+        "from": "../prompt_intelligence.py",
+        "to": "backend/prompt_intelligence.py"
+      },
+      {
+        "from": "../requirements.txt",
+        "to": "backend/requirements.txt"
+      },
+      {
+        "from": "../static",
+        "to": "backend/static"
+      },
+      {
+        "from": "../server",
+        "to": "backend/server"
+      },
+      {
+        "from": "../workflows",
+        "to": "backend/workflows"
+      },
+      {
+        "from": ".version",
+        "to": "backend/VERSION"
+      },
+      {
+        "from": "resources/backend/MGStudioServer.exe",
+        "to": "backend/MGStudioServer.exe"
+      }
+    ],
+    "publish": [
+      {
+        "provider": "github",
+        "owner": "maoge19523-cpu",
+        "repo": "MGCanvas2.0",
+        "releaseType": "release"
+      }
+    ],
+    "mac": {
+      "category": "public.app-category.graphics-design",
+      "icon": "icons/icon.icns",
+      "target": [
+        "dmg",
+        "zip"
+      ]
+    },
+    "win": {
+      "icon": "icons/icon.ico",
+      "artifactName": "MGStudio-Electron-Setup-${version}.${ext}",
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        }
+      ]
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "shortcutName": "猫歌映画"
+    },
+    "linux": {
+      "icon": "icons/icon.png",
+      "category": "Graphics",
+      "target": [
+        "AppImage",
+        "deb"
+      ]
+    }
+  },
+  "devDependencies": {
+    "electron": "33.4.11",
+    "electron-builder": "^24.13.3"
+  }
+}
