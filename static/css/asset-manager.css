@@ -22,7 +22,14 @@
 body { margin:0; min-height:100vh; overflow:hidden; background:var(--page); color:var(--text); font-family: var(--font-sans); }
 button,input,textarea,select { font:inherit; }
 button { border:0; cursor:pointer; }
-.asset-page { width:100%; max-width:1880px; height:100vh; margin:0 auto; padding:20px 28px; display:flex; flex-direction:column; gap:12px; }
+/* 高度必须按 UI 缩放补偿（与在线生图页 .split-root 的写法一致）。
+   页面在全局缩放开启时用 CSS zoom 缩放，zoom 会让布局坐标放大 1/zoom 倍，
+   于是 100vh 解析成"布局视口高"（2560x1400、zoom=0.909 时约 1439），
+   而视觉上只有 1308 —— 整页比可见区域高约 131px，把底部
+   「素材保存路径 / 选择 / 打开」栏推出视口；又因为可滚动高度与视口相等，
+   滚动条不出现，表现为"最大化后这一栏找不到、下拉也没用"。
+   除以 --studio-ui-scale 后高度回到视觉视口高，栏位即落回可见区。 */
+.asset-page { width:100%; max-width:1880px; height:calc(100vh / var(--studio-ui-scale, 1)); margin:0 auto; padding:20px 28px; display:flex; flex-direction:column; gap:12px; }
 .asset-page-head { flex:0 0 auto; display:flex; align-items:center; justify-content:space-between; gap:18px; }
 .asset-title { color:var(--text); font-size:21px; line-height:1.15; font-weight:900; letter-spacing:0; }
 .asset-sub { margin-top:5px; color:var(--muted); font-size:12px; font-weight:650; }
@@ -36,6 +43,59 @@ button { border:0; cursor:pointer; }
 .asset-tabs button:hover { color:var(--text); background:var(--soft); }
 .asset-tabs button.active { background:var(--strong); color:var(--strong-text); }
 .asset-tabs svg,.asset-btn svg,.asset-icon-btn svg,.asset-row-icon svg,.detail-empty svg { width:14px; height:14px; }
+/* ── 橙色加码（统一品牌识别）──────────────────────────────────────
+   原则：橙色只作强调与状态指示，不做大面积底色，避免影响可读性。
+   落点：页头标题条 / 页签底线 / 面板头 / 工具按钮 / 空态图标 / 底部路径栏图标。
+   全部用 --strong/--accent 变量，两套主题下都会跟随。 */
+/* 页头标题左侧橙色竖条 */
+.asset-title { position:relative; padding-left:12px; }
+.asset-title::before {
+    content:''; position:absolute; left:0; top:50%; transform:translateY(-50%);
+    width:4px; height:20px; border-radius:2px;
+    background:linear-gradient(180deg, var(--strong), var(--accent-2, #FF8A2B));
+}
+/* 页签容器底部橙色渐隐线 */
+.asset-tabs { position:relative; }
+.asset-tabs::after {
+    content:''; position:absolute; left:8px; right:8px; bottom:-1px; height:2px;
+    border-radius:1px; opacity:.85; pointer-events:none;
+    background:linear-gradient(90deg, transparent, var(--strong), var(--accent-2, #FF8A2B), var(--strong), transparent);
+}
+/* 面板头：左缘橙条 + 由左向右淡出的极淡橙底 */
+.panel-head { position:relative; background:linear-gradient(90deg,
+    color-mix(in srgb, var(--strong) 12%, transparent), var(--soft) 42%); }
+.panel-head::before {
+    content:''; position:absolute; left:0; top:8px; bottom:8px; width:3px;
+    border-radius:0 3px 3px 0;
+    background:linear-gradient(180deg, var(--strong), var(--accent-2, #FF8A2B));
+}
+/* 工具类按钮：淡橙底 + 橙字，悬停变实心橙（作用域限定在 .asset-page 内） */
+.asset-page .asset-btn {
+    background:color-mix(in srgb, var(--strong) 10%, transparent);
+    color:var(--strong);
+}
+.asset-page .asset-btn:hover {
+    background:var(--strong); color:var(--strong-text);
+}
+/* 空态图标与上传区图标改橙，让"可操作处"有统一色标 */
+.detail-empty svg,
+.upload-grid-card svg,
+.asset-content .empty-icon svg {
+    color:var(--strong);
+}
+/* 底部路径栏：文件夹图标与"素材保存路径"标签改橙 */
+.storage-path-section svg,
+.storage-path-section > span:first-child { color:var(--strong); }
+/* 搜索框聚焦：橙色聚焦圈（原来无聚焦反馈） */
+.asset-search-wrap { transition:box-shadow .2s ease; }
+.asset-search-wrap:focus-within { box-shadow:0 0 0 3px var(--accent-subtle, rgba(255,106,0,.28)); }
+/* 分类树行悬停：橙色内描边，替代原先仅换底色 */
+.tree-row:hover { box-shadow:inset 0 0 0 1px color-mix(in srgb, var(--strong) 35%, transparent); }
+/* 滚动条改橙（仅本页），让长列表也有品牌色 */
+.asset-page *::-webkit-scrollbar-thumb { background-color:var(--strong); border-radius:var(--radius-full); }
+.asset-page *::-webkit-scrollbar-thumb:hover { background-color:var(--accent-hover, #FF7F1F); }
+/* 上传区虚线框改橙 */
+.upload-grid-card { border-color:color-mix(in srgb, var(--strong) 45%, transparent); }
 .asset-manager-root { min-height:0; flex:1; display:grid; grid-template-columns:360px minmax(640px, 1fr) 360px; gap:14px; }
 .asset-panel { min-height:0; border:0; border-radius:var(--radius-lg); background:var(--panel); box-shadow:0 10px 28px var(--shadow); backdrop-filter:blur(28px); overflow:hidden; }
 .asset-nav { display:flex; flex-direction:column; }
