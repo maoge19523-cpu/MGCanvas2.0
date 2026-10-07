@@ -541,3 +541,62 @@ li.selected,
     background: color-mix(in srgb, var(--accent) 10%, transparent) !important;
     box-shadow: inset 3px 0 0 var(--accent);
 }
+
+/* 8. 功能框的橙色发光转圈
+   ─────────────────────────────────────────────────────────────────
+   给主要功能面板加一圈缓慢流动的橙色光边。做法是把渐变放到 padding 区、
+   再用 mask 挖掉内容区，得到"只有边框发光"的效果（不动子元素、不影响布局）。
+   动画只改旋转角度，代价很低；带 prefers-reduced-motion 降级。 */
+@keyframes mgstudio-accent-ring {
+    to { transform: rotate(1turn); }
+}
+.asset-panel,
+.ws-panel,
+.api-block,
+.cfy-block,
+.smart-panel {
+    position: relative;
+}
+.asset-panel::after,
+.ws-panel::after,
+.api-block::after,
+.cfy-block::after,
+.smart-panel::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    padding: 1.5px;
+    pointer-events: none;
+    z-index: 2;
+    background: conic-gradient(from 0deg,
+        transparent 0deg,
+        rgba(255, 106, 0, 0.85) 55deg,
+        rgba(255, 138, 43, 0.35) 110deg,
+        transparent 165deg,
+        transparent 360deg);
+    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    mask-composite: exclude;
+    animation: mgstudio-accent-ring 7s linear infinite;
+    opacity: .85;
+}
+/* 悬停时更亮一点，暗示可交互 */
+.asset-panel:hover::after,
+.ws-panel:hover::after,
+.api-block:hover::after,
+.cfy-block:hover::after,
+.smart-panel:hover::after {
+    opacity: 1;
+}
+@media (prefers-reduced-motion: reduce) {
+    .asset-panel::after,
+    .ws-panel::after,
+    .api-block::after,
+    .cfy-block::after,
+    .smart-panel::after {
+        animation: none;
+        background: linear-gradient(135deg, rgba(255,106,0,.5), transparent 60%);
+    }
+}

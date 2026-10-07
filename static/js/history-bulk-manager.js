@@ -48,6 +48,43 @@
             .hbm-btn.hbm-danger:hover { background: #b91c1c; border-color: #b91c1c; }
             .hbm-hide { display: none !important; }
 
+            /* ── 防裁切 + 橙色统一（放在暗色主题块之前，好让主题规则仍能覆盖）──
+               工具条原本是绝对定位且略宽于内容区，右端的「完成」按钮会贴到
+               .split-right（overflow-x:hidden）的边界上，右半圆被裁掉，
+               表现为"导出右边一个灰色半圆"。
+               改为 sticky 参与文档流：宽度受内容区约束，窄屏时按钮自动换行，
+               结构上不可能再被裁。 */
+            .hbm-toolbar {
+                position: sticky !important;
+                top: 0;
+                left: auto !important;
+                right: auto !important;
+                width: auto !important;
+                max-width: 100%;
+                box-sizing: border-box;
+                z-index: 5;
+            }
+            /* 按钮统一橙色体系：与素材库/设置页的橙色语义层一致 */
+            .hbm-btn {
+                border-color: color-mix(in srgb, var(--accent, #FF6A00) 40%, transparent);
+                color: var(--accent, #FF6A00);
+                background: color-mix(in srgb, var(--accent, #FF6A00) 8%, transparent);
+            }
+            .hbm-btn:hover:not(:disabled) {
+                border-color: var(--accent, #FF6A00);
+                background: color-mix(in srgb, var(--accent, #FF6A00) 16%, transparent);
+            }
+            .hbm-btn.hbm-primary {
+                background: linear-gradient(135deg, var(--accent, #FF6A00), var(--accent-2, #FF8A2B));
+                border-color: transparent;
+                color: #111111;
+            }
+            .hbm-btn.hbm-danger {
+                background: var(--accent, #FF6A00);
+                border-color: transparent;
+                color: #fff;
+            }
+
             /* 选择模式下的卡片浮层 */
             body.history-bulk-selecting [data-history-ts] {
                 position: relative; cursor: pointer !important;

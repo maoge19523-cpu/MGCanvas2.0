@@ -897,7 +897,7 @@ body.studio-theme-dark .select-lite { background-image:url("data:image/svg+xml,%
 .asset-manager-modal.open { display:flex; }
 .asset-manager-panel { width:min(1120px, calc(100vw - 56px)); height:min(780px, calc(100vh - 56px)); margin:auto; border-radius:var(--radius-lg); border:0; background:color-mix(in srgb, var(--panel) 78%, transparent); backdrop-filter:blur(44px) saturate(190%); -webkit-backdrop-filter:blur(44px) saturate(190%); color:var(--text); box-shadow:var(--shadow-xl); padding:14px; display:flex; flex-direction:column; gap:12px; }
 .asset-manager-head { display:flex; align-items:center; justify-content:space-between; gap:12px; }
-.asset-manager-title { color:var(--text); font-size:16px; font-weight:950; }
+.asset-manager-title { color:var(--text); font-size:16px; font-weight:900; }
 .asset-manager-sub { margin-top:2px; color:var(--muted); font-size:12px; font-weight:750; }
 .asset-manager-tabs { display:flex; gap:6px; padding:4px; border-radius:var(--radius-md); background:var(--soft); border:0; }
 .asset-manager-tabs button { height:34px; padding:0 12px; border-radius:var(--radius-sm); color:var(--muted); display:flex; align-items:center; gap:6px; font-size:12px; font-weight:900; }
