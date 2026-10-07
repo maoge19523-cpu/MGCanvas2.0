@@ -3215,9 +3215,17 @@
         pointer-events: none;
         background: var(--shell-hairline);
     }
-    /* 环境光不能盖住页面内容 */
-    body .stage > * {
-        position: relative;
+    /* 环境光不能盖住页面内容。
+       注意：**不能**用 `body .stage > * { position: relative }` ——
+       上游 iframe 用的是 `position: absolute; inset: 0`，
+       统一改成 relative 会让 iframe 塌陷、整个内容区空白。
+       这里只把需要盖在环境光之上的东西抬起来：
+       iframe 自身是 absolute（已在环境光之上），骨架屏只需给个 z-index。 */
+    body .stage > iframe {
+        z-index: 1;
+    }
+    body .stage > .stage-skeleton,
+    body .stage > .stage-actions {
         z-index: 1;
     }
 
@@ -3516,17 +3524,17 @@
                     <div class="skeleton-card"></div>
                 </div>
             </div>
-            <iframe id="frame-home" src="/static/home.html?v=1.0.0.1791371294" class="active" scrolling="yes"></iframe>
-            <iframe id="frame-zimage" data-src="/static/zimage.html?v=1.0.0.1791370770" scrolling="yes"></iframe>
-            <iframe id="frame-enhance" data-src="/static/enhance.html?v=1.0.0.1791371294" scrolling="yes"></iframe>
-            <iframe id="frame-klein" data-src="/static/klein.html?v=1.0.0.1791370770" scrolling="yes"></iframe>
-            <iframe id="frame-angle" data-src="/static/angle.html?v=1.0.0.1791371294" scrolling="yes"></iframe>
-            <iframe id="frame-online" data-src="/static/online.html?v=1.0.0.1791370770" scrolling="yes"></iframe>
-            <iframe id="frame-gpt-chat" data-src="/static/gpt-chat.html?v=1.0.0.1791371294" scrolling="yes"></iframe>
-            <iframe id="frame-asset-manager" data-src="/static/asset-manager.html?v=1.0.0.1791371294" scrolling="yes"></iframe>
-            <iframe id="frame-api-settings" data-src="/static/api-settings.html?v=1.0.0.1791371294" scrolling="yes"></iframe>
-            <iframe id="frame-comfyui-settings" data-src="/static/comfyui-settings.html?v=1.0.0.1791371294" scrolling="yes"></iframe>
-            <iframe id="frame-canvas" data-src="/static/canvas-list.html?v=1.0.0.1791371294" scrolling="yes"></iframe>
+            <iframe id="frame-home" src="/static/home.html?v=1.0.0.1791371644" class="active" scrolling="yes"></iframe>
+            <iframe id="frame-zimage" data-src="/static/zimage.html?v=1.0.0.1791371338" scrolling="yes"></iframe>
+            <iframe id="frame-enhance" data-src="/static/enhance.html?v=1.0.0.1791371644" scrolling="yes"></iframe>
+            <iframe id="frame-klein" data-src="/static/klein.html?v=1.0.0.1791371338" scrolling="yes"></iframe>
+            <iframe id="frame-angle" data-src="/static/angle.html?v=1.0.0.1791371644" scrolling="yes"></iframe>
+            <iframe id="frame-online" data-src="/static/online.html?v=1.0.0.1791371338" scrolling="yes"></iframe>
+            <iframe id="frame-gpt-chat" data-src="/static/gpt-chat.html?v=1.0.0.1791371644" scrolling="yes"></iframe>
+            <iframe id="frame-asset-manager" data-src="/static/asset-manager.html?v=1.0.0.1791371644" scrolling="yes"></iframe>
+            <iframe id="frame-api-settings" data-src="/static/api-settings.html?v=1.0.0.1791371644" scrolling="yes"></iframe>
+            <iframe id="frame-comfyui-settings" data-src="/static/comfyui-settings.html?v=1.0.0.1791371644" scrolling="yes"></iframe>
+            <iframe id="frame-canvas" data-src="/static/canvas-list.html?v=1.0.0.1791371644" scrolling="yes"></iframe>
 
         </main>
     </div>
