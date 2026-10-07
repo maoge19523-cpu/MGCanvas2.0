@@ -87,7 +87,15 @@
                 height: 0 !important;
             }
             html.studio-ui-scaled body:not(.studio-scale-host) {
-                width: calc(100% / var(--studio-ui-scale)) !important;
+                /* 必须用 100vw 而不是 calc(100% / var(--studio-ui-scale))：
+                   body 的百分比是相对 html 解析的，而 html 已被 zoom 放大，
+                   于是 100% / 0.739 会算成 2593px（视口实际只有 1416），
+                   body 比视口宽 1177px，进而把各页面的内容挤出视口 ——
+                   素材库右上角「偏好设置/刷新」、底部「选择/打开」、在线生图的
+                   「完成」等按钮都因此跑到视口外看不见。
+                   100vw 已经是"布局坐标下的视口宽度"，正是这里需要的值。
+                   （min-height 保持原写法：100vh 同理正确，且不应改动纵向行为） */
+                width: 100vw !important;
                 min-height: calc(100vh / var(--studio-ui-scale)) !important;
                 /* 用 zoom 而不是 transform: scale()。
                    transform 是把"已经栅格化好的图层"当贴图缩放，文字不会按目标字号重新栅格化，

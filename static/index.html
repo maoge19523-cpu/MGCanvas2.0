@@ -34,7 +34,7 @@
         })();
     </script>
     <script src="/static/vendor/js/tailwindcss-cdn.js?v=1.0.0.1791368711"></script>
-    <script src="/static/js/theme.js?v=1.0.0.1791368729"></script>
+    <script src="/static/js/theme.js?v=1.0.0.1791388361"></script>
     <script src="/static/js/shared/utils.js?v=1.0.0.1791368711"></script>
     <script src="/static/js/shared/morph-button.js?v=1.0.0.1791368711"></script>
     <script src="/static/js/i18n.js?v=1.0.0.1791368711"></script>
@@ -3198,12 +3198,24 @@
         background: var(--bg);
         position: relative;
     }
+    /* 壳层背景（多层，靠上的先画）：
+       ① 标题栏下方一条橙色微光带 —— 顶部标题栏是系统原生绘制的（HTML 动不了它），
+          所以让橙光从窗口顶边往下渗出一小段，视觉上把标题栏与内容区的橙线连成一体；
+       ② 左上角的橙色环境光；
+       ③ 主题底色。
+       多层必须写成一条带逗号的 background，拆成两条规则会互相覆盖。 */
     body .app-shell {
-        background: var(--shell-glow), var(--bg);
+        background:
+            linear-gradient(180deg,
+                rgba(255, 106, 0, 0.080) 0px,
+                rgba(255, 106, 0, 0.024) 14px,
+                transparent 34px),
+            var(--shell-glow),
+            var(--bg);
     }
-    /* 内容区顶部一条橙色渐变细线，把壳与内容"缝"起来。
-       .stage 有 20px 圆角且 overflow:hidden，直线会被圆角硬切掉两端，
-       所以让渐变在左右各留 1/8 的淡出区，视觉上就不会像"被切断"。 */
+    /* 内容区顶部橙色渐变细线，视觉上是标题栏那条橙光的延续。
+       .stage 有 20px 圆角且 overflow:hidden，直线会被圆角硬切两端，
+       因此左右各留淡出区；渐变改为多段，让线在两端自然消隐而不像"被切断"。 */
     body .stage::after {
         content: '';
         position: absolute;
@@ -3215,9 +3227,11 @@
         pointer-events: none;
         background: linear-gradient(90deg,
             transparent 0%,
-            var(--accent) 12.5%,
+            rgba(255, 106, 0, 0.35) 6%,
+            var(--accent) 16%,
             var(--accent-2) 50%,
-            var(--accent) 87.5%,
+            var(--accent) 84%,
+            rgba(255, 106, 0, 0.35) 94%,
             transparent 100%);
     }
     /* 环境光不能盖住页面内容。
@@ -3529,17 +3543,17 @@
                     <div class="skeleton-card"></div>
                 </div>
             </div>
-            <iframe id="frame-home" src="/static/home.html?v=1.0.0.1791384847" class="active" scrolling="yes"></iframe>
-            <iframe id="frame-zimage" data-src="/static/zimage.html?v=1.0.0.1791384847" scrolling="yes"></iframe>
-            <iframe id="frame-enhance" data-src="/static/enhance.html?v=1.0.0.1791384847" scrolling="yes"></iframe>
-            <iframe id="frame-klein" data-src="/static/klein.html?v=1.0.0.1791384847" scrolling="yes"></iframe>
-            <iframe id="frame-angle" data-src="/static/angle.html?v=1.0.0.1791384847" scrolling="yes"></iframe>
-            <iframe id="frame-online" data-src="/static/online.html?v=1.0.0.1791385106" scrolling="yes"></iframe>
-            <iframe id="frame-gpt-chat" data-src="/static/gpt-chat.html?v=1.0.0.1791384847" scrolling="yes"></iframe>
-            <iframe id="frame-asset-manager" data-src="/static/asset-manager.html?v=1.0.0.1791384847" scrolling="yes"></iframe>
-            <iframe id="frame-api-settings" data-src="/static/api-settings.html?v=1.0.0.1791384847" scrolling="yes"></iframe>
-            <iframe id="frame-comfyui-settings" data-src="/static/comfyui-settings.html?v=1.0.0.1791384847" scrolling="yes"></iframe>
-            <iframe id="frame-canvas" data-src="/static/canvas-list.html?v=1.0.0.1791384847" scrolling="yes"></iframe>
+            <iframe id="frame-home" src="/static/home.html?v=1.0.0.1791388155" class="active" scrolling="yes"></iframe>
+            <iframe id="frame-zimage" data-src="/static/zimage.html?v=1.0.0.1791388369" scrolling="yes"></iframe>
+            <iframe id="frame-enhance" data-src="/static/enhance.html?v=1.0.0.1791388369" scrolling="yes"></iframe>
+            <iframe id="frame-klein" data-src="/static/klein.html?v=1.0.0.1791388369" scrolling="yes"></iframe>
+            <iframe id="frame-angle" data-src="/static/angle.html?v=1.0.0.1791388369" scrolling="yes"></iframe>
+            <iframe id="frame-online" data-src="/static/online.html?v=1.0.0.1791388369" scrolling="yes"></iframe>
+            <iframe id="frame-gpt-chat" data-src="/static/gpt-chat.html?v=1.0.0.1791388369" scrolling="yes"></iframe>
+            <iframe id="frame-asset-manager" data-src="/static/asset-manager.html?v=1.0.0.1791388369" scrolling="yes"></iframe>
+            <iframe id="frame-api-settings" data-src="/static/api-settings.html?v=1.0.0.1791388369" scrolling="yes"></iframe>
+            <iframe id="frame-comfyui-settings" data-src="/static/comfyui-settings.html?v=1.0.0.1791388369" scrolling="yes"></iframe>
+            <iframe id="frame-canvas" data-src="/static/canvas-list.html?v=1.0.0.1791388369" scrolling="yes"></iframe>
 
         </main>
     </div>
@@ -4004,11 +4018,28 @@
         (function() {
             const visited = localStorage.getItem('mgstudio-visited');
             const homepage = document.getElementById('homepage');
-            const onboarding = document.getElementById('onboarding-modal');
 
-            if (visited) {
+            // 重新唤出欢迎/快速上手：访问 /?welcome=1 即可。
+            // 引导原本只有"首次访问"才显示（点过按钮就写入 mgstudio-visited=1 永久隐藏），
+            // 用户一旦错过就再也看不到，所以留一个显式入口。
+            let force = false;
+            try {
+                const q = new URLSearchParams(location.search);
+                if (q.get('welcome') === '1') {
+                    localStorage.removeItem('mgstudio-visited');
+                    force = true;
+                }
+            } catch (e) { }
+
+            if (visited && !force) {
                 homepage.classList.add('hidden');
                 setTimeout(function() { homepage.style.display = 'none'; }, 400);
+            } else {
+                homepage.style.display = '';
+                homepage.classList.remove('hidden');
+                // 引导弹层与首页二选一：这里显式显示首页，避免被上一次的 display:none 留下
+                const modal = document.getElementById('onboarding-modal');
+                if (modal) { modal.style.display = ''; }
             }
         })();
 
