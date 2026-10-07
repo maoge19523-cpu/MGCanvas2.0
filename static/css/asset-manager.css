@@ -28,8 +28,19 @@ button { border:0; cursor:pointer; }
    而视觉上只有 1308 —— 整页比可见区域高约 131px，把底部
    「素材保存路径 / 选择 / 打开」栏推出视口；又因为可滚动高度与视口相等，
    滚动条不出现，表现为"最大化后这一栏找不到、下拉也没用"。
-   除以 --studio-ui-scale 后高度回到视觉视口高，栏位即落回可见区。 */
-.asset-page { width:100%; max-width:1880px; height:calc(100vh / var(--studio-ui-scale, 1)); margin:0 auto; padding:20px 28px; display:flex; flex-direction:column; gap:12px; }
+   除以 --studio-ui-scale 后高度回到视觉视口高，栏位即落回可见区。
+   双保险：再加 flex 纵向滚动 —— 万一在某个窗口尺寸下内容仍高于可用高度，
+   底部栏也不会被裁掉，而是可以滚动到（宁可出现滚动条，也不能让功能够不着）。
+   overflow-x 保持 hidden，避免上一轮修好的横向溢出回归。 */
+.asset-page {
+    width:100%; max-width:1880px;
+    height:calc(100vh / var(--studio-ui-scale, 1));
+    margin:0 auto; padding:20px 28px;
+    display:flex; flex-direction:column; gap:12px;
+    overflow-y:auto; overflow-x:hidden;
+}
+/* 底部那一栏不要被压缩，保证始终完整可见 */
+.storage-path-section { flex:0 0 auto; }
 .asset-page-head { flex:0 0 auto; display:flex; align-items:center; justify-content:space-between; gap:18px; }
 .asset-title { color:var(--text); font-size:21px; line-height:1.15; font-weight:900; letter-spacing:0; }
 .asset-sub { margin-top:5px; color:var(--muted); font-size:12px; font-weight:650; }
