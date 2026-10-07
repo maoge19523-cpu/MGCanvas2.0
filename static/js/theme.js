@@ -89,8 +89,12 @@
             html.studio-ui-scaled body:not(.studio-scale-host) {
                 width: calc(100% / var(--studio-ui-scale)) !important;
                 min-height: calc(100vh / var(--studio-ui-scale)) !important;
-                transform: scale(var(--studio-ui-scale));
-                transform-origin: 0 0;
+                /* 用 zoom 而不是 transform: scale()。
+                   transform 是把"已经栅格化好的图层"当贴图缩放，文字不会按目标字号重新栅格化，
+                   于是笔画发灰发虚；本项目的缩放档位（60/65/75/85/115/125/140…）与 auto 模式
+                   算出的值几乎都是非整数倍，放大后肉眼可见地糊。
+                   zoom 会让浏览器按缩放后的尺寸重新布局与栅格化，文字保持锐利。 */
+                zoom: var(--studio-ui-scale);
             }
             html.studio-ui-scaled body.studio-scale-viewport:not(.studio-scale-host) {
                 height: calc(100vh / var(--studio-ui-scale)) !important;
