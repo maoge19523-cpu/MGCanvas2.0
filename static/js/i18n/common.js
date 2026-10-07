@@ -8,7 +8,7 @@
         "common.settings": { zh: "设置", en: "Settings" },
         "common.back": { zh: "返回", en: "Back" },
         "common.general": { zh: "通用", en: "General" },
-        "common.generalDesc": { zh: "管理 MGStudio 的常用偏好与入口。", en: "Manage common MGStudio preferences and shortcuts." },
+        "common.generalDesc": { zh: "管理 猫歌映画 的常用偏好与入口。", en: "Manage common MGStudio preferences and shortcuts." },
         "common.appearance": { zh: "外观", en: "Appearance" },
         "common.appearanceDesc": { zh: "调整界面主题与显示语言。", en: "Customize the theme and display language." },
         "common.about": { zh: "关于", en: "About" },
