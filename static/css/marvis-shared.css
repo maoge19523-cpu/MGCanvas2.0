@@ -557,12 +557,19 @@ li.selected,
 .api-block,
 .cfy-block,
 .smart-panel {
+    position: relative;
     border: 0;
     box-shadow:
         0 0 0 1px color-mix(in srgb, var(--accent) 45%, transparent),
         0 10px 28px var(--shadow, rgba(0,0,0,.06)),
         0 0 26px -4px rgba(255, 106, 0, 0.45);
 }
+/* 环绕光点：此方案已放弃（保留记录避免重犯）。
+   曾用一个 140% 尺寸、径向橙斑的伪元素做旋转，想得到"光沿边框转圈"的观感。
+   但面板普遍带 overflow:hidden，大尺寸伪元素被裁进面板内部，
+   实测表现为**内容区上盖了一团橙色雾**（截图可见中间面板顶部整片发橙），
+   看起来像污渍而不是描边发光。故只保留下方基于 box-shadow 的静态描边 + 外发光。 */
+
 /* 悬停时描边与外发光加强，作为可交互提示 */
 .asset-panel:hover,
 .ws-panel:hover,
@@ -574,4 +581,83 @@ li.selected,
         0 12px 32px var(--shadow, rgba(0,0,0,.08)),
         0 0 34px -2px rgba(255, 106, 0, 0.62);
     transition: box-shadow .25s ease;
+}
+@media (prefers-reduced-motion: reduce) {
+    .hbm-btn,
+    .btn-primary,
+    .primary-btn {
+        transition: none !important;
+    }
+}
+
+/* 9. 更多橙色落点（第二批）
+   ─────────────────────────────────────────────────────────────────
+   加在"之前没有橙色"的位置，而不是继续加深已有位置 —— 这样视觉更丰富，
+   也不会让某一块过载。
+   · 分区小标题前的小圆点
+   · 主要按钮（.btn-primary / .primary-btn / [class*=save]）实心橙
+   · 页签/胶囊选中态橙色底
+   · 图标按钮悬停转橙
+   · 输入框边框聚焦橙
+   · 面包屑/路径分隔符 */
+.block-title::before,
+.side-section-title::before,
+.side-title::before {
+    content: '';
+    display: inline-block;
+    width: 5px;
+    height: 5px;
+    margin-right: 6px;
+    border-radius: 50%;
+    vertical-align: middle;
+    background: var(--accent);
+    box-shadow: 0 0 6px rgba(255, 106, 0, .7);
+}
+/* 主要按钮：实心橙（各页对"主操作"的类名不同，统一收口） */
+.btn-primary,
+.primary-btn,
+button.primary,
+.btn--primary {
+    background: linear-gradient(135deg, var(--accent), var(--accent-2, #FF8A2B)) !important;
+    border-color: transparent !important;
+    color: #111111 !important;
+    font-weight: 700;
+}
+.btn-primary:hover,
+.primary-btn:hover,
+button.primary:hover,
+.btn--primary:hover {
+    filter: brightness(1.06);
+    box-shadow: 0 6px 18px rgba(255, 106, 0, .35);
+}
+/* 页签 / 胶囊的选中态统一橙色底 */
+.tab.active,
+.tabs button.active,
+.pill.active,
+.chip.active,
+.segmented button.active {
+    background: var(--accent) !important;
+    color: #fff !important;
+    border-color: transparent !important;
+}
+/* 图标按钮悬停转橙 */
+.icon-btn:hover,
+.btn-icon:hover,
+.icon-button:hover,
+.asset-icon-btn:hover {
+    color: var(--accent) !important;
+    border-color: color-mix(in srgb, var(--accent) 45%, transparent) !important;
+}
+/* 输入框：聚焦时橙色边框（与已有聚焦圈呼应） */
+input:focus,
+textarea:focus,
+select:focus {
+    border-color: color-mix(in srgb, var(--accent) 65%, transparent) !important;
+}
+/* 面包屑/路径分隔符改橙，长路径更容易读 */
+.breadcrumb .sep,
+.breadcrumb-sep,
+.path-sep,
+.crumb-sep {
+    color: var(--accent) !important;
 }
