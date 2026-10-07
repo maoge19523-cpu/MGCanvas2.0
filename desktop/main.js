@@ -136,9 +136,17 @@ async function resolvePort(preferred) {
   return preferred;
 }
 
-// 判断指定端口上跑的是不是 MGStudio 后端（而非碰巧占端口的无关程序）。
+// 判断指定端口上跑的是不是"同一个版本"的 MGStudio 后端（而非碰巧占端口的无关程序、
+// 也不是另一个版本的旧安装）。
+//
 // 依据：/static/update-notes.json 是 MGStudio 特有的接口，返回含 version 字段的 JSON。
-function looksLikeMGStudioBackend(port) {
+//
+// ⚠️ 为什么必须比对版本号：
+// 前端资源（index.html 等）是由后端进程按自己的 static/ 目录提供的，不是由 Electron 壳提供。
+// 若只判断"是不是同类后端"就复用，新壳会连到旧版后端上，于是整个界面（含品牌标识、
+// 版本号）都还是旧版的 —— 装完新包却看到旧界面、甚至看到旧品牌名，就是这个原因。
+// 曾经只判断种类不判断版本，导致新装版本复用老版本后端。
+function probeBackend(port) {
   return new Promise((resolve) => {
     const req = http.get({ host: '127.0.0.1', port, path: '/static/update-notes.json', timeout: 1500 }, (res) => {
       let body = '';
@@ -146,13 +154,13 @@ function looksLikeMGStudioBackend(port) {
       res.on('end', () => {
         try {
           const data = JSON.parse(body);
-          resolve(!!(data && data.version));
-        } catch (_) { resolve(false); }
+          resolve(data && data.version ? String(data.version).trim() : null);
+        } catch (_) { resolve(null); }
       });
-      res.on('error', () => resolve(false));
+      res.on('error', () => resolve(null));
     });
-    req.on('error', () => resolve(false));
-    req.on('timeout', () => { req.destroy(); resolve(false); });
+    req.on('error', () => resolve(null));
+    req.on('timeout', () => { req.destroy(); resolve(null); });
   });
 }
 
@@ -543,20 +551,36 @@ if (!gotLock) {
     registerIpc();
 
     const requested = Number(process.env.NOVAI_PORT) || DEFAULT_PORT;
-    // 端口 3000 上若已有 MGStudio 后端（正式版/网页版正在运行）则直接复用——
+    // 端口上若已有"同一版本"的 MGStudio 后端在跑（同一份安装被启动两次）则直接复用——
     // 数据目录相同，再起一个后端写同一数据目录会互相踩踏。
+    //
+    // 版本不一致时**绝不复用**：前端资源由后端进程提供，复用旧版后端会把整个界面
+    // （含品牌标识与版本号）变成旧版的。此时另起本包自带的后端到下一个空闲端口。
     let port = requested;
     let reuseExisting = false;
+    let existingVersion = null;
     if (await isPortInUse(requested)) {
-      reuseExisting = await looksLikeMGStudioBackend(requested);
-      if (!reuseExisting) port = await resolvePort(requested);
+      existingVersion = await probeBackend(requested);
+      const isSameKind = !!existingVersion;
+      const isSameVersion = isSameKind && existingVersion === app.getVersion();
+      if (isSameVersion) {
+        reuseExisting = true;
+      } else {
+        port = await resolvePort(requested);
+        clog('boot',
+          (isSameKind
+            ? '端口 ' + requested + ' 上是另一个版本的 MGStudio 后端（v' + existingVersion +
+              '，本版本 v' + app.getVersion() + '）'
+            : '端口 ' + requested + ' 被无关程序占用') +
+          '，改在端口 ' + port + ' 启动本版本自带的后端');
+      }
     }
     const baseUrl = process.env.NOVAI_URL || `http://127.0.0.1:${port}`;
 
     try {
       clog('boot', '数据目录: ' + dataDir);
       if (reuseExisting) {
-        clog('boot', '端口 ' + port + ' 已有 MGStudio 后端运行，直接复用（不重复启动）');
+        clog('boot', '端口 ' + port + ' 已有同版本(v' + existingVersion + ') MGStudio 后端运行，直接复用（不重复启动）');
         createWindow(baseUrl);
         setupAutoUpdate();
       } else {
