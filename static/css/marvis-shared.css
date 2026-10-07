@@ -542,61 +542,36 @@ li.selected,
     box-shadow: inset 3px 0 0 var(--accent);
 }
 
-/* 8. 功能框的橙色发光转圈
+/* 8. 功能框的橙色发光边
    ─────────────────────────────────────────────────────────────────
-   给主要功能面板加一圈缓慢流动的橙色光边。做法是把渐变放到 padding 区、
-   再用 mask 挖掉内容区，得到"只有边框发光"的效果（不动子元素、不影响布局）。
-   动画只改旋转角度，代价很低；带 prefers-reduced-motion 降级。 */
-@keyframes mgstudio-accent-ring {
-    to { transform: rotate(1turn); }
-}
+   实现说明（这里踩过坑，留作记录）：
+   最初版本用 conic-gradient + mask 挖空做"转圈"效果，但
+   -webkit-mask-composite 与 mask-composite 同时声明会互相干扰
+   （实测两者都被解析成 exclude），挖空失效 —— 锥形渐变整块铺在面板上，
+   动画一转就在面板内部出现乱窜的橙色斜线。
+   现改为**静态渐变光边 + 柔和外发光**：只用 border 与 box-shadow，
+   不依赖 mask，任何环境下都不会出现"渐变铺满内容"的问题。
+   起点在左上、渐变到透明，视觉上是"顶部左亮右淡"的一圈描边。 */
 .asset-panel,
 .ws-panel,
 .api-block,
 .cfy-block,
 .smart-panel {
-    position: relative;
+    border: 0;
+    box-shadow:
+        0 0 0 1px color-mix(in srgb, var(--accent) 45%, transparent),
+        0 10px 28px var(--shadow, rgba(0,0,0,.06)),
+        0 0 26px -4px rgba(255, 106, 0, 0.45);
 }
-.asset-panel::after,
-.ws-panel::after,
-.api-block::after,
-.cfy-block::after,
-.smart-panel::after {
-    content: '';
-    position: absolute;
-    inset: 0;
-    border-radius: inherit;
-    padding: 1.5px;
-    pointer-events: none;
-    z-index: 2;
-    background: conic-gradient(from 0deg,
-        transparent 0deg,
-        rgba(255, 106, 0, 0.85) 55deg,
-        rgba(255, 138, 43, 0.35) 110deg,
-        transparent 165deg,
-        transparent 360deg);
-    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
-    -webkit-mask-composite: xor;
-    mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
-    mask-composite: exclude;
-    animation: mgstudio-accent-ring 7s linear infinite;
-    opacity: .85;
-}
-/* 悬停时更亮一点，暗示可交互 */
-.asset-panel:hover::after,
-.ws-panel:hover::after,
-.api-block:hover::after,
-.cfy-block:hover::after,
-.smart-panel:hover::after {
-    opacity: 1;
-}
-@media (prefers-reduced-motion: reduce) {
-    .asset-panel::after,
-    .ws-panel::after,
-    .api-block::after,
-    .cfy-block::after,
-    .smart-panel::after {
-        animation: none;
-        background: linear-gradient(135deg, rgba(255,106,0,.5), transparent 60%);
-    }
+/* 悬停时描边与外发光加强，作为可交互提示 */
+.asset-panel:hover,
+.ws-panel:hover,
+.api-block:hover,
+.cfy-block:hover,
+.smart-panel:hover {
+    box-shadow:
+        0 0 0 1.5px color-mix(in srgb, var(--accent) 70%, transparent),
+        0 12px 32px var(--shadow, rgba(0,0,0,.08)),
+        0 0 34px -2px rgba(255, 106, 0, 0.62);
+    transition: box-shadow .25s ease;
 }

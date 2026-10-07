@@ -63,6 +63,12 @@
                 max-width: 100%;
                 box-sizing: border-box;
                 z-index: 5;
+                /* 右侧留出滚动条宽度的余量：
+                   .split-right 是 overflow-y:auto 的滚动容器，滚动条会覆盖内容区右缘
+                   约 8~10px。原本工具条最后一个按钮距容器内容区右界只有 20px，
+                   正好被滚动条压住（表现为"完成"按钮被切成半个圆）。 */
+                padding-right: 18px;
+                margin-right: -18px;
             }
             /* 按钮统一橙色体系：与素材库/设置页的橙色语义层一致 */
             .hbm-btn {
