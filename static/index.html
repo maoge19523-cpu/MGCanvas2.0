@@ -3190,20 +3190,20 @@
         --nav-hover: var(--shell-hover);
     }
 
-    /* 内容区：保留内容底色，并在左上角铺一层极淡的橙色环境光 */
+    /* 内容区：底色跟着主题走，环境光改由壳层（.app-shell）承载。
+       早前把环境光做成 .stage::before，与 iframe 的层叠顺位会打架
+       （层级处理不当时整块内容区发白），因此改到壳层背景上：
+       壳永远在内容之下，不可能盖住内容。 */
     body .stage {
         background: var(--bg);
         position: relative;
     }
-    body .stage::before {
-        content: '';
-        position: absolute;
-        inset: 0;
-        background: var(--shell-glow);
-        pointer-events: none;
-        z-index: 0;
+    body .app-shell {
+        background: var(--shell-glow), var(--bg);
     }
-    /* 内容区顶部一条橙色渐变细线，把壳与内容"缝"起来 */
+    /* 内容区顶部一条橙色渐变细线，把壳与内容"缝"起来。
+       .stage 有 20px 圆角且 overflow:hidden，直线会被圆角硬切掉两端，
+       所以让渐变在左右各留 1/8 的淡出区，视觉上就不会像"被切断"。 */
     body .stage::after {
         content: '';
         position: absolute;
@@ -3213,7 +3213,12 @@
         height: 3px;
         z-index: 3;
         pointer-events: none;
-        background: var(--shell-hairline);
+        background: linear-gradient(90deg,
+            transparent 0%,
+            var(--accent) 12.5%,
+            var(--accent-2) 50%,
+            var(--accent) 87.5%,
+            transparent 100%);
     }
     /* 环境光不能盖住页面内容。
        注意：**不要**给内容区的所有直接子元素统一加 position: relative ——
@@ -3524,17 +3529,17 @@
                     <div class="skeleton-card"></div>
                 </div>
             </div>
-            <iframe id="frame-home" src="/static/home.html?v=1.0.0.1791371644" class="active" scrolling="yes"></iframe>
-            <iframe id="frame-zimage" data-src="/static/zimage.html?v=1.0.0.1791371338" scrolling="yes"></iframe>
-            <iframe id="frame-enhance" data-src="/static/enhance.html?v=1.0.0.1791371644" scrolling="yes"></iframe>
-            <iframe id="frame-klein" data-src="/static/klein.html?v=1.0.0.1791371338" scrolling="yes"></iframe>
-            <iframe id="frame-angle" data-src="/static/angle.html?v=1.0.0.1791371644" scrolling="yes"></iframe>
-            <iframe id="frame-online" data-src="/static/online.html?v=1.0.0.1791371338" scrolling="yes"></iframe>
-            <iframe id="frame-gpt-chat" data-src="/static/gpt-chat.html?v=1.0.0.1791371644" scrolling="yes"></iframe>
-            <iframe id="frame-asset-manager" data-src="/static/asset-manager.html?v=1.0.0.1791371644" scrolling="yes"></iframe>
-            <iframe id="frame-api-settings" data-src="/static/api-settings.html?v=1.0.0.1791371644" scrolling="yes"></iframe>
-            <iframe id="frame-comfyui-settings" data-src="/static/comfyui-settings.html?v=1.0.0.1791371644" scrolling="yes"></iframe>
-            <iframe id="frame-canvas" data-src="/static/canvas-list.html?v=1.0.0.1791371644" scrolling="yes"></iframe>
+            <iframe id="frame-home" src="/static/home.html?v=1.0.0.1791384847" class="active" scrolling="yes"></iframe>
+            <iframe id="frame-zimage" data-src="/static/zimage.html?v=1.0.0.1791384847" scrolling="yes"></iframe>
+            <iframe id="frame-enhance" data-src="/static/enhance.html?v=1.0.0.1791384847" scrolling="yes"></iframe>
+            <iframe id="frame-klein" data-src="/static/klein.html?v=1.0.0.1791384847" scrolling="yes"></iframe>
+            <iframe id="frame-angle" data-src="/static/angle.html?v=1.0.0.1791384847" scrolling="yes"></iframe>
+            <iframe id="frame-online" data-src="/static/online.html?v=1.0.0.1791385106" scrolling="yes"></iframe>
+            <iframe id="frame-gpt-chat" data-src="/static/gpt-chat.html?v=1.0.0.1791384847" scrolling="yes"></iframe>
+            <iframe id="frame-asset-manager" data-src="/static/asset-manager.html?v=1.0.0.1791384847" scrolling="yes"></iframe>
+            <iframe id="frame-api-settings" data-src="/static/api-settings.html?v=1.0.0.1791384847" scrolling="yes"></iframe>
+            <iframe id="frame-comfyui-settings" data-src="/static/comfyui-settings.html?v=1.0.0.1791384847" scrolling="yes"></iframe>
+            <iframe id="frame-canvas" data-src="/static/canvas-list.html?v=1.0.0.1791384847" scrolling="yes"></iframe>
 
         </main>
     </div>

@@ -6,16 +6,16 @@
     <link rel="icon" href="/static/images/logo.png" type="image/png">
     <title>在线生图</title>
     <script>(function(){try{var u=new URLSearchParams(location.search).get('theme');var t=u||localStorage.getItem("studio_theme")||localStorage.getItem("canvas_theme")||"light";if(t==="dark"){document.documentElement.classList.add("studio-theme-dark");document.documentElement.classList.add("theme-dark");}}catch(e){}})();</script>
-    <script src="/static/vendor/js/tailwindcss-cdn.js?v=1.0.0.1790512746"></script>
-    <script src="/static/vendor/js/lucide-subset.js?v=1.0.0.1790512746"></script>
-    <script src="/static/js/shared/icons.js?v=1.0.0.1791308700"></script>
-    <script src="/static/js/theme.js?v=1.0.0.1790512746"></script>
-    <script src="/static/js/shared/utils.js?v=1.0.0.1791308700"></script>
-    <script src="/static/js/shared/size-policy.js?v=1.0.0.1791308700"></script>
-    <script src="/static/js/i18n.js?v=1.0.0.1790512746"></script>
-    <script src="/static/js/image-preview.js?v=1.0.0.1790512746"></script>
-    <script src="/static/js/history-bulk-manager.js?v=1.0.0.1791308700"></script>
-    <link rel="stylesheet" href="/static/vendor/css/fonts.css?v=1.0.0.1790512746">
+    <script src="/static/vendor/js/tailwindcss-cdn.js?v=1.0.0.1791368711"></script>
+    <script src="/static/vendor/js/lucide-subset.js?v=1.0.0.1791368711"></script>
+    <script src="/static/js/shared/icons.js?v=1.0.0.1791368711"></script>
+    <script src="/static/js/theme.js?v=1.0.0.1791368729"></script>
+    <script src="/static/js/shared/utils.js?v=1.0.0.1791368711"></script>
+    <script src="/static/js/shared/size-policy.js?v=1.0.0.1791368711"></script>
+    <script src="/static/js/i18n.js?v=1.0.0.1791368711"></script>
+    <script src="/static/js/image-preview.js?v=1.0.0.1791368711"></script>
+    <script src="/static/js/history-bulk-manager.js?v=1.0.0.1791368711"></script>
+    <link rel="stylesheet" href="/static/vendor/css/fonts.css?v=1.0.0.1791368711">
     <style>
         :root { --accent: #1c1c1e; --bg: #f9fafb; --card: #fff; --easing:cubic-bezier(0.4,0,0.2,1); }
         /* body 被 UI 缩放 transform 后底部可能露出 html 根区域，显式铺背景避免露出黑色底框 */
@@ -79,7 +79,7 @@
         .gallery-lightbox { background:rgba(255,255,255,.99); backdrop-filter:blur(33px) saturate(1.05); }
         @keyframes fadeIn { from{opacity:0} to{opacity:1} }
     </style>
-    <link rel="stylesheet" href="/static/css/theme.css?v=1.0.0.1791308700">
+    <link rel="stylesheet" href="/static/css/theme.css?v=1.0.0.1791370440">
     <style>
         html:not(.studio-theme-dark) body:not(.studio-theme-dark) #lightbox.gallery-lightbox {
             background: rgba(255,255,255,.99) !important;
@@ -87,7 +87,7 @@
             -webkit-backdrop-filter: blur(33px) saturate(1.05) !important;
         }
     </style>
-<link rel="stylesheet" href="/static/css/marvis-shared.css?v=1.0.0.1791309025">
+<link rel="stylesheet" href="/static/css/marvis-shared.css?v=1.0.0.1791369796">
 <style>
 /* --- 页面特定 Marvis 覆盖 --- */
         body { background: var(--bg) !important; color: var(--text) !important; }
@@ -103,14 +103,29 @@
 .result-frame { background: var(--stage-bg) !important; border-radius: var(--radius-lg) !important; }
 .masonry-item { background: var(--stage-bg) !important; border-radius: var(--radius-lg) !important; }
 /* --- 左右双栏 Split Layout：左栏固定宽自滚动，右栏填满剩余空间 --- */
-/* 100vh 需除以全局 UI 缩放系数（theme.js autoScale），否则缩放窗口下填不满视口高度 */
-.split-root { display: flex; height: calc(100vh / var(--studio-ui-scale, 1)); overflow: hidden; }
-.split-left { width: clamp(300px, 30vw, 360px); flex-shrink: 0; height: 100%; overflow-y: auto; display: flex; flex-direction: column; gap: 24px; padding: 32px 24px; }
-.split-right { flex: 1; min-width: 0; height: 100%; overflow-y: auto; }
+/* 高度与宽度都必须除以全局 UI 缩放系数（theme.js 的 --studio-ui-scale）：
+   该缩放现在用 CSS `zoom` 实现（早期版本是 transform: scale，内容被整体缩放在
+   固定盒子里，不会撑开布局）。zoom 会让 CSS 像素变小、布局坐标被放大 1/zoom 倍，
+   于是 `width: 100%` 会解析成 视口/zoom（1416 的视口算成 1916），
+   右栏内的工具栏/结果框顺势把容器横向撑宽 500px，右侧「完成」等按钮被切出视口。
+   用 calc(100vw / var(--studio-ui-scale, 1)) 与高度的写法对齐即可抵消该放大。
+   注意必须用 100vw 而非 100%：百分比是相对已放大的父级解析，会越算越宽（实测 2593）。
+   实测（1440x900，zoom=0.739）：split-root 1916 -> 1416，「完成」按钮 right 1472 -> 1222，落回视口内。 */
+.split-root { display: flex; height: calc(100vh / var(--studio-ui-scale, 1)); width: calc(100vw / var(--studio-ui-scale, 1)); max-width: none; overflow: hidden; }
+.split-left { width: clamp(300px, 30vw, 360px); flex-shrink: 0; height: 100%; overflow-y: auto; overflow-x: hidden; display: flex; flex-direction: column; gap: 24px; padding: 32px 24px; }
+.split-right { flex: 1; min-width: 0; max-width: 100%; height: 100%; overflow-y: auto; overflow-x: hidden; }
 .split-right-inner { max-width: 1080px; margin: 0 auto; padding: 32px 24px 72px; display: flex; flex-direction: column; gap: 56px; }
 #resultBox { height: clamp(420px, 58vh, 720px); }
 @media (max-width: 768px) {
-    .split-root { flex-direction: column; height: auto; overflow: visible; }
+    /* 窄屏改为纵向堆叠。这里必须用 !important：
+       文件后面还有一条 `.split-root { display:flex; ... }`（方向 E 那段）会覆盖
+       本段，导致窄屏下仍是横向布局 —— 叠加 zoom 的坐标放大后，
+       .split-root 被撑到 1069px（视口仅 620），生成按钮与结果框全被推出视口。
+       宽度这里**不能**写 100%：zoom 会把布局坐标放大，百分比是相对被放大的父级
+       解析，实测 100% 会算成 1843px，比横向布局更糟；必须沿用 100vw / zoom 的补偿。 */
+    .split-root { flex-direction: column !important; height: auto !important;
+                  width: calc(100vw / var(--studio-ui-scale, 1)) !important;
+                  max-width: none !important; overflow: visible !important; }
     .split-left { width: 100% !important; height: auto; max-height: none; overflow-y: visible; padding: 16px 24px; }
     .split-right { height: auto; overflow-y: visible; }
     .split-right-inner { padding: 16px 24px 48px; gap: 40px; }
