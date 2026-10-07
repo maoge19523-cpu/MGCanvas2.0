@@ -195,8 +195,13 @@ function startBackend(port) {
       backendProc = spawn(binary, ['--port', String(port)], { cwd, env: backendEnv, stdio: ['ignore', 'pipe', 'pipe'] });
       backendProc.stdout.on('data', logBackend);
       backendProc.stderr.on('data', logBackend);
-      backendProc.on('exit', (code) => {
-        if (app.isPackaged && code !== 0) {
+      backendProc.on('exit', (code, signal) => {
+        // 只在"非退出流程中"才报异常。
+        // 正常退出时我们自己调 shutdownBackend() 强杀子进程，
+        // Windows 上被终止的进程 exit code 是 null（不是 0），
+        // 若不看 isQuitting 就会把正常退出误报成"后端异常退出"。
+        clog('boot', '后端进程退出，code = ' + code + (signal ? ' signal = ' + signal : ''));
+        if (!isQuitting && app.isPackaged && code !== 0) {
           dialog.showErrorBox("MGStudio 后端异常退出", "后端进程已退出（code " + code + "）。日志：" + (logFile || "") + (backendLog.length ? String.fromCharCode(10) + backendLog.slice(-12).join(String.fromCharCode(10)) : ""));
         }
       });
@@ -214,9 +219,10 @@ function startBackend(port) {
     backendProc = spawn(pythonCmd, args, { cwd, env: backendEnv, stdio: ['ignore', 'pipe', 'pipe'] });
     backendProc.stdout.on('data', logBackend);
     backendProc.stderr.on('data', logBackend);
-    backendProc.on('exit', (code) => {
-      clog('boot', '后端进程退出，code = ' + code);
-      if (app.isPackaged && code !== 0) {
+    backendProc.on('exit', (code, signal) => {
+      clog('boot', '后端进程退出，code = ' + code + (signal ? ' signal = ' + signal : ''));
+      // 同上：退出流程中的终止不算异常
+      if (!isQuitting && app.isPackaged && code !== 0) {
         dialog.showErrorBox('MGStudio 后端异常退出', 'Python 后端未能启动，请确认已安装 Python 3.10+ 及依赖。');
       }
     });

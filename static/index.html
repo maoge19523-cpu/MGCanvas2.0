@@ -3516,17 +3516,17 @@
                     <div class="skeleton-card"></div>
                 </div>
             </div>
-            <iframe id="frame-home" src="/static/home.html?v=1.0.0.1791370375" class="active" scrolling="yes"></iframe>
-            <iframe id="frame-zimage" data-src="/static/zimage.html?v=1.0.0.1791370375" scrolling="yes"></iframe>
-            <iframe id="frame-enhance" data-src="/static/enhance.html?v=1.0.0.1791370466" scrolling="yes"></iframe>
-            <iframe id="frame-klein" data-src="/static/klein.html?v=1.0.0.1791370375" scrolling="yes"></iframe>
-            <iframe id="frame-angle" data-src="/static/angle.html?v=1.0.0.1791370466" scrolling="yes"></iframe>
-            <iframe id="frame-online" data-src="/static/online.html?v=1.0.0.1791370375" scrolling="yes"></iframe>
-            <iframe id="frame-gpt-chat" data-src="/static/gpt-chat.html?v=1.0.0.1791370466" scrolling="yes"></iframe>
-            <iframe id="frame-asset-manager" data-src="/static/asset-manager.html?v=1.0.0.1791370466" scrolling="yes"></iframe>
-            <iframe id="frame-api-settings" data-src="/static/api-settings.html?v=1.0.0.1791370466" scrolling="yes"></iframe>
-            <iframe id="frame-comfyui-settings" data-src="/static/comfyui-settings.html?v=1.0.0.1791370466" scrolling="yes"></iframe>
-            <iframe id="frame-canvas" data-src="/static/canvas-list.html?v=1.0.0.1791370466" scrolling="yes"></iframe>
+            <iframe id="frame-home" src="/static/home.html?v=1.0.0.1791371294" class="active" scrolling="yes"></iframe>
+            <iframe id="frame-zimage" data-src="/static/zimage.html?v=1.0.0.1791370770" scrolling="yes"></iframe>
+            <iframe id="frame-enhance" data-src="/static/enhance.html?v=1.0.0.1791371294" scrolling="yes"></iframe>
+            <iframe id="frame-klein" data-src="/static/klein.html?v=1.0.0.1791370770" scrolling="yes"></iframe>
+            <iframe id="frame-angle" data-src="/static/angle.html?v=1.0.0.1791371294" scrolling="yes"></iframe>
+            <iframe id="frame-online" data-src="/static/online.html?v=1.0.0.1791370770" scrolling="yes"></iframe>
+            <iframe id="frame-gpt-chat" data-src="/static/gpt-chat.html?v=1.0.0.1791371294" scrolling="yes"></iframe>
+            <iframe id="frame-asset-manager" data-src="/static/asset-manager.html?v=1.0.0.1791371294" scrolling="yes"></iframe>
+            <iframe id="frame-api-settings" data-src="/static/api-settings.html?v=1.0.0.1791371294" scrolling="yes"></iframe>
+            <iframe id="frame-comfyui-settings" data-src="/static/comfyui-settings.html?v=1.0.0.1791371294" scrolling="yes"></iframe>
+            <iframe id="frame-canvas" data-src="/static/canvas-list.html?v=1.0.0.1791371294" scrolling="yes"></iframe>
 
         </main>
     </div>
@@ -4420,7 +4420,8 @@
 
         /* 侧栏底部运行状态块。
            复用同一次轮询节奏（由 syncStatus 调用），不新增定时器。
-           数据源 /api/tasks?status=... ：拿"进行中"的任务数，
+           数据源 /api/tasks/active_count：轻量端点，只返回进行中的任务数
+           （不用 /api/tasks，那条会深拷贝全部任务，2 秒一次太重）。
            有任务时显示数量并让整条脉动，全部结束时回到"就绪"。 */
         async function syncShellStatus() {
             const box = document.getElementById('shellStatus');
@@ -4429,10 +4430,11 @@
             if (!box || !txt) return;
             let active = 0;
             try {
-                const r = await fetch('/api/tasks?status=queued,running,provider_processing,downloading,saving&limit=1');
+                const r = await fetch('/api/tasks/active_count');
                 if (!r.ok) return;
                 const d = await r.json();
-                active = Number(d.total) || 0;
+                // 新版后端给 active_count；若连到旧版（只有 total）则退回用 total
+                active = Number(d.active_count != null ? d.active_count : d.total) || 0;
             } catch (e) { return; }
             if (active > 0) {
                 box.classList.add('is-busy');

@@ -83,6 +83,9 @@ QUIET_ACCESS_PATHS = {
     "/api/queue_status",
     "/api/canvases",
     "/api/canvases/trash",
+    # 侧栏状态块每 2 秒轮询一次，不静音的话日志会被它刷满
+    # （实测一次 7 小时的会话里约一半日志行都是它）
+    "/api/tasks/active_count",
 }
 QUIET_ACCESS_PREFIXES = (
     "/api/canvases/",
@@ -3595,6 +3598,12 @@ TASK_RUNNER_MODEL_NAMES = {
 }
 
 TASK_TERMINAL_STATUSES = {"succeeded", "failed", "cancelled"}
+# "进行中"状态（侧栏状态块用它显示活动任务数）。
+# 依据 TASK_STATUS_FLOW：queued 待执行、running/provider_processing/downloading/saving
+# 是执行链路上的阶段、jimeng_pending 是上游等待、retry 是待重新排队。
+# 注意 cancel_requested 不算（用户已请求取消）、终态不算。
+TASK_ACTIVE_STATUSES = ("queued", "running", "provider_processing", "downloading",
+                        "saving", "jimeng_pending", "retry")
 TASK_STATUS_FLOW = {
     # 状态机：状态 -> 可达状态集合（非法转换直接拒绝并记录）
     "queued": {"running", "cancel_requested", "cancelled", "failed", "retry"},
@@ -17968,6 +17977,27 @@ async def list_tasks(status: str = "", task_type: str = "",
                      limit: int = Query(50, ge=1, le=200), offset: int = Query(0, ge=0)):
     """任务列表：status（逗号分隔多值）/ type（online-image|comfy|video）/ 创建时间范围 过滤。"""
     return task_list(status=status, task_type=task_type, ts_from=from_ts, ts_to=to_ts, limit=limit, offset=offset)
+
+
+@app.get("/api/tasks/active_count")
+async def tasks_active_count():
+    """进行中的任务数（轻量端点）。
+
+    侧栏状态块每 2 秒查一次，所以这里必须廉价：直接读 TASK_STORE 只数状态，
+    不做 task_list() 那种"深拷贝 + JSON 往返全部任务"的动作。
+
+    响应同时给出 active_count 与 total，便于前端在旧/新后端之间兼容：
+    若拿到的是旧版 /api/tasks 的响应（只有 total），前端会退回用 total 判断；
+    新版则用 active_count，避免把已完成的任务也算成"进行中"。
+    """
+    with TASK_STORE_LOCK:
+        total = len(TASK_STORE)
+        active = 0
+        for t in TASK_STORE.values():
+            if (t.get("status") or "") in TASK_ACTIVE_STATUSES:
+                active += 1
+    return {"active_count": active, "total": total,
+            "statuses": list(TASK_ACTIVE_STATUSES)}
 
 @app.get("/api/tasks/{task_id}")
 async def get_task_detail(task_id: str):
