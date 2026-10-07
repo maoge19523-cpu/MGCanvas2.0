@@ -3216,11 +3216,11 @@
         background: var(--shell-hairline);
     }
     /* 环境光不能盖住页面内容。
-       注意：**不能**用 `body .stage > * { position: relative }` ——
-       上游 iframe 用的是 `position: absolute; inset: 0`，
-       统一改成 relative 会让 iframe 塌陷、整个内容区空白。
+       注意：**不要**给内容区的所有直接子元素统一加 position: relative ——
+       上游 iframe 用的是绝对定位铺满内容区，改成 relative 会让 iframe
+       塌陷、整个内容区空白（曾踩过这个坑）。
        这里只把需要盖在环境光之上的东西抬起来：
-       iframe 自身是 absolute（已在环境光之上），骨架屏只需给个 z-index。 */
+       iframe 自身已是绝对定位（天然在环境光之上），骨架屏只需给个 z-index。 */
     body .stage > iframe {
         z-index: 1;
     }
