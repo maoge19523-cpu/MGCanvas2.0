@@ -76,7 +76,7 @@
             --divider: transparent;
             --scrollbar: rgba(0, 0, 0, 0.25);
             --scrollbar-hover: rgba(0, 0, 0, 0.40);
-            --focus-ring: rgba(59, 130, 246, 0.5);
+            --focus-ring: rgba(255, 106, 0, 0.5);
             --card-shadow-sm: 0 1px 2px rgba(0,0,0,0.03);
             --card-shadow-md: 0 4px 16px -4px rgba(0,0,0,0.06);
             --card-shadow-lg: 0 8px 28px -6px rgba(0,0,0,0.1);
@@ -84,9 +84,9 @@
             /* ═══ V4 Glassmorphism tokens ═══ */
             --v4-card-bg: rgba(255,255,255,0.72);
             --v4-card-solid: rgba(255,255,255,0.92);
-            --v4-accent: #0071e3;
-            --v4-accent-soft: rgba(0,113,227,0.08);
-            --v4-focus-ring: #0071e3;
+            --v4-accent: #FF6A00;
+            --v4-accent-soft: rgba(255,106,0,0.10);
+            --v4-focus-ring: #FF6A00;
             --v4-ease-out: cubic-bezier(0.22,0.61,0.36,1);
         }
 
@@ -112,6 +112,25 @@
             --card-shadow-sm: 0 1px 2px rgba(0,0,0,0.15);
             --card-shadow-md: 0 4px 16px -4px rgba(0,0,0,0.25);
             --card-shadow-lg: 0 8px 28px -6px rgba(0,0,0,0.35);
+
+            /* ═══ 外观壳 token（深色一份）═══
+               必须在这里再声明一次：本页 `html.theme-dark, body.theme-dark` 的特异性
+               高于 marvis-shared.css 的 `:root`，否则深色主题会退回浅色壳值（暖灰壳）。
+               两套主题的取值与 marvis-shared.css 中保持一致。 */
+            --shell-bg: #000000;
+            --shell-fg: #f5f5f6;
+            --shell-fg-2: #a1a1a8;
+            --shell-fg-3: #6a6a72;
+            --shell-hover: rgba(255, 255, 255, 0.075);
+            --shell-active: rgba(255, 255, 255, 0.13);
+            --shell-divider: rgba(255, 255, 255, 0.09);
+            --shell-logo-bg: linear-gradient(135deg, #FF6A00, #FF8A2B);
+            --shell-glow: radial-gradient(620px 220px at 120px 70px, rgba(255, 106, 0, 0.20), transparent 70%);
+            --shell-hairline: linear-gradient(90deg, transparent, rgba(255,106,0,.75) 14%, rgba(255,138,43,1) 50%, rgba(255,106,0,.75) 86%, transparent);
+            --accent-2: #FF8A2B;
+            --accent-glow: rgba(255, 106, 0, 0.42);
+            --focus-ring: rgba(255, 106, 0, 0.5);
+            --nav-active: rgba(255, 106, 0, 0.18);
 
             /* ═══ V4 Glassmorphism tokens (dark) ═══ */
             --v4-card-bg: rgba(30,30,30,0.6);
@@ -3248,6 +3267,14 @@
                 <span class="version-dot" aria-hidden="true"></span>
                 <span class="version-text">v-</span>
             </div>
+
+            <!-- 运行状态块：有任务在跑时显示活动数与进度，空闲时显示就绪。
+                 数据来自已有的 2 秒轮询 syncStatus()，不额外增加请求。
+                 点击回到当前画布（生成结果就在那里）。 -->
+            <div class="shell-status" id="shellStatus" role="status" title="生成任务状态">
+                <span class="bar"><i id="shellStatusBar"></i></span>
+                <span class="n" id="shellStatusText">就绪</span>
+            </div>
         </aside>
         <script>
             /* 在侧栏 DOM 解析完后立即把 active 类移到当前页对应的入口，避免首屏先在文生图上闪一下 */
@@ -4183,14 +4210,52 @@
                 if (pos > 0) {
                     monitor?.classList.add('is-busy');
                     if (queueVal) queueVal.innerText = `${pos}/${total}`;
-                    if (logoDot) logoDot.style.backgroundColor = '#3b82f6';
+                    if (logoDot) logoDot.style.backgroundColor = 'var(--accent)';
                 } else {
                     monitor?.classList.remove('is-busy');
                     if (queueVal) queueVal.innerText = total > 0 ? total : '0';
                     if (logoDot) logoDot.style.backgroundColor = 'var(--text)';
                 }
+                await syncShellStatus();
             } catch (e) { }
         }
+
+        /* 侧栏底部运行状态块。
+           复用同一次轮询节奏（由 syncStatus 调用），不新增定时器。
+           数据源 /api/tasks?status=... ：拿"进行中"的任务数，
+           有任务时显示数量并让整条脉动，全部结束时回到"就绪"。 */
+        async function syncShellStatus() {
+            const box = document.getElementById('shellStatus');
+            const bar = document.getElementById('shellStatusBar');
+            const txt = document.getElementById('shellStatusText');
+            if (!box || !txt) return;
+            let active = 0;
+            try {
+                const r = await fetch('/api/tasks?status=queued,running,provider_processing,downloading,saving&limit=1');
+                if (!r.ok) return;
+                const d = await r.json();
+                active = Number(d.total) || 0;
+            } catch (e) { return; }
+            if (active > 0) {
+                box.classList.add('is-busy');
+                txt.textContent = active > 99 ? '99+' : String(active);
+                if (bar) bar.style.width = '100%';
+                box.title = `正在生成：${active} 个任务`;
+            } else {
+                box.classList.remove('is-busy');
+                txt.textContent = '就绪';
+                if (bar) bar.style.width = '0%';
+                box.title = '当前没有进行中的生成任务';
+            }
+        }
+
+        /* 点击状态块：回到当前画布（生成结果落在那里） */
+        document.getElementById('shellStatus')?.addEventListener('click', function () {
+            const cur = localStorage.getItem('studio_active_page');
+            if (cur === 'canvas') return;           // 已在画布工作台，不重复跳转
+            const canvasNav = document.querySelector('[onclick*="\'canvas\'"]');
+            if (canvasNav) switchUI(canvasNav, 'canvas');
+        });
 
         const host = window.location.host;
         if (host) {

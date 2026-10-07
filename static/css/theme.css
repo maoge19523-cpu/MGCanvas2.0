@@ -1784,3 +1784,164 @@ body.studio-theme-dark .shadow-slate-900\/5 {
     from { opacity: 0; transform: translateY(4px); }
     to { opacity: 1; transform: translateY(0); }
 }
+
+/* ═══════════════════════════════════════════════════════════════
+   外观壳（侧栏 / 状态栏 / 窗口控制）· 深色壳
+   ───────────────────────────────────────────────────────────────
+   壳用 --shell-* 一组专用 token（在 marvis-shared.css 里两套主题各定义一份），
+   内容区继续用 --bg / --surface / --text。
+   因为两套主题下变量名相同、取值不同，这一层不需要再区分明暗。
+   注意：必须放在文件末尾 —— 上方第 48 行那条
+   `html.studio-theme-dark body .app-shell/.sidebar/.stage { background: var(--bg) }`
+   会把三者刷成同色，覆盖掉侧栏与内容区的层次。
+   ═══════════════════════════════════════════════════════════════ */
+
+/* 侧栏：壳色底，去掉毛玻璃（侧栏是壳，不是内容；毛玻璃在深色壳上只会发灰） */
+body .sidebar,
+body .sidebar:hover {
+    background: var(--shell-bg) !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    box-shadow: none !important;
+    color: var(--shell-fg);
+}
+
+/* 侧栏内的导航项与折叠按钮 */
+body .sidebar .nav-item,
+body .sidebar .save-list-dropdown,
+body .sidebar .nav-fold-toggle,
+body .sidebar .side-pill {
+    color: var(--shell-fg-2);
+}
+body .sidebar .nav-item:hover,
+body .sidebar .nav-fold-toggle:hover,
+body .sidebar .side-pill:hover {
+    background: var(--shell-hover) !important;
+    color: var(--shell-fg) !important;
+}
+/* 选中项：橙色实心胶囊 + 墨黑图标/文字 */
+body .sidebar .nav-item.active,
+body .sidebar .nav-item.active:hover,
+body .sidebar .side-pill.active {
+    background: var(--shell-logo-bg) !important;
+    color: #111111 !important;
+    box-shadow: 0 6px 18px var(--accent-glow) !important;
+}
+body .sidebar .nav-item.active svg,
+body .sidebar .side-pill.active svg {
+    stroke: #111111;
+}
+html.studio-theme-dark body .sidebar .nav-item.active,
+html.studio-theme-dark body .sidebar .side-pill.active,
+body.studio-theme-dark .sidebar .nav-item.active,
+body.studio-theme-dark .sidebar .side-pill.active {
+    color: #111111 !important;
+}
+
+/* 侧栏 logo：橙色渐变圆角块 + 墨黑猫耳标识
+   标识 SVG 的图形自带留白，给 svg 加底并留 4px 内缩即可得到"圆角块包住标识"的效果 */
+body .sidebar .sidebar-logo-img {
+    background: var(--shell-logo-bg);
+    border-radius: 9px;
+    padding: 4px;
+    box-sizing: border-box;
+    color: #111111;
+    box-shadow: 0 5px 15px var(--accent-glow);
+}
+/* 浅色主题的壳是暖灰，"侧栏文字"颜色也要跟着走壳而不是内容 */
+body .sidebar .logo-text-label {
+    color: var(--shell-fg);
+}
+/* 版本号与状态行属于壳，用壳的弱化字色 */
+body .sidebar .version-display {
+    color: var(--shell-fg-3);
+}
+body .sidebar .version-display .version-text {
+    color: var(--shell-fg-3);
+}
+
+/* 焦点环：原来写死蓝色 rgba(59,130,246,.5)，统一收编为橙色 */
+body {
+    --focus-ring: rgba(255, 106, 0, 0.5);
+    --nav-active: rgba(255, 106, 0, 0.14);
+    --nav-hover: var(--shell-hover);
+}
+
+/* 内容区：保留内容底色，并在左上角铺一层极淡的橙色环境光 */
+body .stage {
+    background: var(--bg);
+    position: relative;
+}
+body .stage::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: var(--shell-glow);
+    pointer-events: none;
+    z-index: 0;
+}
+/* 内容区顶部一条橙色渐变细线，把壳与内容"缝"起来 */
+body .stage::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    z-index: 3;
+    pointer-events: none;
+    background: var(--shell-hairline);
+}
+/* 环境光不能盖住页面内容 */
+body .stage > * {
+    position: relative;
+    z-index: 1;
+}
+
+/* 侧栏底部：运行状态块（有任务时显示进度与计数，空闲时显示就绪） */
+.shell-status {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+    padding: 8px 0 2px;
+    cursor: pointer;
+    user-select: none;
+    color: var(--shell-fg-3);
+}
+.shell-status .bar {
+    width: 26px;
+    height: 3px;
+    border-radius: 2px;
+    background: var(--shell-divider);
+    overflow: hidden;
+    position: relative;
+}
+.shell-status .bar > i {
+    display: block;
+    height: 100%;
+    width: 0%;
+    border-radius: 2px;
+    background: var(--shell-logo-bg);
+    transition: width .35s var(--ease-apple, cubic-bezier(.25,.1,.25,1));
+}
+.shell-status .n {
+    font-size: 9px;
+    line-height: 1;
+    letter-spacing: .02em;
+    color: var(--shell-fg-3);
+}
+/* 有任务在跑：进度条整条脉动，暗示"活着" */
+.shell-status.is-busy .bar { background: var(--accent-subtle); }
+.shell-status.is-busy .bar > i { width: 100%; }
+.shell-status.is-busy .n { color: var(--accent); font-weight: 600; }
+.shell-status.is-busy { animation: shell-status-breathe 2.4s ease-in-out infinite; }
+@keyframes shell-status-breathe {
+    0%, 100% { opacity: 1; }
+    50% { opacity: .62; }
+}
+@media (prefers-reduced-motion: reduce) {
+    .shell-status.is-busy { animation: none; }
+    .shell-status .bar > i { transition: none; }
+}
+

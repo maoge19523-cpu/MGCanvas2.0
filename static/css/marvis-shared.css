@@ -30,6 +30,26 @@
     --accent-pressed: #E85D00;
     --accent-text: #ffffff;
     --accent-subtle: rgba(255, 106, 0, 0.10);
+    /* 橙色渐变第二色（主按钮 / 选中胶囊 / 图标底用；纯色 --accent 仍是唯一基色） */
+    --accent-2: #FF8A2B;
+    --accent-line: rgba(255, 106, 0, 0.55);
+    --accent-glow: rgba(255, 106, 0, 0.28);
+
+    /* ── 外观壳（侧栏 / 顶栏 / 窗口控制）──
+       壳永远比内容区"更收进去"：浅色主题用暖灰（比内容深），
+       深色主题用纯黑（比内容更黑）。两套都靠明度包围感分层，不靠描边。
+       壳专用 token 与内容区 token 分开，避免两套主题互相打架。 */
+    --shell-bg: #e9e9ec;
+    --shell-fg: #0a0a0a;
+    --shell-fg-2: #5f5f66;
+    --shell-fg-3: #9a9aa1;
+    --shell-hover: rgba(0, 0, 0, 0.055);
+    --shell-active: rgba(0, 0, 0, 0.09);
+    --shell-divider: rgba(0, 0, 0, 0.09);
+    --shell-logo-bg: linear-gradient(135deg, var(--accent), var(--accent-2));
+    --shell-glow: radial-gradient(560px 190px at 108px 84px, rgba(255, 106, 0, 0.13), transparent 68%);
+    --shell-hairline: linear-gradient(90deg, transparent, rgba(255,106,0,.55) 14%, rgba(255,138,43,.85) 50%, rgba(255,106,0,.55) 86%, transparent);
+    --shell-log-dot: #8e8e93;
 
     /* ── 语义色（统一到 Apple 风，与 MGStudio OS 冻结基线一致） ── */
     --danger: #ff3b30;
@@ -175,6 +195,22 @@ body.studio-theme-dark {
     --accent-pressed: #E85D00;
     --accent-text: #ffffff;
     --accent-subtle: rgba(255, 106, 0, 0.16);
+    --accent-2: #FF8A2B;
+    --accent-line: rgba(255, 106, 0, 0.75);
+    --accent-glow: rgba(255, 106, 0, 0.42);
+
+    /* 外观壳：深色主题下壳用纯黑，比内容区（--bg #0b0b0c）更黑，形成包围感 */
+    --shell-bg: #000000;
+    --shell-fg: #f5f5f6;
+    --shell-fg-2: #a1a1a8;
+    --shell-fg-3: #6a6a72;
+    --shell-hover: rgba(255, 255, 255, 0.075);
+    --shell-active: rgba(255, 255, 255, 0.13);
+    --shell-divider: rgba(255, 255, 255, 0.09);
+    --shell-logo-bg: linear-gradient(135deg, var(--accent), var(--accent-2));
+    --shell-glow: radial-gradient(620px 220px at 120px 70px, rgba(255, 106, 0, 0.20), transparent 70%);
+    --shell-hairline: linear-gradient(90deg, transparent, rgba(255,106,0,.75) 14%, rgba(255,138,43,1) 50%, rgba(255,106,0,.75) 86%, transparent);
+    --shell-log-dot: #6a6a72;
 
     /* 语义色（Apple 风暗色微调，与 MGStudio OS 冻结基线一致） */
     --danger: #ff453a;
