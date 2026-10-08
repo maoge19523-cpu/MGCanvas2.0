@@ -168,7 +168,34 @@ if ($Publish) { $flag = 'always' }
 另外 `package.json` 的替换必须**行首锚定** (`(?m)^\s*"version"`)，
 否则会误伤 `build.win.artifactName` 里的 `${version}`。
 
-### 4. 后端二进制不入库
+### 5. 原生命令的 stderr 会中断脚本（本次发版实际踩到）
+
+脚本顶层设了 `$ErrorActionPreference = 'Stop'`，而 **PowerShell 会把原生命令
+（pyinstaller / npx electron-builder）写到 stderr 的内容也当成错误**，
+即使那条命令其实在正常构建。实测现象：
+
+```
+=== 重新编译后端二进制（PyInstaller） ===
+powershell.exe : pyinstaller.exe : 181 INFO: PyInstaller: 6.22.3 ...
+    + FullyQualifiedErrorId : NativeCommandError
+（脚本在此中断，构建白跑）
+```
+
+修法：调用原生命令前后临时把 `$ErrorActionPreference` 设为 `Continue`，
+用 `cmd /c` 执行并捕获输出，最后**用 `$LASTEXITCODE` 判断成败**：
+
+```powershell
+$oldEap = $ErrorActionPreference
+$ErrorActionPreference = 'Continue'
+$log = & cmd /c "pyinstaller $args 2>&1"
+$code = $LASTEXITCODE
+$ErrorActionPreference = $oldEap
+if ($code -ne 0) { Die "退出码 $code" }
+```
+
+`release.ps1` 里的 PyInstaller 与 electron-builder 两处都已按此处理。
+
+### 6. 后端二进制不入库
 
 `.gitignore` 里忽略了 `desktop/resources/backend/` 与 `MGStudioServer.exe`。
 发版时由脚本重新编译，所以**不要**指望从仓库里拿到后端。

@@ -150,12 +150,27 @@ if (-not $SkipBackend) {
     Step '重新编译后端二进制（PyInstaller）'
     Push-Location $root
     try {
-        & pyinstaller --noconfirm --onefile --name MGStudioServer `
-            --distpath (Join-Path $desktop 'resources\backend') `
-            --workpath (Join-Path $root 'build\pyi') `
-            --specpath (Join-Path $root 'build') main.py 2>&1 |
-            Select-String -Pattern 'completed successfully|ERROR|error:' | Select-Object -Last 3
+        # 关键：原生命令（pyinstaller / npx）会把 INFO 日志写到 stderr。
+        # 而脚本顶层设了 $ErrorActionPreference='Stop'，PowerShell 会把原生
+        # 命令的 stderr 当成错误并**直接终止脚本** —— 即使该命令其实在正常构建。
+        # 实测：pyinstaller 刚打印 "INFO: PyInstaller: 6.22.3" 就被中断。
+        # 因此这里必须临时改成 'Continue'，并用 $LASTEXITCODE 判断成败。
+        $oldEap = $ErrorActionPreference
+        $ErrorActionPreference = 'Continue'
+
+        # 用 cmd /c 执行并捕获全部输出，避免 stderr 触发 PowerShell 的错误机制
+        $pyArgs = '--noconfirm --clean --onefile --name MGStudioServer' +
+                  ' --distpath "' + (Join-Path $desktop 'resources\backend') + '"' +
+                  ' --workpath "' + (Join-Path $root 'build\pyi') + '"' +
+                  ' --specpath "' + (Join-Path $root 'build') + '" main.py'
+        $pyLog = & cmd /c "pyinstaller $pyArgs 2>&1"
+        $pyCode = $LASTEXITCODE
+        $ErrorActionPreference = $oldEap
+
+        $pyLog | Select-String -Pattern 'completed successfully|ERROR|error:' | Select-Object -Last 3
+
         $exe = Join-Path $desktop 'resources\backend\MGStudioServer.exe'
+        if ($pyCode -ne 0) { Die "PyInstaller 退出码 $pyCode" }
         if (-not (Test-Path $exe)) { Die "后端二进制未生成：$exe" }
         Ok "后端二进制已更新（$([math]::Round((Get-Item $exe).Length / 1MB, 1)) MB）"
     } finally { Pop-Location }
@@ -170,8 +185,16 @@ if ($Publish -and -not $env:GH_TOKEN) {
 }
 Push-Location $desktop
 try {
+    # 同 PyInstaller 那步：electron-builder 也把进度写到 stderr，
+    # 在 $ErrorActionPreference='Stop' 下会误判为错误并中断脚本。
+    $oldEap = $ErrorActionPreference
+    $ErrorActionPreference = 'Continue'
     $builderLog = & cmd /c "npx electron-builder --win --publish $publishFlag 2>&1"
-    $builderLog | Select-String -Pattern 'building|error|⨯|published' | Select-Object -First 6
+    $builderCode = $LASTEXITCODE
+    $ErrorActionPreference = $oldEap
+
+    $builderLog | Select-String -Pattern 'building|error|⨯|published|Cannot|ENOENT' | Select-Object -First 8
+    if ($builderCode -ne 0) { Die "electron-builder 退出码 $builderCode（见上方输出）" }
     $setup = Join-Path $desktop "release\MGStudio-Electron-Setup-$ver.exe"
     if (-not (Test-Path $setup)) { Die "安装包未生成：$setup" }
     $size = [math]::Round((Get-Item $setup).Length / 1MB, 2)
