@@ -146,6 +146,16 @@ if ($VersionOnly) {
     exit 0
 }
 
+# 关键约束：只要版本号变了，后端就必须重编，不允许 -SkipBackend。
+# 原因（真实踩过）：后端 exe 是**版本号的来源**（current_app_version 优先读
+# exe 同级目录的 VERSION），而壳的版本号来自 package.json。若升版本时跳过
+# 后端重编，就会出现「壳已是 1.0.2、界面仍显示 1.0.0」的错位 —— 1.0.2 那次
+# 正是如此，事后才发现后端 exe 与 VERSION 都还是旧版。
+if ($Bump -and $SkipBackend) {
+    Warn '-Bump 与 -SkipBackend 不能同时使用：升版本号必须重编后端，已忽略 -SkipBackend'
+    $SkipBackend = $false
+}
+
 if (-not $SkipBackend) {
     Step '重新编译后端二进制（PyInstaller）'
     Push-Location $root
@@ -173,6 +183,15 @@ if (-not $SkipBackend) {
         if ($pyCode -ne 0) { Die "PyInstaller 退出码 $pyCode" }
         if (-not (Test-Path $exe)) { Die "后端二进制未生成：$exe" }
         Ok "后端二进制已更新（$([math]::Round((Get-Item $exe).Length / 1MB, 1)) MB）"
+
+        # 后端 exe 旁边必须放当前版本的 VERSION。
+        # current_app_version() 优先读 BASE_DIR/VERSION，其次读「exe 同级目录/VERSION」
+        # —— PyInstaller onefile 解包目录里没有 VERSION，所以实际生效的是后者，
+        # 也就是 resources/backend/VERSION。安装包会把它一并带到用户机器上。
+        # 这个文件若不同步，界面显示的版本号就会与壳不一致（1.0.2 那次即如此）。
+        $verFile = Join-Path $desktop 'resources\backend\VERSION'
+        [IO.File]::WriteAllText($verFile, $ver + "`n", (New-Object System.Text.UTF8Encoding($false)))
+        Ok "后端 VERSION 已写入：$ver"
     } finally { Pop-Location }
 }
 
@@ -183,6 +202,29 @@ if ($Publish) { $publishFlag = 'always' }
 if ($Publish -and -not $env:GH_TOKEN) {
     Die '未设置 GH_TOKEN，无法发布。请先设置环境变量 GH_TOKEN'
 }
+
+# 打包前硬校验：四处版本号 + 后端 VERSION 必须全部等于目标版本。
+# 这是最后一道闸门 —— 1.0.2 那次就是因为后端 VERSION 没同步，
+# 导致装完后壳是 1.0.2、界面却显示 1.0.0，用户完全看不懂发生了什么。
+Step '打包前版本一致性硬校验'
+$final = Get-Versions
+$mismatch = @()
+if ($final.File -ne $ver) { $mismatch += "VERSION=$($final.File)" }
+if ($final.Package -ne $ver) { $mismatch += "package.json=$($final.Package)" }
+if ($final.MainPy -ne $ver) { $mismatch += "main.py=$($final.MainPy)" }
+if ($final.Notes -ne $ver) { $mismatch += "update-notes.json=$($final.Notes)" }
+$backendVerFile = Join-Path $desktop 'resources\backend\VERSION'
+if (Test-Path $backendVerFile) {
+    $bv = (Get-Content $backendVerFile -Raw).Trim()
+    if ($bv -ne $ver) { $mismatch += "resources/backend/VERSION=$bv" }
+} else {
+    $mismatch += 'resources/backend/VERSION 不存在'
+}
+if ($mismatch.Count -gt 0) {
+    Die ("版本号未全部对齐，已中止打包：`n    " + ($mismatch -join "`n    "))
+}
+Ok "全部版本号均为 $ver（含后端 VERSION）"
+
 Push-Location $desktop
 try {
     # 同 PyInstaller 那步：electron-builder 也把进度写到 stderr，
