@@ -71,6 +71,10 @@ $env:GH_TOKEN = "github_pat_xxxxx"
 在仓库根目录执行（`.ps1` 用 Windows PowerShell 5.1 运行即可）：
 
 ```powershell
+# 0) 先做发布前预检 —— 避免跑完 10 分钟构建才在最后一步因 token 权限失败
+$env:GH_TOKEN = "github_pat_xxxxx"
+.\preflight.ps1
+
 # 1) 只升版本号并构建，不发布 —— 先本地验证
 .\release.ps1 -Bump
 
@@ -82,6 +86,15 @@ $env:GH_TOKEN = "github_pat_xxxxx"
 .\release.ps1 -VersionOnly          # 只同步四处版本号，不构建（自检用）
 .\release.ps1 -SkipBackend          # 跳过后端重编译（只改了前端时更快）
 ```
+
+`preflight.ps1` 会检查四件事，任一项不通过就别开始发版：
+
+1. `GH_TOKEN` 是否已设置
+2. token 是否有效（能否读到自己的账号）
+3. token 对该仓库是否有**写权限**（`permissions.push`）
+4. 本机能否连上 GitHub —— 发版要上传约 180MB，网络不稳会白跑
+
+它还会顺带报告仓库是否公开、以及是否已有 Release。
 
 脚本会依次：
 
