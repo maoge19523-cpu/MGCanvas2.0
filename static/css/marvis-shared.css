@@ -732,3 +732,106 @@ select:focus {
 :where(.asset-page) .content-toolbar {
     border-bottom: 1px solid color-mix(in srgb, var(--accent) 22%, transparent);
 }
+
+/* 11. 全站"黑色按钮"统一为橙色（浅色 / 深色一致）
+   ─────────────────────────────────────────────────────────────────
+   原则：只覆盖颜色类属性（background / color / box-shadow / border-color），
+   **绝不触碰**任何尺寸或定位属性（width / height / padding / border-radius /
+   font-size / display / flex / position）。因此不存在位移、换行、撑破容器
+   的可能 —— 布局完全不变，只有颜色变。
+
+   为什么必须逐个列举而不能通配：
+   全站有 100 处 background:var(--text)，其中 46 处不是按钮 —— 包括
+   <video> 画面、滑杆拇指、复选框、节点端口等，误改会破坏画布。
+   因此这里按"确认是按钮/开关"的选择器精确覆盖。
+
+   深色主题下同一枚规则同样生效，故两套主题观感一致。 */
+.api-link-btn,
+.action-btn.save-btn,
+.action-btn.primary-btn,
+.save-btn,
+.primary-btn,
+.btn-render,
+.theme-dock-btn.active,
+.asset-tabs button.active,
+.asset-tabs button:not(.active):hover,
+.settings-pill.active,
+.settings-tab.active,
+.settings-toggle-switch input:checked + .settings-toggle-slider,
+.comfy-random-btn.active,
+.version-btn.primary,
+.picker-checkbox.checked,
+.stp-check input[type="checkbox"]:checked,
+.ios-switch .ios-slider::before {
+    background: linear-gradient(135deg, var(--accent), var(--accent-2, #FF8A2B)) !important;
+    border-color: transparent !important;
+    color: #111111 !important;
+    box-shadow: 0 4px 14px -2px rgba(255, 106, 0, .42);
+}
+/* 上述元素里的图标/伪元素也要跟着变墨黑，保证橙色底上的对比 */
+.api-link-btn svg,
+.action-btn svg,
+.save-btn svg,
+.primary-btn svg,
+.btn-render svg,
+.asset-tabs button.active svg,
+.settings-pill.active svg,
+.settings-tab.active svg,
+.picker-checkbox.checked::after,
+.stp-check input[type="checkbox"]:checked::after {
+    color: #111111 !important;
+    stroke: #111111 !important;
+    border-color: #111111 !important;
+}
+
+/* 素材库左树的"选中行"与右侧深色圆形图标按钮也一并转橙，
+   与页签选中态统一（原为深灰渐变 + 深色圆底）。 */
+:where(.asset-page) .tree-row.active {
+    background: linear-gradient(90deg,
+        color-mix(in srgb, var(--accent) 26%, transparent),
+        color-mix(in srgb, var(--accent) 10%, transparent)) !important;
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent) 35%, transparent);
+}
+:where(.asset-page) .tree-row.active::before {
+    background: linear-gradient(180deg, var(--accent), var(--accent-2, #FF8A2B)) !important;
+}
+:where(.asset-page) .tree-row.active .tree-row-count {
+    background: var(--accent) !important;
+    color: #111111 !important;
+}
+:where(.asset-page) .asset-icon-btn {
+    background: color-mix(in srgb, var(--accent) 16%, transparent) !important;
+    color: var(--accent) !important;
+}
+:where(.asset-page) .asset-icon-btn:hover {
+    background: var(--accent) !important;
+    color: #111111 !important;
+}
+
+/* 12. 主行动按钮：硬编码用主题文字色做底的，统一转橙
+   ─────────────────────────────────────────────────────────────────
+   这几处没有走 --v4-btn-bg 变量，而是直接用 var(--text)（浅色=黑 / 深色=白），
+   因此单独覆盖。注意只改 background / color，保留各自的 nv-beam 光束边框
+   （柠檬绿描边）—— 那是既有效果，不属于本次要改的"黑色底"。 */
+.homepage-start,
+.hp-btn-primary,
+.hero-btn,
+.hero-btn-primary,
+#genBtn {
+    background: linear-gradient(135deg, var(--accent), var(--accent-2, #FF8A2B)) !important;
+    color: #111111 !important;
+}
+.homepage-start:hover,
+.hp-btn-primary:hover,
+.hero-btn:hover,
+.hero-btn-primary:hover,
+#genBtn:hover:not(:disabled) {
+    filter: brightness(1.07);
+    box-shadow: 0 8px 24px -6px rgba(255, 106, 0, .5);
+}
+.homepage-start svg,
+.hp-btn-primary svg,
+#genBtn svg {
+    color: #111111 !important;
+    stroke: #111111 !important;
+}

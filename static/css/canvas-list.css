@@ -18,8 +18,8 @@
     --faint: var(--text-3);
     --shadow: var(--shadow-color);
     --shadow-strong: var(--shadow-color-lg);
-    --strong: var(--text);
-    --strong-text: var(--bg);
+    --strong: var(--accent);
+    --strong-text: var(--accent-text);
     --accent-soft: var(--info-bg);
     --accent-line: var(--info-border);
     --success: var(--success);
