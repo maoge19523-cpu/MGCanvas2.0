@@ -101,12 +101,27 @@ function Set-Version([string]$ver) {
     }
     Write-TextPreservingEncoding $pyPath $pyNew
 
-    # static/update-notes.json：只改首个 version 与 updated_at
+    # static/update-notes.json：只改**顶层**的 version 与 updated_at。
+    #
+    # 踩过的坑：这个文件是**累积的更新日志**，里面每条历史记录都有自己的
+    # version / updated_at（各 10 处）。最初没加行首锚定，一个 Replace 把
+    # 全部 10 条历史记录的版本号和日期都改成了当前版本 —— 历史日志被破坏。
+    # 顶层字段缩进为 2 空格，嵌套记录缩进为 6 空格，因此用 (?m)^ 锚定行首
+    # 并要求其后恰好是 2 个空格，即可只命中顶层那两个字段。
     $notesPath = Join-Path $root 'static\update-notes.json'
     $notesRaw = [IO.File]::ReadAllText($notesPath)
-    $notesNew = [regex]::Replace($notesRaw, '("version"\s*:\s*")[^"]+(")', ('${1}' + $ver + '${2}'), 1)
+    $notesNew = [regex]::Replace($notesRaw, '(?m)^(  "version"\s*:\s*")[^"]+(")', ('${1}' + $ver + '${2}'), 1)
     $stamp = (Get-Date).ToString('yyyy-MM-ddTHH:mm:sszz00')
-    $notesNew = [regex]::Replace($notesNew, '("updated_at"\s*:\s*")[^"]+(")', ('${1}' + $stamp + '${2}'), 1)
+    $notesNew = [regex]::Replace($notesNew, '(?m)^(  "updated_at"\s*:\s*")[^"]+(")', ('${1}' + $stamp + '${2}'), 1)
+    # 守卫：确认顶层已写入目标版本，且嵌套历史版本未被改动
+    $topVer = [regex]::Match($notesNew, '(?m)^  "version"\s*:\s*"([^"]+)"')
+    if (-not $topVer.Success -or $topVer.Groups[1].Value -ne $ver) {
+        Die "update-notes.json 的顶层 version 未能写成 $ver"
+    }
+    $nestedChanged = [regex]::Matches($notesNew, '(?m)^      "version"\s*:\s*"' + [regex]::Escape($ver) + '"').Count
+    if ($nestedChanged -gt 0) {
+        Die "update-notes.json 的嵌套历史记录被误改（$nestedChanged 处），已中止以免破坏更新日志"
+    }
     Write-TextPreservingEncoding $notesPath $notesNew
 }
 
