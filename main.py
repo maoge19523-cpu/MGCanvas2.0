@@ -247,19 +247,50 @@ GITHUB_VERSION_URL = "https://raw.githubusercontent.com/maoge19523-cpu/MGCanvas2
 GITHUB_TREE_URL = "https://api.github.com/repos/maoge19523-cpu/MGCanvas2.0/git/trees/main?recursive=1"
 GITHUB_RAW_ROOT = "https://raw.githubusercontent.com/maoge19523-cpu/MGCanvas2.0/main"
 GITHUB_UPDATE_NOTES_URL = GITHUB_RAW_ROOT + "/static/update-notes.json"
-GITEE_REPO_URL = "https://github.com/maoge19523-cpu/MGCanvas2.0"
-GITEE_VERSION_URL = "https://github.com/maoge19523-cpu/MGCanvas2.0/raw/main/VERSION"
-GITEE_TREE_URL = "https://api.github.com/repos/maoge19523-cpu/MGCanvas2.0/git/trees/main?recursive=1"
-GITEE_RAW_ROOT = "https://github.com/maoge19523-cpu/MGCanvas2.0/raw/main"
+
+# ════════════════════════════════════════════════════════════════════════
+#  多源兜底（domestic mirrors）
+#  ────────────────────────────────────────────────────────────────────────
+#  背景：原先 gitee / modelscope 两组 URL 其实**全部指向 GitHub**，
+#  所谓"三源兜底"是同一个源 —— 国内网络下 github 一断就全部失效。
+#  现改为两个**真实的、独立的**备用通道（源标识沿用 gitee/modelscope
+#  以保持接口与前端兼容，但底层服务已不是 Gitee/ModelScope）：
+#
+#    github    ：直连 GitHub（原始源，内容最新）
+#    gitee     ：gh-proxy.com 转发 GitHub（同一份内容，走不同网络路径）
+#    modelscope：jsDelivr CDN（独立 CDN，不依赖 GitHub 的 API 域名）
+#
+#  三个源都必须同时满足三项能力，缺一即不可用（已实测）：
+#    ① 取 VERSION       —— 判断是否有新版本
+#    ② 取文件清单        —— 枚举需要更新的文件
+#    ③ 取文件内容        —— 逐文件下载
+#  实测结果：gh-proxy.com 三项全通；jsDelivr 三项全通。
+#  而 ghfast.top / ghproxy.net / gh.llkk.cc 的**文件清单接口返回 403**，
+#  只能取文件内容，不能作为更新源 —— 故未采用。
+# ════════════════════════════════════════════════════════════════════════
+
+# ── 备用源一：gh-proxy.com（转发 GitHub，内容与 github 源一致）──
+_GH_PROXY_PREFIX = "https://gh-proxy.com/"
+_RAW_UPSTREAM = "https://raw.githubusercontent.com/maoge19523-cpu/MGCanvas2.0/main"
+_API_UPSTREAM = "https://api.github.com/repos/maoge19523-cpu/MGCanvas2.0/git/trees/main?recursive=1"
+GITEE_REPO_URL = GITHUB_REPO_URL
+GITEE_RAW_ROOT = _GH_PROXY_PREFIX + _RAW_UPSTREAM
+GITEE_VERSION_URL = GITEE_RAW_ROOT + "/VERSION"
+GITEE_TREE_URL = _GH_PROXY_PREFIX + _API_UPSTREAM
 GITEE_UPDATE_NOTES_URL = GITEE_RAW_ROOT + "/static/update-notes.json"
-MODELSCOPE_REPO_URL = "https://github.com/maoge19523-cpu/MGCanvas2.0"
-MODELSCOPE_RAW_ROOT = "https://github.com/maoge19523-cpu/MGCanvas2.0/resolve/master"
-# ModelScope 模型仓库默认分支为 master；raw 网页路径会返回 HTML，必须用仓库文件 API 才能拿到纯文本
-# 注意：API 路径大小写敏感（推送/文件 API 用大写会 404/拒绝）
-MODELSCOPE_FILE_API_ROOT = "https://github.com/maoge19523-cpu/MGCanvas2.0/repo?Revision=master&FilePath="
-MODELSCOPE_VERSION_URL = MODELSCOPE_FILE_API_ROOT + "VERSION"
-MODELSCOPE_UPDATE_NOTES_URL = MODELSCOPE_FILE_API_ROOT + "static/update-notes.json"
-MODELSCOPE_TREE_URL = "https://github.com/maoge19523-cpu/MGCanvas2.0/repo/files?Revision=master&Recursive=true"
+
+# ── 备用源二：jsDelivr CDN ──
+# 文件内容：https://cdn.jsdelivr.net/gh/<owner>/<repo>@<branch>/<path>
+# 文件清单：https://data.jsdelivr.com/v1/packages/gh/<owner>/<repo>@<branch>?structure=flat
+#   注意其清单结构与 GitHub 的 git/trees 不同（顶层是 files，路径带前导 /），
+#   由 modelscope_update_file_list() 负责归一化后再复用既有解析逻辑。
+MODELSCOPE_REPO_URL = GITHUB_REPO_URL
+MODELSCOPE_RAW_ROOT = "https://cdn.jsdelivr.net/gh/maoge19523-cpu/MGCanvas2.0@main"
+MODELSCOPE_VERSION_URL = MODELSCOPE_RAW_ROOT + "/VERSION"
+MODELSCOPE_UPDATE_NOTES_URL = MODELSCOPE_RAW_ROOT + "/static/update-notes.json"
+MODELSCOPE_TREE_URL = "https://data.jsdelivr.com/v1/packages/gh/maoge19523-cpu/MGCanvas2.0@main?structure=flat"
+# 兼容旧代码引用（原 ModelScope 文件 API 前缀已废弃）
+MODELSCOPE_FILE_API_ROOT = MODELSCOPE_RAW_ROOT + "/"
 
 @app.on_event("startup")
 async def startup_event():
@@ -2909,18 +2940,51 @@ def download_github_update_files(files: List[str], staging_root: str, progress_c
                 progress_cb(rel, done, total)
 
 def modelscope_update_file_list() -> List[str]:
-    """通过 ModelScope 仓库文件 API 列出所有允许更新的文件（不依赖 git）。"""
+    """列出该源允许更新的文件（不依赖 git）。
+
+    源标识沿用 modelscope，但底层已改为 **jsDelivr CDN**，其清单结构与
+    GitHub 的 git/trees 不同，需在此归一化：
+        git/trees : {"tree": [{"path": "static/a.js", "type": "blob"}, ...]}
+        jsDelivr  : {"files": [{"name": "/static/a.js", "hash": "...", "size": n}, ...]}
+    两种都兼容，便于以后换源时不必再改这里。
+    """
     resp = github_get(MODELSCOPE_TREE_URL, headers={"User-Agent": "Infinite-Canvas-Updater"}, timeout=30)
     payload = json.loads(resp.content.decode("utf-8", errors="replace"))
-    files_node = ((payload.get("Data") or {}).get("Files")) or []
+    if not isinstance(payload, dict):
+        return []
+
     out: List[str] = []
-    for entry in files_node:
-        if not isinstance(entry, dict):
+
+    # 形态一：jsDelivr —— 顶层 files，路径带前导 /
+    files_node = payload.get("files")
+    if isinstance(files_node, list):
+        for entry in files_node:
+            if not isinstance(entry, dict):
+                continue
+            path = str(entry.get("name") or "").replace("\\", "/").lstrip("/")
+            if path and update_allowed_file(path):
+                out.append(path)
+        return sorted(set(out))
+
+    # 形态二：旧 ModelScope 仓库文件 API —— Data.Files + Path/Type
+    files_node = ((payload.get("Data") or {}).get("Files")) or []
+    if isinstance(files_node, list) and files_node:
+        for entry in files_node:
+            if not isinstance(entry, dict):
+                continue
+            if entry.get("Type") != "blob":
+                continue
+            path = str(entry.get("Path") or "").replace("\\", "/").lstrip("/")
+            if path and update_allowed_file(path):
+                out.append(path)
+        return sorted(set(out))
+
+    # 形态三：GitHub 风格 tree（备用）
+    for entry in (payload.get("tree") or []):
+        if not isinstance(entry, dict) or entry.get("type") != "blob":
             continue
-        if entry.get("Type") != "blob":
-            continue
-        path = str(entry.get("Path") or "").replace("\\", "/")
-        if update_allowed_file(path):
+        path = str(entry.get("path") or "").replace("\\", "/").lstrip("/")
+        if path and update_allowed_file(path):
             out.append(path)
     return sorted(set(out))
 

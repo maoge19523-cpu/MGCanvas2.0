@@ -168,7 +168,44 @@ if ($Publish) { $flag = 'always' }
 另外 `package.json` 的替换必须**行首锚定** (`(?m)^\s*"version"`)，
 否则会误伤 `build.win.artifactName` 里的 `${version}`。
 
-### 5. 原生命令的 stderr 会中断脚本（本次发版实际踩到）
+### 5. 后端「多源兜底」已改为可用的真实镜像
+
+原先 `main.py` 里 `GITEE_*` 与 `MODELSCOPE_*` 三组 URL **全部指向 GitHub**，
+所谓"多源兜底"其实是同一个源 —— 国内网络下 github 一断就全失效。
+
+现已改为三个**互不相同**的源（源标识沿用旧名以保持接口兼容）：
+
+| 源标识 | 实际服务 | VERSION / 清单 / 文件 |
+|---|---|---|
+| `github` | 直连 GitHub | 三项直连 |
+| `gitee` | **gh-proxy.com** 转发 GitHub | 三项均可用 |
+| `modelscope` | **jsDelivr CDN** | 三项均可用 |
+
+**选型依据来自实测**（每项都同时验证「取 VERSION / 取文件清单 / 取文件内容」，
+缺一即不可作更新源）：
+
+| 候选 | 取文件内容 | 文件清单 | 结论 |
+|---|---|---|---|
+| gh-proxy.com | 6/6，P50 1437ms | ✅ 321 条 | **采用** |
+| jsDelivr | 6/6，P50 1511ms | ✅ 277 条 | **采用** |
+| 直连 raw.github | 6/6，P50 2581ms | ✅（但易 403 限流） | 主源 |
+| ghfast.top | ✅ | ❌ 403 | 舍弃 |
+| ghproxy.net | ✅ | ❌ 403 | 舍弃 |
+| gh.llkk.cc | ❌ SSL 中断 | ❌ 403 | 舍弃 |
+| raw.githack | 5/6 | — | 舍弃 |
+
+> 关键教训：**很多 GitHub 加速服务只代理"文件内容"，不代理 API**
+> （`api.github.com/git/trees`）。热更必须先拿到文件清单，所以只测
+> "能下载文件"是不够的，必须三项一起测。
+
+jsDelivr 的清单结构与 GitHub 不同（顶层 `files`、路径带前导 `/`），
+已在 `modelscope_update_file_list()` 里做归一化，并同时兼容三种结构，
+便于以后再次换源。
+
+实测两个备用源都能完成完整流程：枚举出 **108 个 `static/` 文件**，
+抽样下载 5 个文件全部成功，且与直连源**字节数完全一致**。
+
+### 6. 原生命令的 stderr 会中断脚本（本次发版实际踩到）
 
 脚本顶层设了 `$ErrorActionPreference = 'Stop'`，而 **PowerShell 会把原生命令
 （pyinstaller / npx electron-builder）写到 stderr 的内容也当成错误**，
