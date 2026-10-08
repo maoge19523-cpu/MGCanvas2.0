@@ -707,7 +707,26 @@ function setupAutoUpdate() {
       defaultId: 0,
       cancelId: 1,
     }).then(({ response }) => {
-      if (response === 0) autoUpdater.quitAndInstall();
+      if (response !== 0) return;
+      // 优雅退出后再启动安装程序。
+      //
+      // 为什么不能直接 quitAndInstall()：它会**立即**拉起 NSIS 安装程序并退出。
+      // 此时应用（含后端子进程）尚未退出，安装程序检测到"应用正在运行"会提前
+      // 中止 —— 表现为：壳与静态资源（安装较早的步骤）换掉了，而后端 exe
+      // （较晚的步骤）没换掉，于是出现"壳是新版、界面版本号还是旧的"错乱，
+      // 且反复安装都无法修复。
+      //
+      // 因此这里改为：先把后端进程真正结束 → 等文件句柄释放 → 再启动安装程序。
+      isQuitting = true;
+      try { shutdownBackend(); } catch (_) {}
+      clog('updater', '准备重启安装：已请求结束后端，等待文件释放');
+      setTimeout(() => {
+        try {
+          autoUpdater.quitAndInstall(false, true);
+        } catch (err) {
+          clog('updater', '启动安装程序失败: ' + ((err && err.message) || err));
+        }
+      }, 1200);
     }).catch(() => {});
   });
   autoUpdater.on('error', (err) => {
