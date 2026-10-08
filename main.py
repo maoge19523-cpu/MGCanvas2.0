@@ -241,7 +241,7 @@ class ConnectionManager:
 
 manager = ConnectionManager()
 GLOBAL_LOOP = None
-APP_VERSION = "1.0.9"
+APP_VERSION = "1.0.10"
 GITHUB_REPO_URL = "https://github.com/maoge19523-cpu/MGCanvas2.0"
 GITHUB_VERSION_URL = "https://raw.githubusercontent.com/maoge19523-cpu/MGCanvas2.0/main/VERSION"
 GITHUB_TREE_URL = "https://api.github.com/repos/maoge19523-cpu/MGCanvas2.0/git/trees/main?recursive=1"
