@@ -399,6 +399,105 @@ function registerIpc() {
 
 // ---------- 自动更新 ----------
 let autoUpdater = null;
+// 更新进度窗：electron-updater 自己没有下载进度界面，若不监听
+// download-progress，用户点完「立即更新」会在整个 180MB 下载期间
+// 看不到任何反馈，极易误判为"没反应"或重复点击。
+let updateProgressWin = null;
+let updateProgressState = { percent: 0, transferred: 0, total: 0, bytesPerSecond: 0 };
+
+function fmtMB(n) { return (Number(n || 0) / 1048576).toFixed(1); }
+
+function openUpdateProgressWin() {
+  if (updateProgressWin && !updateProgressWin.isDestroyed()) return updateProgressWin;
+  updateProgressWin = new BrowserWindow({
+    width: 460,
+    height: 190,
+    resizable: false,
+    minimizable: false,
+    maximizable: false,
+    fullscreenable: false,
+    parent: mainWindow || undefined,
+    modal: false,
+    show: false,
+    title: '正在下载更新',
+    webPreferences: { contextIsolation: true, nodeIntegration: false },
+  });
+  const html = `<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><style>
+    :root { color-scheme: dark; }
+    * { box-sizing: border-box; }
+    body { margin:0; padding:16px 18px; font-family:"Microsoft YaHei",system-ui,sans-serif;
+           background:#1c1c1e; color:#f2f2f2; user-select:none; }
+    h1 { font-size:14px; margin:0 0 10px; font-weight:600; letter-spacing:.02em; }
+    .bar { height:8px; border-radius:5px; background:#3a3a3c; overflow:hidden; }
+    .fill { height:100%; width:0%; border-radius:5px;
+            background:linear-gradient(135deg,#FF6A00,#FF8A2B); transition:width .18s ease-out; }
+    .meta { display:flex; justify-content:space-between; margin-top:9px;
+            font-size:12px; color:#b9b9be; }
+    .hint { margin-top:11px; font-size:12px; color:#8e8e93; line-height:1.5; }
+    .pct { font-size:20px; font-weight:700; color:#FF8A2B; margin-top:2px; }
+  </style></head><body>
+    <h1>正在下载新版本…</h1>
+    <div class="bar"><div class="fill" id="f"></div></div>
+    <div class="meta"><span id="l">准备中…</span><span id="r"></span></div>
+    <div class="pct" id="p">0%</div>
+    <div class="hint">下载完成后会提示重启安装。请勿关闭本窗口。</div>
+    <script>
+      window.__setProgress = function (s) {
+        var pct = Math.max(0, Math.min(100, Number(s.percent) || 0));
+        document.getElementById('f').style.width = pct.toFixed(1) + '%';
+        document.getElementById('p').textContent = pct.toFixed(1) + '%';
+        var mb = function (n) { return (Number(n||0)/1048576).toFixed(1); };
+        document.getElementById('l').textContent =
+          mb(s.transferred) + ' MB / ' + mb(s.total) + ' MB';
+        document.getElementById('r').textContent =
+          s.bytesPerSecond ? (mb(s.bytesPerSecond) + ' MB/s') : '';
+      };
+      window.__setDone = function () {
+        document.getElementById('f').style.width = '100%';
+        document.getElementById('p').textContent = '100%';
+        document.getElementById('l').textContent = '下载完成';
+        document.getElementById('r').textContent = '';
+        document.querySelector('.hint').textContent = '下载完成，正在准备安装…';
+      };
+      window.__setError = function (msg) {
+        document.getElementById('p').textContent = '失败';
+        document.getElementById('p').style.color = '#ff453a';
+        document.getElementById('l').textContent = String(msg || '下载失败');
+        document.querySelector('.hint').textContent = '可关闭本窗口后重试，或前往发布页手动下载安装包。';
+      };
+    </script>
+  </body></html>`;
+  updateProgressWin.loadURL('data:text/html;charset=utf-8,' + encodeURIComponent(html));
+  updateProgressWin.once('ready-to-show', () => {
+    // 立刻推一次当前状态，避免窗口空白
+    pushUpdateProgress(updateProgressState);
+    updateProgressWin.show();
+  });
+  updateProgressWin.on('closed', () => { updateProgressWin = null; });
+  return updateProgressWin;
+}
+
+function pushUpdateProgress(state) {
+  updateProgressState = Object.assign({}, updateProgressState, state || {});
+  if (!updateProgressWin || updateProgressWin.isDestroyed()) return;
+  const s = JSON.stringify(updateProgressState);
+  updateProgressWin.webContents
+    .executeJavaScript(`window.__setProgress && window.__setProgress(${s})`)
+    .catch(() => {});
+}
+
+function closeUpdateProgressWin(done, errMsg) {
+  if (!updateProgressWin || updateProgressWin.isDestroyed()) return;
+  const js = errMsg
+    ? `window.__setError && window.__setError(${JSON.stringify(String(errMsg))})`
+    : 'window.__setDone && window.__setDone()';
+  updateProgressWin.webContents.executeJavaScript(js).catch(() => {});
+  // 完成/失败后留一点时间让用户看到结果
+  setTimeout(() => {
+    if (updateProgressWin && !updateProgressWin.isDestroyed()) updateProgressWin.close();
+  }, errMsg ? 6000 : 1200);
+}
+
 function setupAutoUpdate() {
   if (!app.isPackaged) return;
   try {
@@ -413,6 +512,24 @@ function setupAutoUpdate() {
   // 那种魔搭式路径在 GitHub 上必然 404，属于死代码，已移除。
   // 需要国内加速时，请在仓库里配置自己的镜像源（GitHub Releases 的
   // latest.yml 必须能直接取到，不能用网页版仓库路径）。
+
+  // 下载进度：必须监听，否则 180MB 下载期间界面毫无反馈
+  let lastLoggedPct = -10;
+  autoUpdater.on('download-progress', (p) => {
+    const st = {
+      percent: p && p.percent,
+      transferred: p && p.transferred,
+      total: p && p.total,
+      bytesPerSecond: p && p.bytesPerSecond,
+    };
+    pushUpdateProgress(st);
+    // 每推进 10% 记一次日志，便于事后排查"到底下到哪一步"
+    const pct = Math.floor(Number(st.percent) || 0);
+    if (pct >= lastLoggedPct + 10) {
+      lastLoggedPct = pct;
+      clog('updater', `下载进度 ${pct}% (${fmtMB(st.transferred)}/${fmtMB(st.total)} MB, ${fmtMB(st.bytesPerSecond)} MB/s)`);
+    }
+  });
   autoUpdater.on('update-available', (info) => {
     const current = app.getVersion();
     const next = info && info.version;
@@ -426,10 +543,22 @@ function setupAutoUpdate() {
       defaultId: 0,
       cancelId: 1,
     }).then(({ response }) => {
-      if (response === 0) autoUpdater.downloadUpdate();
+      if (response !== 0) return;
+      // 打开进度窗，并重置进度状态；downloadUpdate 的失败必须捕获，
+      // 否则下载启动异常会被静默吞掉（用户只看到"没反应"）。
+      updateProgressState = { percent: 0, transferred: 0, total: 0, bytesPerSecond: 0 };
+      openUpdateProgressWin();
+      clog('updater', `开始下载 v${next}`);
+      autoUpdater.downloadUpdate().catch((err) => {
+        const msg = (err && err.message) || String(err);
+        clog('updater', '下载失败: ' + msg);
+        closeUpdateProgressWin(false, '下载失败：' + msg);
+      });
     }).catch(() => {});
   });
   autoUpdater.on('update-downloaded', () => {
+    closeUpdateProgressWin(true);
+    clog('updater', '下载完成，等待用户确认重启安装');
     if (process.platform === 'darwin') {
       dialog.showMessageBox(mainWindow, {
         type: 'info',
@@ -455,15 +584,18 @@ function setupAutoUpdate() {
     }).catch(() => {});
   });
   autoUpdater.on('error', (err) => {
-    clog('updater', '检查更新失败: ' + (err && err.message || err));
-    // 检查失败通常是：仓库还没有 Release（404），或网络连不上 GitHub。
-    // 不再做镜像重试，直接引导手动下载覆盖安装——数据目录独立不受影响。
+    const msg = (err && err.message) || String(err || '未知错误');
+    // 区分「检查阶段失败」与「下载阶段失败」：两者给用户的建议不同。
+    const downloading = !!updateProgressWin && !updateProgressWin.isDestroyed();
+    clog('updater', (downloading ? '下载失败: ' : '检查更新失败: ') + msg);
+    if (downloading) closeUpdateProgressWin(false, msg);
     if (!mainWindow) return;
     dialog.showMessageBox(mainWindow, {
       type: 'info',
-      title: '自动更新不可用',
-      message: '暂时无法自动检查更新',
-      detail: '常见原因：仓库还没有发布 Release，或网络无法连接 GitHub。'
+      title: downloading ? '更新下载失败' : '自动更新不可用',
+      message: downloading ? '新版本下载未完成' : '暂时无法自动检查更新',
+      detail: `${msg}\n\n`
+        + '常见原因：网络无法连接 GitHub，或下载过程被中断。\n'
         + '可前往发布页手动下载最新安装包覆盖安装，数据不会丢失。',
       buttons: ['前往下载', '稍后'],
       defaultId: 0,
@@ -472,7 +604,17 @@ function setupAutoUpdate() {
       if (response === 0) shell.openExternal('https://github.com/maoge19523-cpu/MGCanvas2.0/releases');
     }).catch(() => {});
   });
-  setTimeout(() => { try { autoUpdater.checkForUpdates(); } catch (_) {} }, 8000);
+  // checkForUpdates 也返回 Promise，失败要落日志，避免"检查阶段"静默无痕
+  setTimeout(() => {
+    try {
+      const p = autoUpdater.checkForUpdates();
+      if (p && typeof p.catch === 'function') {
+        p.catch((err) => clog('updater', '检查更新异常: ' + ((err && err.message) || err)));
+      }
+    } catch (err) {
+      clog('updater', '检查更新抛错: ' + ((err && err.message) || err));
+    }
+  }, 8000);
 }
 
 // ---------- 窗口 ----------
