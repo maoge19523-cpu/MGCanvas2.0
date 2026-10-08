@@ -194,8 +194,13 @@ function findListeningPids(port) {
 }
 
 function processPathOf(pid) {
-  // 取进程可执行文件路径。优先 PowerShell（在受限语言模式下也可用 Get-Process），
-  // 失败则返回空串 —— 调用方据此决定是否放宽判定，而不是直接放弃清理。
+  // 取进程可执行文件路径，**失败或乱码时返回空串**。
+  //
+  // 重要（踩过的坑）：这里返回的路径在本机环境下可能是乱码 ——
+  // PowerShell/wmic 的输出带中文路径时按 UTF-8 解码会得到 mojibake
+  // （实测 "D:\猫歌映画\..." 变成 "D:\è��ӳ��\..."）。
+  // 因此**绝不能**用这个字符串做路径相等比较，否则永远不相等、清理逻辑形同虚设。
+  // 调用方只用它做"能拿到就记日志"的参考，判定一律基于进程名 + 时间戳。
   for (const cmd of [
     `powershell -NoProfile -Command "(Get-Process -Id ${pid} -ErrorAction Stop).Path"`,
     `wmic process where "ProcessId=${pid}" get ExecutablePath /value`,
@@ -206,7 +211,8 @@ function processPathOf(pid) {
         .trim();
       const m = out.match(/^ExecutablePath=(.+)$/mi);
       const p = (m ? m[1] : out).trim();
-      if (p) return p;
+      // 简单乱码检测：出现替换字符 U+FFFD 即认为不可用
+      if (p && p.indexOf('\uFFFD') === -1) return p;
     } catch (_) { /* 换下一种方式 */ }
   }
   return '';
@@ -216,21 +222,21 @@ function killStaleBackendOnPort(port) {
   // 结束"是 MGStudio 后端、且 exe 早于本次启动"的残留进程。
   // 返回被结束的 PID 数组，便于记日志。
   //
-  // 为什么要按 exe 时间判断，而不是直接杀掉端口上的后端：
-  //   同一份安装被启动两次（多实例）时，复用已有后端是正确的，不能误杀；
-  //   只有"exe 比本次启动还早"才说明它是上次安装遗留的进程。
+  // 判定只用两个条件，都不依赖路径字符串：
+  //   ① 进程名为 MGStudioServer.exe —— 端口上的普通程序不会叫这个名字；
+  //   ② 后端 exe 的修改时间早于本次应用启动 —— 即上次安装遗留、非本次拉起。
+  // 为什么不再比对进程路径：见 processPathOf 的注释，中文路径会乱码，
+  // 用它比较必然失败，会让整个清理逻辑永远不触发（这正是它一度失效的原因）。
   if (process.platform !== 'win32' || !app.isPackaged) return [];
   const backendDir = path.join(process.resourcesPath, 'backend');
   const currentExe = path.join(backendDir, 'MGStudioServer.exe');
   // exe 不存在或读不到时间，则跳过清理（不冒险误杀）
   try { fs.statSync(currentExe); } catch (_) { return []; }
   const processStartMs = Date.now() - Math.round(process.uptime() * 1000);
-  const norm = (p) => path.resolve(p).toLowerCase();
   const killed = [];
   for (const pid of findListeningPids(port)) {
     try {
-      // ① 必须是 MGStudioServer（用 tasklist 判定进程名，最可靠；
-      //    wmic/PowerShell 在受限环境可能不可用，故不作唯一依据）
+      // ① 进程名必须是 MGStudioServer.exe
       let imageName = '';
       try {
         const tl = require('child_process')
@@ -242,21 +248,17 @@ function killStaleBackendOnPort(port) {
       } catch (_) { continue; }
       if (imageName.toLowerCase() !== 'mgstudioserver.exe') continue;
 
-      // ② 取进程路径做归属确认；取不到路径时，仅凭进程名也允许清理
-      //    —— 否则一旦 wmic/PowerShell 都不可用，残留进程就永远清不掉，
-      //       又会退回"新壳连旧后端"的老问题。
-      const exePath = processPathOf(pid);
-      if (exePath && norm(path.dirname(exePath)) !== norm(backendDir)) continue;
-
-      // ③ exe 比本次启动还早 → 上次安装遗留的陈旧后端
+      // ② exe 比本次启动还早 → 上次安装遗留的陈旧后端
       let mtime = 0;
-      try { mtime = fs.statSync(exePath || currentExe).mtimeMs; } catch (_) {}
+      try { mtime = fs.statSync(currentExe).mtimeMs; } catch (_) {}
       if (!mtime || mtime >= processStartMs) continue;
 
+      const exePathHint = processPathOf(pid);  // 仅用于日志，不参与判定
       require('child_process').execSync(`taskkill /PID ${pid} /F /T`, {
         stdio: 'ignore', timeout: 8000, windowsHide: true,
       });
       killed.push(pid);
+      if (exePathHint) clog('boot', `  (路径参考: ${exePathHint})`);
     } catch (_) { /* 进程已消失或无权限，忽略 */ }
   }
   return killed;
