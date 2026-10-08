@@ -503,6 +503,21 @@ let autoUpdater = null;
 let updateProgressWin = null;
 let updateProgressState = { percent: 0, transferred: 0, total: 0, bytesPerSecond: 0 };
 
+// 速度采样：electron-updater 给的 bytesPerSecond 是**全程平均**
+// （transferred / 已用总秒数），下载初段或暂停时会显示成 0，
+// 参考价值低。这里改用 delta（上一次事件新增的字节）算瞬时速度，
+// 并做几次滑动平均让读数不抖动。
+const speedSamples = [];
+function pushSpeedSample(bytes) {
+  speedSamples.push(Number(bytes) || 0);
+  if (speedSamples.length > 5) speedSamples.shift();
+}
+function currentSpeed() {
+  if (!speedSamples.length) return 0;
+  const sum = speedSamples.reduce((a, b) => a + b, 0);
+  return sum / speedSamples.length;
+}
+
 function fmtMB(n) { return (Number(n || 0) / 1048576).toFixed(1); }
 
 function openUpdateProgressWin() {
@@ -514,12 +529,16 @@ function openUpdateProgressWin() {
     minimizable: false,
     maximizable: false,
     fullscreenable: false,
+    // 进度窗不需要菜单栏；不设这项会显示默认的 File/Edit/View/... 菜单
+    autoHideMenuBar: true,
     parent: mainWindow || undefined,
     modal: false,
     show: false,
     title: '正在下载更新',
     webPreferences: { contextIsolation: true, nodeIntegration: false },
   });
+  // 双保险：即使 autoHideMenuBar 未生效也把菜单去掉
+  try { updateProgressWin.setMenuBarVisibility(false); } catch (_) {}
   const html = `<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><style>
     :root { color-scheme: dark; }
     * { box-sizing: border-box; }
@@ -614,11 +633,18 @@ function setupAutoUpdate() {
   // 下载进度：必须监听，否则 180MB 下载期间界面毫无反馈
   let lastLoggedPct = -10;
   autoUpdater.on('download-progress', (p) => {
+    // delta 是本次事件（约 1 秒）新增的字节数，用它算瞬时速度；
+    // 拿不到 delta 时退回官方给的全程平均值，避免显示成 0
+    if (p && typeof p.delta === 'number' && p.delta > 0) {
+      pushSpeedSample(p.delta);
+    } else if (p && p.bytesPerSecond) {
+      pushSpeedSample(p.bytesPerSecond);
+    }
     const st = {
       percent: p && p.percent,
       transferred: p && p.transferred,
       total: p && p.total,
-      bytesPerSecond: p && p.bytesPerSecond,
+      bytesPerSecond: currentSpeed() || (p && p.bytesPerSecond) || 0,
     };
     pushUpdateProgress(st);
     // 每推进 10% 记一次日志，便于事后排查"到底下到哪一步"
@@ -645,6 +671,7 @@ function setupAutoUpdate() {
       // 打开进度窗，并重置进度状态；downloadUpdate 的失败必须捕获，
       // 否则下载启动异常会被静默吞掉（用户只看到"没反应"）。
       updateProgressState = { percent: 0, transferred: 0, total: 0, bytesPerSecond: 0 };
+      speedSamples.length = 0; // 清掉上一轮的速度采样
       openUpdateProgressWin();
       clog('updater', `开始下载 v${next}`);
       autoUpdater.downloadUpdate().catch((err) => {
