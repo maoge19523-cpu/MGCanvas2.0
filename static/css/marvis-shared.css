@@ -447,7 +447,10 @@ body.theme-dark .sidebar {
    也会让浅色主题显脏。
    ═══════════════════════════════════════════════════════════════════ */
 
-/* 1. 页面主标题：左侧橙色竖条（各页主标题类名不同，逐个列出） */
+/* 1. 页面主标题：左侧橙色竖条（各页主标题类名不同，逐个列出）
+   注意 padding-left 必须带 !important：素材库页内联了一段 V4 样式覆盖，
+   会重置标题的盒模型，导致这里留不出 12px 空间 —— 竖条随即压在标题文字上
+   （实测「素」字被橙条穿过）。 */
 .page-head .title,
 .content-head .title,
 .page-head h1,
@@ -456,8 +459,8 @@ body.theme-dark .sidebar {
 .ws-side-title,
 .topbar-title,
 .hp-head .hp-title {
-    position: relative;
-    padding-left: 12px;
+    position: relative !important;
+    padding-left: 13px !important;
 }
 .page-head .title::before,
 .content-head .title::before,
@@ -471,11 +474,10 @@ body.theme-dark .sidebar {
     left: 0;
     top: 50%;
     transform: translateY(-50%);
-    width: 4px;
+    width: 3px;
     height: 1em;
     border-radius: 2px;
-    background: linear-gradient(180deg, var(--accent), var(--accent-2, #FF8A2B));
-}
+    background: linear-gradient(180deg, var(--accent), var(--accent-2, #FF8A2B));}
 
 /* 2. 分区小标题：文字改橙（原本多为灰色小字） */
 .block-title,

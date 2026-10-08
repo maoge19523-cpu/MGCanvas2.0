@@ -43,7 +43,9 @@ button { border:0; cursor:pointer; }
 .storage-path-section { flex:0 0 auto; }
 .asset-page-head { flex:0 0 auto; display:flex; align-items:center; justify-content:space-between; gap:18px; }
 .asset-title { color:var(--text); font-size:21px; line-height:1.15; font-weight:900; letter-spacing:0; }
-.asset-sub { margin-top:5px; color:var(--muted); font-size:12px; font-weight:650; }
+/* 副标题必须与主标题左对齐：主标题为给橙色竖条留位有 13px 内边距，
+   副标题若不跟随，左端会顶到竖条上、被压住看不全。 */
+.asset-sub { margin-top:5px; color:var(--muted); font-size:12px; font-weight:650; padding-left:13px; }
 .asset-head-actions { display:flex; align-items:center; gap:10px; }
 .asset-refresh-btn { width:34px; height:34px; border-radius:var(--radius-md); border:0; background:var(--card); color:var(--muted); display:inline-flex; align-items:center; justify-content:center; padding:0; box-shadow:var(--shadow-md); transition:transform .16s ease, background .16s ease, color .16s ease, box-shadow .16s ease; }
 .asset-refresh-btn:hover { background:var(--strong); color:var(--strong-text); transform:translateY(-1px); box-shadow:var(--shadow-lg); }
