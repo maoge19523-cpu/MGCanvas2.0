@@ -241,7 +241,7 @@ class ConnectionManager:
 
 manager = ConnectionManager()
 GLOBAL_LOOP = None
-APP_VERSION = "1.0.7"
+APP_VERSION = "1.0.8"
 GITHUB_REPO_URL = "https://github.com/maoge19523-cpu/MGCanvas2.0"
 GITHUB_VERSION_URL = "https://raw.githubusercontent.com/maoge19523-cpu/MGCanvas2.0/main/VERSION"
 GITHUB_TREE_URL = "https://api.github.com/repos/maoge19523-cpu/MGCanvas2.0/git/trees/main?recursive=1"
@@ -2854,9 +2854,29 @@ def update_allowed_file(path: str) -> bool:
     path = str(path or "").replace("\\", "/").lstrip("/")
     if not path or any(part in {"", ".", ".."} for part in path.split("/")):
         return False
+    # 允许一键更新下发的根目录文件。
+    #
+    # 踩过的坑：此清单沿用了上游项目的根目录文件名，其中
+    #   build.py / build-all.py / build-desktop.py / build-mac.py /
+    #   installer.py / launcher.py / mgstudio-desktop.py / app.py
+    # 在本仓库里是**开发与打包脚本**，并非运行所需文件。它们被当作"运行文件"
+    # 拉进安装目录后，backend 里凭空多出一堆构建脚本（已实际发生），
+    # 既污染目录、也带来被误运行的风险。
+    # 现已剔除；若将来确需热更某个根目录文件，请显式加入此集合。
+    if path in {
+        "main.py",
+        "VERSION",
+        "prompt_intelligence.py",
+        "requirements.txt",
+        # 即梦 CLI 的辅助脚本（属于运行期功能，需要能随更新下发）
+        "安装即梦CLI.bat",
+        "安装即梦CLI.command",
+        "登录即梦CLI.bat",
+        "登录即梦CLI.command",
+    }:
+        return True
     return (
-        path in {"main.py", "VERSION", "prompt_intelligence.py", "安装即梦CLI.bat", "安装即梦CLI.command", "登录即梦CLI.bat", "登录即梦CLI.command", "launcher.py", "mgstudio-desktop.py", "app.py", "build.py", "build-all.py", "build-desktop.py", "build-mac.py", "installer.py"}
-        or path.startswith("static/")
+        path.startswith("static/")
         or path.startswith("server/")   # 协议表 / 模块化后端（server/protocols、server/routes 等）也要能随一键更新下发
         or path.startswith("tools/")
         or path.startswith("assets/models/")
@@ -3132,9 +3152,15 @@ def schedule_self_restart(delay_seconds: int = 3) -> bool:
             log_path = os.path.join(BASE_DIR, "_self_restart.log")
 
             if has_desktop_exe:
+                # 注意（真实踩到）：这里必须启动 MGStudioServer.exe。
+                # 原代码写的是 MGStudio.exe —— 那个文件在 backend 目录里并不存在，
+                # 于是自重启后 Windows 弹「找不到文件 '...\backend\MGStudio.exe'」，
+                # 后端再也没起来（日志里 boot 记录 code = 1 即由此而来）。
+                # 上面那行 echo 写的是 MGStudioServer.exe，与实际的启动目标不一致，
+                # 属于历史遗留的笔误。
                 launch_line = (
                     f"echo [%date% %time%] starting MGStudioServer.exe >> \"%LOG_FILE%\"\r\n"
-                    f"start \"\" /D \"%APP_DIR%\" \"%APP_DIR%\\MGStudio.exe\"\r\n"
+                    f"start \"\" /D \"%APP_DIR%\" \"%APP_DIR%\\MGStudioServer.exe\"\r\n"
                 )
             else:
                 launch_line = (
@@ -3167,8 +3193,12 @@ def schedule_self_restart(delay_seconds: int = 3) -> bool:
                 + launch_line +
                 "del \"%~f0\"\r\n"
             )
-            # bat 文件必须用系统 ANSI 编码（GBK/mbcs），cmd 不会按 chcp 切换文件解析编码
-            with open(bat_path, "w", encoding="mbcs") as f:
+            # 编码必须与脚本开头的 "chcp 65001" 一致：chcp 65001 让 cmd 按
+            # **UTF-8** 解析本文件内容，若这里写成 mbcs(GBK) 就会自相矛盾 ——
+            # 脚本里的中文路径（如 D:\猫歌映画\...）会被按 UTF-8 误读成乱码
+            # （实测落盘成 D:\è��ӳ��\MGStudio），后续 cd /d 与 start 全部失败。
+            # 因此这里统一写 UTF-8，并写 BOM 便于部分 cmd 版本正确识别。
+            with open(bat_path, "w", encoding="utf-8-sig", newline="") as f:
                 f.write(script)
             subprocess.Popen(
                 ["cmd", "/c", bat_path],
