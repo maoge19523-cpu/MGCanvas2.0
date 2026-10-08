@@ -238,10 +238,10 @@
 
         /* ===== 开始创作按钮：动态光束边框（nv-beam，与在线生图页生成按钮同款柠檬绿） ===== */
         #hpCreateBtn.nv-beam { --beam-core: rgba(180,255,60,.8); --beam-mid: rgba(180,255,60,.35); --beam-glow: rgba(180,255,60,.4); }
-        /* 深色主题：按钮保持深底（与浅色主题按钮同色），柠檬绿光束在深底上清晰可见 */
+        /* 深色主题：按钮底色统一为品牌橙（与浅色主题一致），柠檬绿光束仍保留 */
         html.theme-dark #hpCreateBtn, html.studio-theme-dark #hpCreateBtn {
-            background: #1d1d1f !important;
-            color: #fff !important;
+            background: linear-gradient(135deg, var(--accent, #FF6A00), var(--accent-2, #FF8A2B)) !important;
+            color: #111111 !important;
         }
 
         .hp-btn-ghost {

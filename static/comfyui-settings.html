@@ -13,17 +13,17 @@
             }
         })();
     </script>
-    <script src="/static/vendor/js/tailwindcss-cdn.js?v=1.0.0.1790512746"></script>
-    <script src="/static/vendor/js/lucide-subset.js?v=1.0.0.1790512746"></script>
-    <script src="/static/js/shared/icons.js?v=1.0.0.1791308700"></script>
-    <script src="/static/js/theme.js?v=1.0.0.1790512746"></script>
-    <script src="/static/js/shared/utils.js?v=1.0.0.1791308700"></script>
-    <script src="/static/js/i18n.js?v=1.0.0.1790512746"></script>
-    <link rel="stylesheet" href="/static/css/comfyui-settings.css?v=1.0.0.1790512746">
-    <link rel="stylesheet" href="/static/css/theme.css?v=1.0.0.1791308700">
+    <script src="/static/vendor/js/tailwindcss-cdn.js?v=1.0.0.1791368711"></script>
+    <script src="/static/vendor/js/lucide-subset.js?v=1.0.0.1791368711"></script>
+    <script src="/static/js/shared/icons.js?v=1.0.0.1791368711"></script>
+    <script src="/static/js/theme.js?v=1.0.0.1791388361"></script>
+    <script src="/static/js/shared/utils.js?v=1.0.0.1791368711"></script>
+    <script src="/static/js/i18n.js?v=1.0.0.1791368711"></script>
+    <link rel="stylesheet" href="/static/css/comfyui-settings.css?v=1.0.0.1791392685">
+    <link rel="stylesheet" href="/static/css/theme.css?v=1.0.0.1791434606">
 
-<link rel="stylesheet" href="/static/vendor/css/fonts.css?v=1.0.0.1790512746">
-<link rel="stylesheet" href="/static/css/marvis-shared.css?v=1.0.0.1791309025">
+<link rel="stylesheet" href="/static/vendor/css/fonts.css?v=1.0.0.1791368711">
+<link rel="stylesheet" href="/static/css/marvis-shared.css?v=1.0.0.1791432702">
 <style>
 /* --- 页面特定 Marvis 覆盖 --- */
 body { background: transparent !important; color: var(--text) !important; }
@@ -32,7 +32,7 @@ header { background: var(--sidebar-bg) !important; backdrop-filter: blur(28px) !
 .card { background: var(--stage-bg) !important; border-radius: var(--radius-lg) !important; }
 .side-card { background: transparent !important; border-radius: var(--radius-lg) !important; }
 .graph-card { background: transparent !important; border-radius: var(--radius-lg) !important; }
-button.primary { background: var(--text) !important; color: var(--bg) !important; border-radius: var(--radius-md) !important; }
+button.primary { background:var(--accent) !important; color: var(--bg) !important; border-radius: var(--radius-md) !important; }
 input, select { background-color: var(--stage-bg) !important; border-radius: var(--radius-sm) !important; color: var(--text) !important; }
 /* ═══ 设置弹窗内嵌模式（?embed=1）— 与通用/外观/关于面板同一套设计语言 ═══
    扁平 / 半透明 / 无描边 / 柔和投影；唯一强调 = 黑白反转
@@ -363,11 +363,11 @@ html.settings-embed .action-btn:hover {
     transform: none !important;
 }
 html.settings-embed .action-btn.save-btn {
-    background: var(--text) !important;
+    background:var(--accent) !important;
     color: var(--stage-bg) !important;
 }
 html.settings-embed .action-btn.save-btn:hover {
-    background: var(--text) !important;
+    background:var(--accent) !important;
     color: var(--stage-bg) !important;
     opacity: .88;
 }
@@ -407,7 +407,7 @@ html.settings-embed .workspace-mode-tabs button {
 }
 html.settings-embed .workspace-mode-tabs button:hover { background: var(--border-2) !important; }
 html.settings-embed .workspace-mode-tabs button.active {
-    background: var(--text) !important;
+    background:var(--accent) !important;
     color: var(--stage-bg) !important;
     box-shadow: none !important;
 }
@@ -595,7 +595,7 @@ html.settings-embed .random-btn:hover {
     color: var(--text) !important;
 }
 html.settings-embed .random-btn.active {
-    background: var(--text) !important;
+    background:var(--accent) !important;
     color: var(--stage-bg) !important;
 }
 html.settings-embed .random-toggle {
@@ -741,7 +741,7 @@ html.settings-embed .run-btn {
     padding: 0 14px !important;
     border: 0 !important;
     border-radius: 10px !important;
-    background: var(--text) !important;
+    background:var(--accent) !important;
     color: var(--stage-bg) !important;
     font-size: 12.5px !important;
     font-weight: 600 !important;
@@ -998,7 +998,7 @@ input[type="checkbox"].toggle-switch { transition: all 0.2s cubic-bezier(0.22,0.
         <img id="imageLightboxImg" src="" alt="preview" onclick="event.stopPropagation()">
     </div>
 
-    <script defer src="/static/js/comfyui-settings.js?v=1.0.0.1790512746"></script>
+    <script defer src="/static/js/comfyui-settings.js?v=1.0.0.1791368711"></script>
     <script>
     /* ═══ R5 交互反馈：轻量 Toast + 二次确认 + 保存/上传/删除反馈包装 ═══ */
     (function(){
@@ -1246,7 +1246,7 @@ input[type="checkbox"].toggle-switch { transition: all 0.2s cubic-bezier(0.22,0.
         else document.addEventListener('DOMContentLoaded', start);
     })();
     </script>
-    <script src="/static/js/shared/morph-button.js?v=1.0.0.1791308700"></script>
+    <script src="/static/js/shared/morph-button.js?v=1.0.0.1791368711"></script>
     <script>
     /* ═══ Morph Button 接入：保存/确定按钮的点击状态动效（只旁挂状态，不改原有点击逻辑） ═══ */
     (function(){

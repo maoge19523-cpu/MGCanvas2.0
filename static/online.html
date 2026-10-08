@@ -14,7 +14,7 @@
     <script src="/static/js/shared/size-policy.js?v=1.0.0.1791368711"></script>
     <script src="/static/js/i18n.js?v=1.0.0.1791368711"></script>
     <script src="/static/js/image-preview.js?v=1.0.0.1791368711"></script>
-    <script src="/static/js/history-bulk-manager.js?v=1.0.0.1791368711"></script>
+    <script src="/static/js/history-bulk-manager.js?v=1.0.0.1791395575"></script>
     <link rel="stylesheet" href="/static/vendor/css/fonts.css?v=1.0.0.1791368711">
     <style>
         :root { --accent: #1c1c1e; --bg: #f9fafb; --card: #fff; --easing:cubic-bezier(0.4,0,0.2,1); }
@@ -41,7 +41,7 @@
         .upload-item { background:var(--card); border:0; transition:all .4s var(--easing); position:relative; overflow:hidden; }
         .upload-item:hover,.upload-item.drag-over { background:#f0f0f2; transform:translateY(-2px); }
         .preview-img { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; animation:fadeIn .5s var(--easing); }
-        .glass-btn { background:var(--text); transition:all .3s var(--easing); }
+        .glass-btn { background:var(--accent); transition:all .3s var(--easing); }
         .glass-btn:hover { background:#000; transform:translateY(-1px); box-shadow:0 12px 24px rgba(0,0,0,.1); }
         .result-frame { background:#fff; border-radius:var(--radius-xl); box-shadow:0 2px 15px rgba(0,0,0,.02); }
         .tool-panel { background:#fff; border-radius:var(--radius-xl); padding:12px; display:flex; flex-direction:column; gap:10px; }
@@ -79,7 +79,7 @@
         .gallery-lightbox { background:rgba(255,255,255,.99); backdrop-filter:blur(33px) saturate(1.05); }
         @keyframes fadeIn { from{opacity:0} to{opacity:1} }
     </style>
-    <link rel="stylesheet" href="/static/css/theme.css?v=1.0.0.1791370440">
+    <link rel="stylesheet" href="/static/css/theme.css?v=1.0.0.1791434606">
     <style>
         html:not(.studio-theme-dark) body:not(.studio-theme-dark) #lightbox.gallery-lightbox {
             background: rgba(255,255,255,.99) !important;
@@ -87,7 +87,7 @@
             -webkit-backdrop-filter: blur(33px) saturate(1.05) !important;
         }
     </style>
-<link rel="stylesheet" href="/static/css/marvis-shared.css?v=1.0.0.1791369796">
+<link rel="stylesheet" href="/static/css/marvis-shared.css?v=1.0.0.1791432702">
 <style>
 /* --- 页面特定 Marvis 覆盖 --- */
         body { background: var(--bg) !important; color: var(--text) !important; }
@@ -98,7 +98,7 @@
 .upload-item:hover, .upload-item.drag-over { background: var(--soft) !important; }
 .tool-panel, .control-panel { background: var(--stage-bg) !important; border: 0 !important; border-radius: var(--radius-lg) !important; }
 .size-select, .size-custom { background: var(--soft) !important; color: var(--text) !important; border: 0 !important; border-radius: var(--radius-md) !important; }
-.glass-btn { background: var(--text) !important; color: var(--bg) !important; border-radius: var(--radius-lg) !important; }
+.glass-btn { background:var(--accent) !important; color: var(--bg) !important; border-radius: var(--radius-lg) !important; }
 .glass-btn:hover { opacity: 0.88 !important; }
 .result-frame { background: var(--stage-bg) !important; border-radius: var(--radius-lg) !important; }
 .masonry-item { background: var(--stage-bg) !important; border-radius: var(--radius-lg) !important; }
@@ -352,10 +352,10 @@ html.theme-dark .nv-beam-wrap, html.studio-theme-dark .nv-beam-wrap {
     --beam-mid: rgba(255,255,255,.26);
     --beam-glow: rgba(255,255,255,.4);
 }
-/* 深色主题：生成按钮保持深底（与浅色主题按钮同色） */
+/* 深色主题：生成按钮底色统一为品牌橙（与浅色主题一致；光束仍为柠檬绿） */
 html.theme-dark #genBtn, html.studio-theme-dark #genBtn {
-    background: #1d1d1f !important;
-    color: #fff !important;
+    background: linear-gradient(135deg, var(--accent, #FF6A00), var(--accent-2, #FF8A2B)) !important;
+    color: #111111 !important;
 }
 /* 生成按钮专属：光束固定为柠檬绿（覆盖深色主题通用白色光束变量） */
 #genBtn.nv-beam,
@@ -390,7 +390,7 @@ html.theme-dark #downloadBtn, html.studio-theme-dark #downloadBtn {
     box-shadow: var(--shadow-md) !important;
 }
 html.theme-dark #downloadBtn:hover, html.studio-theme-dark #downloadBtn:hover {
-    background: var(--text) !important;
+    background:var(--accent) !important;
     color: var(--bg) !important;
 }
 html.theme-dark #lightbox.gallery-lightbox, html.studio-theme-dark #lightbox.gallery-lightbox {
@@ -402,7 +402,7 @@ html.theme-dark #lightboxCard, html.studio-theme-dark #lightboxCard {
     border: 0 !important;
 }
 html.theme-dark #sameStyleBtn, html.studio-theme-dark #sameStyleBtn {
-    background: var(--text) !important;
+    background:var(--accent) !important;
     color: var(--bg) !important;
 }
 html.theme-dark #lightboxPrompt, html.studio-theme-dark #lightboxPrompt { color: var(--text-2) !important; }

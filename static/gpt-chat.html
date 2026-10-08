@@ -6,14 +6,14 @@
     <link rel="icon" href="/static/images/logo.png" type="image/png" data-page-node-id="d2lTaxgg4dwHWvOR7TLKCK">
     <title>GPT 对话</title>
     <script>(function(){try{var t=localStorage.getItem("studio_theme")||localStorage.getItem("canvas_theme")||"light";if(t==="dark"){document.documentElement.classList.add("studio-theme-dark");document.documentElement.classList.add("theme-dark");}}catch(e){}})();</script>
-    <script src="/static/vendor/js/tailwindcss-cdn.js?v=1.0.0.1790512746"></script>
-    <script defer src="/static/vendor/js/lucide-subset.js?v=1.0.0.1790512746"></script>
-    <script defer src="/static/js/shared/icons.js?v=1.0.0.1791308700"></script>
-    <script src="/static/js/theme.js?v=1.0.0.1790512746"></script>
-    <script src="/static/js/shared/utils.js?v=1.0.0.1791308700"></script>
-    <script src="/static/js/i18n.js?v=1.0.0.1790512746"></script>
-    <link rel="stylesheet" href="/static/css/theme.css?v=1.0.0.1791308700" data-page-node-id="JTGvAal8uI6j7wTHI5wwho">
-    <link rel="stylesheet" href="/static/vendor/css/fonts.css?v=1.0.0.1790512746" data-page-node-id="sBSjKrFOadAKo0d0aaQqPR">
+    <script src="/static/vendor/js/tailwindcss-cdn.js?v=1.0.0.1791368711"></script>
+    <script defer src="/static/vendor/js/lucide-subset.js?v=1.0.0.1791368711"></script>
+    <script defer src="/static/js/shared/icons.js?v=1.0.0.1791368711"></script>
+    <script src="/static/js/theme.js?v=1.0.0.1791388361"></script>
+    <script src="/static/js/shared/utils.js?v=1.0.0.1791368711"></script>
+    <script src="/static/js/i18n.js?v=1.0.0.1791368711"></script>
+    <link rel="stylesheet" href="/static/css/theme.css?v=1.0.0.1791434606" data-page-node-id="JTGvAal8uI6j7wTHI5wwho">
+    <link rel="stylesheet" href="/static/vendor/css/fonts.css?v=1.0.0.1791368711" data-page-node-id="sBSjKrFOadAKo0d0aaQqPR">
     <style>
         :root {
             --ease:cubic-bezier(.4,0,.2,1);
@@ -143,7 +143,7 @@
         .system-prompt-popover .persona-mini-btn { display:none; align-items:center; gap:4px; height:24px; padding:0 9px; border:0; border-radius:8px; background:color-mix(in srgb, var(--text) 6%, transparent); color:color-mix(in srgb, var(--text) 58%, transparent); font-size:10px; font-weight:800; line-height:1; cursor:pointer; transition:background .15s var(--ease), color .15s var(--ease); }
         .system-prompt-popover .persona-mini-btn.show { display:inline-flex; }
         .system-prompt-popover .persona-mini-btn:hover { background:color-mix(in srgb, var(--text) 13%, transparent); color:var(--text); }
-        .system-prompt-popover .persona-mini-btn.primary { background:var(--text); color:var(--bg); }
+        .system-prompt-popover .persona-mini-btn.primary { background:var(--accent); color:var(--bg); }
         .system-prompt-popover .persona-mini-btn.danger:hover { background:color-mix(in srgb, #ff4d4f 15%, transparent); color:#ff4d4f; }
         /* createIcons() 会把 <i> 替换成 <svg>，所以不用 i:first-child，靠 gap 控制间距 */
         .system-prompt-popover .persona-mini-btn > :first-child { width:11px; height:11px; flex:0 0 auto; }
@@ -172,11 +172,11 @@
         .system-prompt-popover .memory-addbox { display:flex; align-items:center; gap:6px; }
         .system-prompt-popover .memory-input { flex:1 1 auto; min-width:0; height:28px; padding:0 9px; border:0; border-radius:8px; background:color-mix(in srgb, var(--text) 6%, transparent); color:var(--text); font-size:11px; font-weight:700; outline:none; }
         .system-prompt-popover .memory-input::placeholder { color:color-mix(in srgb, var(--text) 34%, transparent); }
-        .system-prompt-popover .memory-add-btn { flex:0 0 auto; height:28px; padding:0 12px; border:0; border-radius:8px; background:var(--text); color:var(--bg); font-size:11px; font-weight:850; cursor:pointer; }
+        .system-prompt-popover .memory-add-btn { flex:0 0 auto; height:28px; padding:0 12px; border:0; border-radius:8px; background:var(--accent); color:var(--bg); font-size:11px; font-weight:850; cursor:pointer; }
         .system-prompt-popover .memory-hint { font-size:10px; font-weight:700; color:color-mix(in srgb, var(--text) 34%, transparent); }
         .system-prompt-popover .memory-scope { flex:0 0 auto; display:inline-flex; align-items:center; gap:0; padding:1px; border:0; border-radius:8px; background:color-mix(in srgb, var(--text) 6%, transparent); }
         .system-prompt-popover .scope-btn { height:26px; padding:0 9px; border:0; border-radius:7px; background:transparent; color:color-mix(in srgb, var(--text) 55%, transparent); font-size:10px; font-weight:800; line-height:1; cursor:pointer; transition:background .15s var(--ease), color .15s var(--ease); }
-        .system-prompt-popover .scope-btn.active { background:var(--text); color:var(--bg); }
+        .system-prompt-popover .scope-btn.active { background:var(--accent); color:var(--bg); }
         .system-prompt-popover .memory-tag { flex:0 0 auto; height:16px; padding:0 6px; border:0; border-radius:5px; background:color-mix(in srgb, var(--text) 8%, transparent); color:color-mix(in srgb, var(--text) 55%, transparent); font-family:inherit; font-size:9px; font-weight:850; line-height:16px; white-space:nowrap; cursor:pointer; transition:background .15s var(--ease), color .15s var(--ease); }
         .system-prompt-popover .memory-tag:hover { background:color-mix(in srgb, var(--text) 16%, transparent); color:color-mix(in srgb, var(--text) 82%, transparent); }
         .system-prompt-popover .memory-tag.global { background:transparent; color:color-mix(in srgb, var(--text) 42%, transparent); }
@@ -543,7 +543,7 @@
             background:transparent !important;
         }
     </style>
-<link rel="stylesheet" href="/static/css/marvis-shared.css?v=1.0.0.1791309025" data-page-node-id="lND75BMHLe1XsRqMwb55T7">
+<link rel="stylesheet" href="/static/css/marvis-shared.css?v=1.0.0.1791432702" data-page-node-id="lND75BMHLe1XsRqMwb55T7">
 <style>
 /* --- 页面特定 Marvis 覆盖 --- */
         html body,
@@ -562,7 +562,7 @@
         .model-picker-button, .upload-btn { background: var(--stage-bg) !important; border: 0 !important; box-shadow: var(--shadow-sm) !important; }
         .action-btn { background: var(--stage-bg) !important; border: 0 !important; color: var(--muted) !important; }
         .action-btn:hover { background: var(--nav-hover-bg) !important; color: var(--text) !important; }
-        .send-btn { background: var(--text) !important; color: var(--bg) !important; }
+        .send-btn { background:var(--accent) !important; color: var(--bg) !important; }
         .thread-item:hover { background: var(--nav-hover-bg) !important; }
         .thread-item.active { background: var(--nav-hover-bg) !important; border: 0 !important; }
         html.theme-dark .topbar { background: color-mix(in srgb, var(--bg) 90%, transparent) !important; }
@@ -840,8 +840,8 @@ html.studio-theme-dark #sendBtn.nv-beam {
     --beam-glow: rgba(180,255,60,.55);
 }
 #sendBtn.nv-beam {
-    background: #1d1d1f !important;
-    color: #ffffff !important;
+    background: linear-gradient(135deg, var(--accent, #FF6A00), var(--accent-2, #FF8A2B)) !important;
+    color: #111111 !important;
     border-radius: var(--radius-md) !important;
     box-shadow: var(--shadow-md) !important;
 }
@@ -1204,7 +1204,7 @@ html.studio-theme-dark #sendBtn.nv-beam {
     /* —— 发送：V17 圆形 —— */
     .send-btn {
         width: 36px !important; height: 36px !important; border-radius: 50% !important;
-        background: var(--text) !important; color: var(--bg) !important;
+        background:var(--accent) !important; color: var(--bg) !important;
     }
     .send-btn svg { width: 16px !important; height: 16px !important; stroke-width: 2 !important; }
     .send-btn:hover { transform: scale(1.08) !important; }
@@ -1430,9 +1430,9 @@ html.studio-theme-dark #sendBtn.nv-beam {
     .nv-glide-host .resolution-picker-scope button.active { color: var(--nv-glide-fg, var(--text)); }
 
     </style>
-    <link rel="stylesheet" href="/static/css/glide.css?v=1.0.0.1791308700">
-    <script src="/static/js/shared/glide.js?v=1.0.0.1791308700"></script>
-    <script src="/static/js/shared/morph-button.js?v=1.0.0.1791308700"></script>
+    <link rel="stylesheet" href="/static/css/glide.css?v=1.0.0.1791368711">
+    <script src="/static/js/shared/glide.js?v=1.0.0.1791368711"></script>
+    <script src="/static/js/shared/morph-button.js?v=1.0.0.1791368711"></script>
 </head>
 <body data-page-node-id="B0FSrTLRPPotTcEryWhCSp">
     <div class="chat-shell" data-page-node-id="MRDi657CZfPyLahTJpQS7R">

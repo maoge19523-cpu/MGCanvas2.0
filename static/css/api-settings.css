@@ -48,7 +48,7 @@ html.studio-theme-dark body .provider-card-banner .ms-icon-dark { display:block;
 .add-btn { width:100%; height:40px; border:0; border-radius:var(--radius-md); background:var(--soft); color:var(--muted); display:inline-flex; align-items:center; justify-content:center; gap:6px; font-size:12px; font-weight:800; transition:all .15s ease; }
 .add-btn:hover { color:var(--text); background:var(--card); }
 .api-link-btn { width:100%; height:40px; border:0; border-radius:var(--radius-md); background:var(--soft); color:var(--text); display:inline-flex; align-items:center; justify-content:center; gap:6px; font-size:12px; font-weight:850; text-decoration:none; transition:all .15s ease; }
-.api-link-btn:hover { background:var(--text); color:var(--bg); transform:translateY(-1px); box-shadow:var(--shadow-md); }
+.api-link-btn:hover { background:var(--accent); color:var(--bg); transform:translateY(-1px); box-shadow:var(--shadow-md); }
 body.studio-theme-dark .api-link-btn,
 html.studio-theme-dark body .api-link-btn { background:var(--surface-2); color:var(--text); box-shadow:0 8px 18px rgba(0,0,0,.24); }
 body.studio-theme-dark .api-link-btn:hover,
@@ -104,7 +104,7 @@ html.studio-theme-dark body .recommend-tag.recommend-perk-tag i,
 html.studio-theme-dark body .recommend-tag.recommend-perk-tag svg { color:#b98cff !important; stroke:#b98cff !important; }
 .recommend-actions { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:auto; padding-top:10px; }
 .recommend-actions a,.recommend-actions button { min-width:0; height:34px; border-radius:var(--radius-sm); display:inline-flex; align-items:center; justify-content:center; gap:6px; text-decoration:none; font-size:11.5px; font-weight:900; border:0; background:var(--soft); transition:all .15s ease; }
-.recommend-register { background:var(--text); color:var(--bg); }
+.recommend-register { background:var(--accent); color:var(--bg); }
 .recommend-register:hover { transform:translateY(-1px); box-shadow:var(--shadow-md); }
 .recommend-fill { background:var(--soft); color:var(--text); }
 .recommend-fill:hover { background:var(--card); }
@@ -215,7 +215,7 @@ body.studio-theme-dark .icon-btn:hover { background:rgba(127,29,29,.18); color:v
 .action-btn { height:36px; padding:0 14px; border-radius:var(--radius-sm); display:inline-flex; align-items:center; justify-content:center; gap:6px; font-size:12px; font-weight:800; transition:all .15s ease; border:0; background:var(--soft); color:var(--muted); }
 .action-btn:hover { color:var(--text); background:var(--card); }
 .action-btn.primary-btn { color:var(--text); background:var(--card); }
-.action-btn.primary-btn:hover { background:var(--text); color:var(--bg); }
+.action-btn.primary-btn:hover { background:var(--accent); color:var(--bg); }
 .action-btn.danger-btn { color:var(--danger); background:color-mix(in srgb, var(--danger) 14%, transparent); }
 .action-btn.danger-btn:hover { background:color-mix(in srgb, var(--danger) 22%, transparent); color:var(--danger); }
 body.studio-theme-dark .action-btn.danger-btn,
@@ -474,7 +474,7 @@ body.studio-theme-dark .rh-preview-random-btn:not(.active) { background:var(--so
 .rh-preview-switch.on { background:var(--accent); }
 .rh-preview-switch.on span { background:var(--bg); transform:translateX(16px); }
 .rh-preview-empty { padding:16px 10px; border:0; border-radius:var(--radius-sm); background:var(--soft); color:var(--faint); text-align:center; font-size:11.5px; font-weight:750; }
-.rh-preview-run { height:36px; border-radius:var(--radius-sm); background:var(--text); color:var(--bg); display:flex; align-items:center; justify-content:center; gap:8px; font-size:12px; font-weight:900; }
+.rh-preview-run { height:36px; border-radius:var(--radius-sm); background:var(--accent); color:var(--bg); display:flex; align-items:center; justify-content:center; gap:8px; font-size:12px; font-weight:900; }
 .rh-preview-run:disabled { opacity:.72; cursor:not-allowed; }
 .rh-preview-status { padding:9px 10px; border:0; border-radius:var(--radius-md); background:var(--soft); color:var(--muted); font-size:11.5px; font-weight:800; line-height:1.4; }
 .rh-preview-output-list { display:flex; flex-direction:column; gap:8px; }
@@ -923,7 +923,7 @@ html.studio-theme-dark body .field-frame {
 }
 
 .action-btn.save-btn {
-    background:var(--text);
+    background:var(--accent);
     color:var(--bg);
 }
 
@@ -1186,7 +1186,7 @@ body {
 .api-link-btn:hover,
 body.studio-theme-dark .api-link-btn:hover,
 html.studio-theme-dark body .api-link-btn:hover {
-    background:var(--text);
+    background:var(--accent);
     color:var(--bg);
     transform:none;
     box-shadow:none;
@@ -1296,7 +1296,7 @@ html.studio-theme-dark body .action-btn.primary-btn {
 .action-btn.primary-btn:hover,
 body.studio-theme-dark .action-btn.primary-btn:hover,
 html.studio-theme-dark body .action-btn.primary-btn:hover {
-    background:var(--text);
+    background:var(--accent);
     color:var(--bg);
     box-shadow:none;
 }
@@ -1703,7 +1703,7 @@ html.studio-theme-dark body .api-link-btn:hover {
 
 .api-link-btn {
     border:0;
-    background:var(--text);
+    background:var(--accent);
     color:var(--bg);
 }
 
@@ -1712,7 +1712,7 @@ html.studio-theme-dark body .api-link-btn:hover {
 }
 
 .api-link-btn:hover {
-    background:var(--text);
+    background:var(--accent);
     color:var(--bg);
     filter:brightness(.94);
 }

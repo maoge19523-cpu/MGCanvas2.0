@@ -13,18 +13,18 @@
             }
         })();
     </script>
-    <script src="/static/vendor/js/tailwindcss-cdn.js?v=1.0.0.1790512746"></script>
-    <script src="/static/vendor/js/lucide-subset.js?v=1.0.0.1790512746"></script>
-    <script src="/static/js/shared/icons.js?v=1.0.0.1791308700"></script>
-    <script src="/static/js/theme.js?v=1.0.0.1790512746"></script>
-    <script src="/static/js/shared/utils.js?v=1.0.0.1791308700"></script>
-    <script src="/static/js/shared/morph-button.js?v=1.0.0.1791308700"></script>
-    <script src="/static/js/i18n.js?v=1.0.0.1790512746"></script>
-    <link rel="stylesheet" href="/static/css/theme.css?v=1.0.0.1791308700">
-    <link rel="stylesheet" href="/static/css/api-settings.css?v=1.0.0.1790512746">
+    <script src="/static/vendor/js/tailwindcss-cdn.js?v=1.0.0.1791368711"></script>
+    <script src="/static/vendor/js/lucide-subset.js?v=1.0.0.1791368711"></script>
+    <script src="/static/js/shared/icons.js?v=1.0.0.1791368711"></script>
+    <script src="/static/js/theme.js?v=1.0.0.1791388361"></script>
+    <script src="/static/js/shared/utils.js?v=1.0.0.1791368711"></script>
+    <script src="/static/js/shared/morph-button.js?v=1.0.0.1791368711"></script>
+    <script src="/static/js/i18n.js?v=1.0.0.1791368711"></script>
+    <link rel="stylesheet" href="/static/css/theme.css?v=1.0.0.1791434606">
+    <link rel="stylesheet" href="/static/css/api-settings.css?v=1.0.0.1791434471">
 
-<link rel="stylesheet" href="/static/vendor/css/fonts.css?v=1.0.0.1790512746">
-<link rel="stylesheet" href="/static/css/marvis-shared.css?v=1.0.0.1791309025">
+<link rel="stylesheet" href="/static/vendor/css/fonts.css?v=1.0.0.1791368711">
+<link rel="stylesheet" href="/static/css/marvis-shared.css?v=1.0.0.1791432702">
 <style>
 /* --- 页面特定 Marvis 覆盖 --- */
 body { background: transparent !important; color: var(--text) !important; }
@@ -37,7 +37,7 @@ body { background: transparent !important; color: var(--text) !important; }
 .field-frame input, .field-frame select { color: var(--text) !important; }
 .field-frame input:focus, .field-frame select:focus { box-shadow: 0 0 0 3px color-mix(in srgb, var(--strong) 18%, transparent) !important; }
 .action-btn { border-radius: var(--radius-sm) !important; }
-.save-btn { background: var(--text) !important; color: var(--bg) !important; }
+.save-btn { background:var(--accent) !important; color: var(--bg) !important; }
 .provider-list .provider-item { color: var(--muted) !important; border-radius: var(--radius-sm) !important; }
 .provider-list .provider-item.active { background: var(--nav-hover-bg) !important; color: var(--text) !important; }
 .model-list .model-item { background: var(--bg) !important; border-radius: var(--radius-sm) !important; }
@@ -412,7 +412,7 @@ html.settings-embed body:not(#settings-embed-scope) .api-link-btn::after { conte
 html.settings-embed body:not(#settings-embed-scope) .api-link-btn svg,
 html.settings-embed body:not(#settings-embed-scope) .api-link-btn i { animation: none !important; }
 html.settings-embed body:not(#settings-embed-scope) .api-link-btn:hover {
-    background: var(--text) !important;
+    background:var(--accent) !important;
     color: var(--stage-bg) !important;
     opacity: .88;
     box-shadow: none !important;
@@ -643,12 +643,12 @@ html.settings-embed body:not(#settings-embed-scope) .action-btn svg,
 html.settings-embed body:not(#settings-embed-scope) .ghost-btn svg { width: 15px !important; height: 15px !important; }
 html.settings-embed body:not(#settings-embed-scope) .action-btn.primary-btn,
 html.settings-embed body:not(#settings-embed-scope) .action-btn.save-btn {
-    background: var(--text) !important;
+    background:var(--accent) !important;
     color: var(--stage-bg) !important;
 }
 html.settings-embed body:not(#settings-embed-scope) .action-btn.primary-btn:hover,
 html.settings-embed body:not(#settings-embed-scope) .action-btn.save-btn:hover {
-    background: var(--text) !important;
+    background:var(--accent) !important;
     color: var(--stage-bg) !important;
     opacity: .88;
 }
@@ -965,7 +965,7 @@ html.settings-embed body:not(#settings-embed-scope) .recommend-actions button {
     padding: 0 14px !important;
     border: 0 !important;
     border-radius: 8px !important;
-    background: var(--text) !important;
+    background:var(--accent) !important;
     color: var(--stage-bg) !important;
     font-size: 12px !important;
     font-weight: 600 !important;
@@ -978,7 +978,7 @@ html.settings-embed body:not(#settings-embed-scope) .recommend-register:hover,
 html.settings-embed body:not(#settings-embed-scope) .recommend-fill:hover,
 html.settings-embed body:not(#settings-embed-scope) .recommend-actions a:hover,
 html.settings-embed body:not(#settings-embed-scope) .recommend-actions button:hover {
-    background: var(--text) !important;
+    background:var(--accent) !important;
     color: var(--stage-bg) !important;
     opacity: .88;
 }
@@ -1864,7 +1864,7 @@ input[type="checkbox"].toggle-switch { transition: all 0.2s cubic-bezier(0.22,0.
         </div>
     </div>
 
-    <script src="/static/js/api-settings.js?v=1.0.0.1790512746"></script>
+    <script src="/static/js/api-settings.js?v=1.0.0.1791368711"></script>
     <script>
         // 保存类按钮多为动态渲染（推荐卡片/新手引导/RH 编辑器），渲染后需要重扫
         (function () {

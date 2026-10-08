@@ -1784,3 +1784,40 @@ body.studio-theme-dark .shadow-slate-900\/5 {
     from { opacity: 0; transform: translateY(4px); }
     to { opacity: 1; transform: translateY(0); }
 }
+
+/* ═══════════════════════════════════════════════════════════════════
+   主行动按钮：一律橙色（不分主题）
+   ───────────────────────────────────────────────────────────────────
+   实测这些按钮在深色下仍是近黑（按钮中心像素 rgb(10,10,10)）。
+   上方第 886 行原有的深色规则依赖 `html.studio-theme-dark` 等类名，
+   但页面在 iframe 内、主题类可能只挂在 body 或未同步，导致规则不匹配。
+   因此这里**不依赖任何主题类**：直接让主行动按钮始终为橙色。
+   只改 background / color / border-color，不涉及尺寸与定位，故无布局影响。
+   ─────────────────────────────────────────────────────────────────── */
+.glass-btn,
+.gen-btn,
+.send-btn,
+.gen-btn,
+.btn-render,
+.comfy-run,
+.llm-run,
+.primary-btn,
+.btn-action-dark,
+.bg-black,
+#genBtn,
+#downloadBtn,
+#lightboxDownload {
+    background: linear-gradient(135deg, var(--accent, #FF6A00), var(--accent-2, #FF8A2B)) !important;
+    color: #111111 !important;
+    border-color: transparent !important;
+}
+.glass-btn:hover,
+.gen-btn:hover,
+.send-btn:hover,
+.btn-render:hover,
+.primary-btn:hover,
+#genBtn:hover:not(:disabled),
+#downloadBtn:hover {
+    background: linear-gradient(135deg, var(--accent-hover, #FF7F1F), var(--accent-2, #FF8A2B)) !important;
+    color: #111111 !important;
+}
