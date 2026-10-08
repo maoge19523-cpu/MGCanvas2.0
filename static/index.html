@@ -33,13 +33,13 @@
             } catch(e) {}
         })();
     </script>
-    <script src="/static/vendor/js/tailwindcss-cdn.js?v=1.0.5.1791368711"></script>
-    <script src="/static/js/theme.js?v=1.0.5.1791388361"></script>
-    <script src="/static/js/shared/utils.js?v=1.0.5.1791368711"></script>
-    <script src="/static/js/shared/morph-button.js?v=1.0.5.1791368711"></script>
-    <script src="/static/js/i18n.js?v=1.0.5.1791368711"></script>
-    <link rel="stylesheet" href="/static/vendor/css/fonts.css?v=1.0.5.1791368711">
-    <link rel="stylesheet" href="/static/css/marvis-shared.css?v=1.0.5.1791432702">
+    <script src="/static/vendor/js/tailwindcss-cdn.js?v=1.0.7.1791368711"></script>
+    <script src="/static/js/theme.js?v=1.0.7.1791388361"></script>
+    <script src="/static/js/shared/utils.js?v=1.0.7.1791368711"></script>
+    <script src="/static/js/shared/morph-button.js?v=1.0.7.1791368711"></script>
+    <script src="/static/js/i18n.js?v=1.0.7.1791368711"></script>
+    <link rel="stylesheet" href="/static/vendor/css/fonts.css?v=1.0.7.1791368711">
+    <link rel="stylesheet" href="/static/css/marvis-shared.css?v=1.0.7.1791432702">
     <style>
         /* 本地 Tailwind 工具类兜底：CDN 慢/未就绪时也能立刻给图标尺寸，避免首屏左侧栏空白 */
         .w-1\.5 { width: 0.375rem; }
@@ -3569,17 +3569,17 @@
                     <div class="skeleton-card"></div>
                 </div>
             </div>
-            <iframe id="frame-home" src="/static/home.html?v=1.0.5.1791459823" class="active" scrolling="yes"></iframe>
-            <iframe id="frame-zimage" data-src="/static/zimage.html?v=1.0.5.1791439501" scrolling="yes"></iframe>
-            <iframe id="frame-enhance" data-src="/static/enhance.html?v=1.0.5.1791459823" scrolling="yes"></iframe>
-            <iframe id="frame-klein" data-src="/static/klein.html?v=1.0.5.1791439501" scrolling="yes"></iframe>
-            <iframe id="frame-angle" data-src="/static/angle.html?v=1.0.5.1791459823" scrolling="yes"></iframe>
-            <iframe id="frame-online" data-src="/static/online.html?v=1.0.5.1791439501" scrolling="yes"></iframe>
-            <iframe id="frame-gpt-chat" data-src="/static/gpt-chat.html?v=1.0.5.1791459823" scrolling="yes"></iframe>
-            <iframe id="frame-asset-manager" data-src="/static/asset-manager.html?v=1.0.5.1791459823" scrolling="yes"></iframe>
-            <iframe id="frame-api-settings" data-src="/static/api-settings.html?v=1.0.5.1791459823" scrolling="yes"></iframe>
-            <iframe id="frame-comfyui-settings" data-src="/static/comfyui-settings.html?v=1.0.5.1791459823" scrolling="yes"></iframe>
-            <iframe id="frame-canvas" data-src="/static/canvas-list.html?v=1.0.5.1791459823" scrolling="yes"></iframe>
+            <iframe id="frame-home" src="/static/home.html?v=1.0.7.1791473750" class="active" scrolling="yes"></iframe>
+            <iframe id="frame-zimage" data-src="/static/zimage.html?v=1.0.7.1791460042" scrolling="yes"></iframe>
+            <iframe id="frame-enhance" data-src="/static/enhance.html?v=1.0.7.1791473750" scrolling="yes"></iframe>
+            <iframe id="frame-klein" data-src="/static/klein.html?v=1.0.7.1791460042" scrolling="yes"></iframe>
+            <iframe id="frame-angle" data-src="/static/angle.html?v=1.0.7.1791473750" scrolling="yes"></iframe>
+            <iframe id="frame-online" data-src="/static/online.html?v=1.0.7.1791460042" scrolling="yes"></iframe>
+            <iframe id="frame-gpt-chat" data-src="/static/gpt-chat.html?v=1.0.7.1791473750" scrolling="yes"></iframe>
+            <iframe id="frame-asset-manager" data-src="/static/asset-manager.html?v=1.0.7.1791473750" scrolling="yes"></iframe>
+            <iframe id="frame-api-settings" data-src="/static/api-settings.html?v=1.0.7.1791473750" scrolling="yes"></iframe>
+            <iframe id="frame-comfyui-settings" data-src="/static/comfyui-settings.html?v=1.0.7.1791473750" scrolling="yes"></iframe>
+            <iframe id="frame-canvas" data-src="/static/canvas-list.html?v=1.0.7.1791473750" scrolling="yes"></iframe>
 
         </main>
     </div>
@@ -5543,6 +5543,17 @@
             renderInto(document.querySelector('[data-connectivity-source="modelscope"]'), 'modelscope');
         }
 
+        // 判断当前是否已是最新版本。
+        // 单一来源：弹窗刷新、更新结束复位、执行守卫三处都调它，
+        // 避免各写一份比较逻辑导致行为不一致。
+        function isAlreadyLatestVersion() {
+            const btn = document.getElementById('update-now-btn') || document.getElementById('settings-update-now-btn');
+            const remoteVersion = btn?.dataset.remoteVersion || '';
+            const localVersion = btn?.dataset.localVersion || appInfo.version || '';
+            if(!remoteVersion || !localVersion) return false;
+            return compareVersions(String(remoteVersion), String(localVersion)) <= 0;
+        }
+
         function refreshProjectUpdateModalText() {
             const updateBtn = document.getElementById('update-now-btn') || document.getElementById('settings-update-now-btn');
             const remoteVersion = updateBtn?.dataset.remoteVersion || '';
@@ -5587,8 +5598,7 @@
             // 「开始更新」也始终可点，用户已经装到最新版后仍会被引导"再更新一遍"，
             // 点下去还会因为拉取同版本文件而走到 96% 才失败。
             // 现在明确区分「有新版可更新」与「已是最新版」两种状态。
-            const alreadyLatest = !!(localVersion && remoteVersion &&
-                compareVersions(String(remoteVersion), String(localVersion)) <= 0);
+            const alreadyLatest = isAlreadyLatestVersion();
             const confirmBtnEl = document.getElementById('project-update-confirm-btn');
             if(!projectUpdateRunning) {
                 if(confirmBtnEl) {
@@ -5665,6 +5675,15 @@
             if(!modal) return;
             updateConnectivityResult = null;
             projectUpdateNotes = null;
+            // 打开时无条件重置运行态：上一次若被中途关闭、请求在途，
+            // projectUpdateRunning 可能仍为 true，会让按钮停在禁用+「更新中」，
+            // 表现为"打开就一直在转圈"。
+            if(projectUpdateRunning) {
+                try { projectUpdateAbort?.abort(); } catch(e) {}
+                stopUpdateProgressPolling();
+                showUpdateProgressBoxes(false);
+                projectUpdateRunning = false;
+            }
             refreshProjectUpdateModalText();
             modal.hidden = false;
             document.getElementById('connectivity-test-btn')?.focus?.();
@@ -5954,15 +5973,13 @@
             // 守卫：已是最新版则直接拒绝执行。
             // 按钮虽然已被禁用，但这里再挡一次 —— 避免通过其它入口（快捷键、
             // 程序化调用、旧缓存页面）重新发起一次无意义的同版本更新。
-            const guardRemote = btn?.dataset.remoteVersion || '';
-            const guardLocal = btn?.dataset.localVersion || appInfo.version || '';
-            if(guardRemote && guardLocal && compareVersions(String(guardRemote), String(guardLocal)) <= 0) {
+            if(isAlreadyLatestVersion()) {
                 setUpdateSummary(
                     'ok',
                     isEn ? 'Already up to date' : '已是最新版本',
                     isEn
-                        ? `Current ${versionLabel(guardLocal)} is the latest version; no update needed.`
-                        : `当前 ${versionLabel(guardLocal)} 已是最新版本，无需更新。`
+                        ? `Current ${versionLabel(appInfo.version || '')} is the latest version; no update needed.`
+                        : `当前 ${versionLabel(appInfo.version || '')} 已是最新版本，无需更新。`
                 );
                 return;
             }
@@ -6027,10 +6044,24 @@
                 showUpdateProgressBoxes(false);
                 projectUpdateRunning = false;
                 if(btn) btn.disabled = false;
-                if(confirmBtn) confirmBtn.disabled = false;
                 if(testBtn) testBtn.disabled = false;
+                // 复位确认按钮时必须重新判断"是否已是最新版"。
+                // 踩过的坑：这里原来是无条件 confirmBtn.disabled = false 并把文字
+                // 改回「开始更新」，结果把 refreshProjectUpdateModalText 里刚做的
+                // 禁用覆盖掉了 —— 表现就是更新失败后按钮又变回可点的「开始更新」，
+                // 用户反复点、反复失败，看起来像"一直转圈"。
+                if(confirmBtn) {
+                    if(isAlreadyLatestVersion()) {
+                        confirmBtn.disabled = true;
+                        confirmBtn.title = isEn ? 'Already up to date' : '当前已是最新版本，无需更新';
+                        if(confirmText) confirmText.textContent = isEn ? 'Up to date' : '已是最新版本';
+                    } else {
+                        confirmBtn.disabled = false;
+                        confirmBtn.title = '';
+                        if(confirmText) confirmText.textContent = isEn ? 'Start update' : '开始更新';
+                    }
+                }
                 if(text) text.textContent = oldText || (isEn ? 'Update' : '一键更新');
-                if(confirmText) confirmText.textContent = isEn ? 'Start update' : '开始更新';
                 refreshUpdateButtonText();
             }
         }
