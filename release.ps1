@@ -183,17 +183,26 @@ if (-not $SkipBackend) {
         if ($pyCode -ne 0) { Die "PyInstaller 退出码 $pyCode" }
         if (-not (Test-Path $exe)) { Die "后端二进制未生成：$exe" }
         Ok "后端二进制已更新（$([math]::Round((Get-Item $exe).Length / 1MB, 1)) MB）"
-
-        # 后端 exe 旁边必须放当前版本的 VERSION。
-        # current_app_version() 优先读 BASE_DIR/VERSION，其次读「exe 同级目录/VERSION」
-        # —— PyInstaller onefile 解包目录里没有 VERSION，所以实际生效的是后者，
-        # 也就是 resources/backend/VERSION。安装包会把它一并带到用户机器上。
-        # 这个文件若不同步，界面显示的版本号就会与壳不一致（1.0.2 那次即如此）。
-        $verFile = Join-Path $desktop 'resources\backend\VERSION'
-        [IO.File]::WriteAllText($verFile, $ver + "`n", (New-Object System.Text.UTF8Encoding($false)))
-        Ok "后端 VERSION 已写入：$ver"
     } finally { Pop-Location }
 }
+
+# 后端版本文件同步（**在 -SkipBackend 之外**，必须始终执行）。
+#
+# current_app_version() 优先读 BASE_DIR/VERSION，PyInstaller onefile 的解包目录
+# 里没有该文件，于是实际读到的是「exe 同级目录/VERSION」，即安装后的
+# resources/backend/VERSION。
+#
+# 踩过的坑：这个文件**不是**从 resources/backend/VERSION 拷进去的。
+# package.json 的 extraResources 写的是
+#     { "from": ".version", "to": "backend/VERSION" }
+# —— 真正进包的是 desktop/.version。只写 resources/backend/VERSION 完全无效，
+# 结果就是壳已是 1.0.2、界面却一直显示 1.0.0（1.0.2 事故的直接原因）。
+# 所以两个文件都要写，且必须放在 -SkipBackend 判断之外。
+$verFile = Join-Path $desktop 'resources\backend\VERSION'
+[IO.File]::WriteAllText($verFile, $ver + "`n", (New-Object System.Text.UTF8Encoding($false)))
+$verFileDot = Join-Path $desktop '.version'
+[IO.File]::WriteAllText($verFileDot, $ver + "`n", (New-Object System.Text.UTF8Encoding($false)))
+Ok "后端版本文件已同步：$ver（resources/backend/VERSION 与 desktop/.version）"
 
 Step '打包 Windows 安装包'
 # 注意：PowerShell 5.1 不支持 $x = if(...){}else{}，必须显式赋值
@@ -203,9 +212,14 @@ if ($Publish -and -not $env:GH_TOKEN) {
     Die '未设置 GH_TOKEN，无法发布。请先设置环境变量 GH_TOKEN'
 }
 
-# 打包前硬校验：四处版本号 + 后端 VERSION 必须全部等于目标版本。
-# 这是最后一道闸门 —— 1.0.2 那次就是因为后端 VERSION 没同步，
-# 导致装完后壳是 1.0.2、界面却显示 1.0.0，用户完全看不懂发生了什么。
+# 打包前硬校验：所有版本来源必须全部等于目标版本。
+# 这是最后一道闸门 —— 1.0.2 那次壳是 1.0.2、界面却显示 1.0.0，
+# 用户完全看不懂发生了什么。
+#
+# 校验清单里**必须包含 desktop/.version**：它是 extraResources 里
+# { from: ".version", to: "backend/VERSION" } 的来源，也就是最终装进包里、
+# 被 current_app_version() 读到的那个文件。
+# 之前只校验了 resources/backend/VERSION，校验的是错文件，因此给出了假绿灯。
 Step '打包前版本一致性硬校验'
 $final = Get-Versions
 $mismatch = @()
@@ -213,17 +227,24 @@ if ($final.File -ne $ver) { $mismatch += "VERSION=$($final.File)" }
 if ($final.Package -ne $ver) { $mismatch += "package.json=$($final.Package)" }
 if ($final.MainPy -ne $ver) { $mismatch += "main.py=$($final.MainPy)" }
 if ($final.Notes -ne $ver) { $mismatch += "update-notes.json=$($final.Notes)" }
+# 真正进包的那个（extraResources 的 from 源）
+$dotVerFile = Join-Path $desktop '.version'
+if (Test-Path $dotVerFile) {
+    $dv = (Get-Content $dotVerFile -Raw).Trim()
+    if ($dv -ne $ver) { $mismatch += "desktop/.version=$dv （这个才是进包的）" }
+} else {
+    $mismatch += 'desktop/.version 不存在（extraResources 会因此缺文件）'
+}
+# 后端 exe 目录下那份（便于排查，非进包来源）
 $backendVerFile = Join-Path $desktop 'resources\backend\VERSION'
 if (Test-Path $backendVerFile) {
     $bv = (Get-Content $backendVerFile -Raw).Trim()
     if ($bv -ne $ver) { $mismatch += "resources/backend/VERSION=$bv" }
-} else {
-    $mismatch += 'resources/backend/VERSION 不存在'
 }
 if ($mismatch.Count -gt 0) {
     Die ("版本号未全部对齐，已中止打包：`n    " + ($mismatch -join "`n    "))
 }
-Ok "全部版本号均为 $ver（含后端 VERSION）"
+Ok "全部版本号均为 $ver（含 desktop/.version —— 它是真正进包的那份）"
 
 Push-Location $desktop
 try {
