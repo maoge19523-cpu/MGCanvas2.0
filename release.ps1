@@ -171,6 +171,44 @@ if ($Bump -and $SkipBackend) {
     $SkipBackend = $false
 }
 
+# 后端 exe 新鲜度校验：exe 必须比"后端会被打进包的那些源文件"更新。
+# 只在跳过重编时校验 —— 正常重编刚产出新 exe，必然是最新的。
+#
+# 为什么需要这道校验（真实踩过）：曾以为重编过后端，实际 exe 还是旧的，
+# 结果安装包里带的是旧后端，机器上"壳是新的、后端是旧的"，极难排查。
+# 这里以 main.py / server / prompt_intelligence.py 的最新修改时间为基准。
+if ($SkipBackend) {
+    Step '后端 exe 新鲜度校验（-SkipBackend 模式）'
+    $exePath = Join-Path $desktop 'resources\backend\MGStudioServer.exe'
+    if (-not (Test-Path $exePath)) {
+        Die "后端 exe 不存在，不能用 -SkipBackend：$exePath"
+    }
+    $exeTime = (Get-Item $exePath).LastWriteTime
+    $sources = @(
+        (Join-Path $root 'main.py'),
+        (Join-Path $root 'prompt_intelligence.py')
+    )
+    foreach ($d in @((Join-Path $root 'server'), (Join-Path $root 'workflows'))) {
+        if (Test-Path $d) {
+            $sources += (Get-ChildItem $d -Recurse -File -Include '*.py' -EA SilentlyContinue |
+                Sort-Object LastWriteTime -Descending | Select-Object -First 1 -ExpandProperty FullName)
+        }
+    }
+    $newer = @()
+    foreach ($s in $sources) {
+        if ($s -and (Test-Path $s)) {
+            if ((Get-Item $s).LastWriteTime -gt $exeTime) {
+                $newer += "$([IO.Path]::GetFileName($s)) ($((Get-Item $s).LastWriteTime))"
+            }
+        }
+    }
+    if ($newer.Count -gt 0) {
+        Die ("后端源文件比 exe 新，exe 已过期，不能用 -SkipBackend 打包：`n    exe 时间: $exeTime`n    更新的源:`n      " +
+             ($newer -join "`n      "))
+    }
+    Ok "后端 exe 是最新的（$exeTime），源文件均未更新"
+}
+
 if (-not $SkipBackend) {
     Step '重新编译后端二进制（PyInstaller）'
     Push-Location $root

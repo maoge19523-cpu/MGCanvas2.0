@@ -164,6 +164,104 @@ function probeBackend(port) {
   });
 }
 
+// ---------- 陈旧后端检测 ----------
+// 事故背景（真实发生）：安装新版时若旧后端进程仍在运行，
+//   · 后端 exe 被占用 → 安装程序跳过替换 → 机器上留下旧 exe
+//   · 但 VERSION 文件是普通文本，安装程序换掉了 → 旧 exe 也回报新版本号
+//   · 新壳探测到"版本一致" → 判定同版本、直接复用 → 一直用旧后端
+// 结果是：壳已升级，界面资源与更新源配置却全是旧的，且用户完全看不出来
+// （版本号显示正常、重启也没用，因为进程从来没退）。
+//
+// 这里按端口找出监听进程，确认它**属于当前安装目录**（避免误杀其它软件），
+// 再比较 exe 时间戳：比当前进程启动时间还早的，就是在本次启动之前遗留的
+// 陈旧后端，结束它，让新壳正常拉起自带的后端。
+
+function findListeningPids(port) {
+  // 返回监听指定端口的 PID 列表（Windows: netstat；其它平台返回空）
+  if (process.platform !== 'win32') return [];
+  try {
+    const out = require('child_process').execSync('netstat -ano -p TCP', {
+      encoding: 'utf8', timeout: 5000, windowsHide: true,
+    });
+    const pids = new Set();
+    for (const line of out.split(/\r?\n/)) {
+      // 形如：  TCP    127.0.0.1:3000    0.0.0.0:0    LISTENING    24148
+      const m = line.match(/^\s*TCP\s+\S+:(\d+)\s+\S+\s+LISTENING\s+(\d+)\s*$/i);
+      if (m && Number(m[1]) === Number(port)) pids.add(m[2]);
+    }
+    return Array.from(pids);
+  } catch (_) { return []; }
+}
+
+function processPathOf(pid) {
+  // 取进程可执行文件路径。优先 PowerShell（在受限语言模式下也可用 Get-Process），
+  // 失败则返回空串 —— 调用方据此决定是否放宽判定，而不是直接放弃清理。
+  for (const cmd of [
+    `powershell -NoProfile -Command "(Get-Process -Id ${pid} -ErrorAction Stop).Path"`,
+    `wmic process where "ProcessId=${pid}" get ExecutablePath /value`,
+  ]) {
+    try {
+      const out = require('child_process')
+        .execSync(cmd, { encoding: 'utf8', timeout: 6000, windowsHide: true })
+        .trim();
+      const m = out.match(/^ExecutablePath=(.+)$/mi);
+      const p = (m ? m[1] : out).trim();
+      if (p) return p;
+    } catch (_) { /* 换下一种方式 */ }
+  }
+  return '';
+}
+
+function killStaleBackendOnPort(port) {
+  // 结束"是 MGStudio 后端、且 exe 早于本次启动"的残留进程。
+  // 返回被结束的 PID 数组，便于记日志。
+  //
+  // 为什么要按 exe 时间判断，而不是直接杀掉端口上的后端：
+  //   同一份安装被启动两次（多实例）时，复用已有后端是正确的，不能误杀；
+  //   只有"exe 比本次启动还早"才说明它是上次安装遗留的进程。
+  if (process.platform !== 'win32' || !app.isPackaged) return [];
+  const backendDir = path.join(process.resourcesPath, 'backend');
+  const currentExe = path.join(backendDir, 'MGStudioServer.exe');
+  // exe 不存在或读不到时间，则跳过清理（不冒险误杀）
+  try { fs.statSync(currentExe); } catch (_) { return []; }
+  const processStartMs = Date.now() - Math.round(process.uptime() * 1000);
+  const norm = (p) => path.resolve(p).toLowerCase();
+  const killed = [];
+  for (const pid of findListeningPids(port)) {
+    try {
+      // ① 必须是 MGStudioServer（用 tasklist 判定进程名，最可靠；
+      //    wmic/PowerShell 在受限环境可能不可用，故不作唯一依据）
+      let imageName = '';
+      try {
+        const tl = require('child_process')
+          .execSync(`tasklist /FI "PID eq ${pid}" /FO CSV /NH`,
+            { encoding: 'utf8', timeout: 5000, windowsHide: true })
+          .trim();
+        const m = tl.match(/^"([^"]+)"/);
+        imageName = m ? m[1] : '';
+      } catch (_) { continue; }
+      if (imageName.toLowerCase() !== 'mgstudioserver.exe') continue;
+
+      // ② 取进程路径做归属确认；取不到路径时，仅凭进程名也允许清理
+      //    —— 否则一旦 wmic/PowerShell 都不可用，残留进程就永远清不掉，
+      //       又会退回"新壳连旧后端"的老问题。
+      const exePath = processPathOf(pid);
+      if (exePath && norm(path.dirname(exePath)) !== norm(backendDir)) continue;
+
+      // ③ exe 比本次启动还早 → 上次安装遗留的陈旧后端
+      let mtime = 0;
+      try { mtime = fs.statSync(exePath || currentExe).mtimeMs; } catch (_) {}
+      if (!mtime || mtime >= processStartMs) continue;
+
+      require('child_process').execSync(`taskkill /PID ${pid} /F /T`, {
+        stdio: 'ignore', timeout: 8000, windowsHide: true,
+      });
+      killed.push(pid);
+    } catch (_) { /* 进程已消失或无权限，忽略 */ }
+  }
+  return killed;
+}
+
 // ---------- 启动后端 ----------
 function startBackend(port) {
   return new Promise(async (resolve, reject) => {
@@ -707,6 +805,17 @@ if (!gotLock) {
     let port = requested;
     let reuseExisting = false;
     let existingVersion = null;
+
+    // 先清掉"上次安装遗留、只因 VERSION 文件被换而伪装成同版本"的后端。
+    // 不做这一步的话，下面的版本相等判断会误判为可复用，导致新壳一直连旧后端
+    // （壳是新的、界面资源与更新源配置却是旧的，且重启无效）。
+    const stalePids = killStaleBackendOnPort(requested);
+    if (stalePids.length) {
+      clog('boot', '已结束陈旧后端进程（exe 早于本次启动）: ' + stalePids.join(', '));
+      // 给操作系统一点时间真正释放端口
+      await new Promise((r) => setTimeout(r, 1200));
+    }
+
     if (await isPortInUse(requested)) {
       existingVersion = await probeBackend(requested);
       const isSameKind = !!existingVersion;
