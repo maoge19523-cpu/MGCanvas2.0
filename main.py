@@ -2355,6 +2355,70 @@ def current_app_version():
 def update_notes_path() -> str:
     return os.path.join(STATIC_DIR, "update-notes.json")
 
+def compare_app_versions(a: str, b: str) -> int:
+    """比较两个版本号：a>b 返回正数，a<b 返回负数，相等返回 0。
+
+    与前端 compareVersions 保持同一套语义：先比数字核心段，
+    正式版视为比同核心的预发布版更新（1.0.5 > 1.0.5-beta.1）。
+    非数字的附加段（如 -beta.1 里的 beta）忽略，只用于判断是否预发布。
+    """
+    def parts(value: str) -> list:
+        core = str(value or "").strip().split("-")[0]
+        out = []
+        for seg in core.replace("_", ".").split("."):
+            digits = "".join(ch for ch in seg if ch.isdigit())
+            out.append(int(digits) if digits else 0)
+        return out
+
+    pa, pb = parts(a), parts(b)
+    for i in range(max(len(pa), len(pb))):
+        diff = (pa[i] if i < len(pa) else 0) - (pb[i] if i < len(pb) else 0)
+        if diff:
+            return diff
+    pre_a = "-" in str(a or "")
+    pre_b = "-" in str(b or "")
+    if pre_a != pre_b:
+        return -1 if pre_a else 1
+    return 0
+
+_UPDATE_VERSION_URLS = {
+    "github": lambda: GITHUB_VERSION_URL,
+    "gitee": lambda: GITEE_VERSION_URL,
+    "modelscope": lambda: MODELSCOPE_VERSION_URL,
+}
+
+def probe_source_version(source: str) -> Dict[str, Any]:
+    """读取指定源当前提供的版本号（用于防降级判定与连通性展示）。
+
+    返回 {"ok": bool, "version": str, "url": str, "error": str}。
+    只做一次短超时请求，失败不抛异常 —— 调用方据此决定是否放行。
+    """
+    getter = _UPDATE_VERSION_URLS.get(source) or _UPDATE_VERSION_URLS["github"]
+    url = getter()
+    info: Dict[str, Any] = {"ok": False, "version": "", "url": url, "error": "", "source": source}
+    try:
+        resp = _NO_PROXY_SESSION.get(
+            url,
+            headers={"User-Agent": "MGStudio-Updater"},
+            timeout=6,
+        )
+        if resp.status_code >= 400:
+            info["error"] = f"HTTP {resp.status_code}"
+            return info
+        text = resp.content.decode("utf-8", errors="replace")
+        version = (text.strip().splitlines() or [""])[0].strip()
+        if version:
+            info["ok"] = True
+            info["version"] = version
+        else:
+            info["error"] = "版本文件为空"
+    except Exception as exc:  # noqa: BLE001
+        info["error"] = str(exc)[:200]
+    return info
+
+# 供内部调用使用的短别名
+_probe_source_version = probe_source_version
+
 def safe_update_notes(payload: Any, version: str = "") -> Dict[str, Any]:
     if not isinstance(payload, dict):
         return {}
@@ -3323,6 +3387,34 @@ def stage_update_from_source(source: str, staging_root: str, progress_cb: Option
 
 @app.post("/api/update-from-github")
 def update_from_github(req: UpdateRequest = UpdateRequest()):
+    # ── 防降级闸门 ──────────────────────────────────────────────────
+    # 背景：国内镜像（gh-proxy / jsDelivr）是 CDN，缓存明显滞后于发布。
+    # 实测 1.0.9 已发布数小时后，两个镜像仍报告 1.0.7 / 1.0.4。
+    # 而本接口原先**只加锁、不校验版本**，于是客户端一旦发起热更，
+    # 就会用镜像上的旧文件把本机**降级**回旧版本 —— 属于实质性损害。
+    # 因此这里先取远端版本，确认确实比本地新才继续；否则直接拒绝。
+    #
+    # 注意：校验失败（网络问题、取不到版本）时**不拒绝**，只记日志放行，
+    # 以免把正常的手动热更也一并挡掉；只有"明确拿到一个不更新的版本号"
+    # 才拦截。
+    try:
+        local_version = current_app_version()
+        remote_source = normalize_update_source(req.source)
+        probe = _probe_source_version(remote_source)
+        remote_version = str(probe.get("version") or "").strip()
+        if remote_version and local_version and compare_app_versions(remote_version, local_version) <= 0:
+            raise HTTPException(
+                status_code=409,
+                detail=(
+                    f"当前版本 {local_version} 不低于该源提供的 {remote_version}，已阻止本次更新（防止降级）。"
+                    "镜像缓存可能滞后，请稍后再试，或改用其它下载源。"
+                ),
+            )
+    except HTTPException:
+        raise
+    except Exception as exc:  # noqa: BLE001
+        logging.warning("update version guard skipped: %s", exc)
+
     if not UPDATE_LOCK.acquire(blocking=False):
         raise HTTPException(status_code=409, detail="正在更新中，请稍后再试")
     staging_root = ""
