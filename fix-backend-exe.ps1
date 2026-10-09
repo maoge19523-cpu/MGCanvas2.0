@@ -36,7 +36,27 @@ function Write-Warn2($m) { Write-Host "  !!  $m" -ForegroundColor Yellow }
 function Write-Info($m) { Write-Host "      $m" }
 
 # ---------- 定位安装目录 ----------
-if (-not $InstallDir -or -not (Test-Path $InstallDir)) {
+# 坑（真实踩到）：注册表的 UninstallString 形如
+#     "D:\猫歌映画\MGStudio\Uninstall MGStudio.exe" /S
+# 带引号、还带参数。若直接 Trim('"') 再 Split-Path -Parent，
+# 会把 " /S" 或未闭合的引号一起当成路径，Test-Path 抛 InvalidArgument：
+#     InvalidArgument: D:\猫歌映画\MGStudi... MGStudio.exe":String
+# 因此改为用正则只取"第一个引号内"或"到第一个空白为止"的那段路径。
+function Get-DirFromUninstallString([string]$s) {
+    if (-not $s) { return '' }
+    $t = $s.Trim()
+    $m = [regex]::Match($t, '^"([^"]+)"')
+    if ($m.Success) {
+        $exePath = $m.Groups[1].Value
+    } else {
+        $exePath = ($t -split '\s+')[0]
+    }
+    if (-not $exePath) { return '' }
+    $exePath = $exePath.Trim('"')
+    try { return (Split-Path -Path $exePath -Parent) } catch { return '' }
+}
+
+if (-not $InstallDir -or -not (Test-Path $InstallDir -ErrorAction SilentlyContinue)) {
     $found = ''
     foreach ($root in @(
         'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\*',
@@ -46,15 +66,12 @@ if (-not $InstallDir -or -not (Test-Path $InstallDir)) {
         $hits = Get-ItemProperty $root -ErrorAction SilentlyContinue |
             Where-Object { $_.DisplayName -match '^MGStudio' }
         foreach ($hit in $hits) {
-            if ($hit.InstallLocation) {
-                $cand = $hit.InstallLocation.Trim('"')
-                if (Test-Path $cand) { $found = $cand; break }
+            $cand = ''
+            if ($hit.InstallLocation) { $cand = $hit.InstallLocation.Trim('"') }
+            if ((-not $cand -or -not (Test-Path $cand -ErrorAction SilentlyContinue)) -and $hit.UninstallString) {
+                $cand = Get-DirFromUninstallString $hit.UninstallString
             }
-            if (-not $found -and $hit.UninstallString) {
-                $u = $hit.UninstallString.Trim('"')
-                $d = Split-Path $u -Parent
-                if ($d -and (Test-Path $d)) { $found = $d; break }
-            }
+            if ($cand -and (Test-Path $cand -ErrorAction SilentlyContinue)) { $found = $cand; break }
         }
         if ($found) { break }
     }
@@ -69,7 +86,7 @@ if (-not $InstallDir -or -not (Test-Path $InstallDir)) {
     if ($found) { $InstallDir = $found }
 }
 
-if (-not $InstallDir -or -not (Test-Path $InstallDir)) {
+if (-not $InstallDir -or -not (Test-Path $InstallDir -ErrorAction SilentlyContinue)) {
     Write-Warn2 '无法自动定位安装目录。请显式指定：'
     Write-Info '.\fix-backend-exe.ps1 -InstallDir "D:\你的安装目录\MGStudio"'
     exit 1
