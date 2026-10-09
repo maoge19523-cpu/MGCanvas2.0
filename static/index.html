@@ -33,13 +33,13 @@
             } catch(e) {}
         })();
     </script>
-    <script src="/static/vendor/js/tailwindcss-cdn.js?v=1.0.10.1791368711"></script>
-    <script src="/static/js/theme.js?v=1.0.10.1791388361"></script>
-    <script src="/static/js/shared/utils.js?v=1.0.10.1791368711"></script>
-    <script src="/static/js/shared/morph-button.js?v=1.0.10.1791368711"></script>
-    <script src="/static/js/i18n.js?v=1.0.10.1791368711"></script>
-    <link rel="stylesheet" href="/static/vendor/css/fonts.css?v=1.0.10.1791368711">
-    <link rel="stylesheet" href="/static/css/marvis-shared.css?v=1.0.10.1791432702">
+    <script src="/static/vendor/js/tailwindcss-cdn.js?v=1.0.11.1791368711"></script>
+    <script src="/static/js/theme.js?v=1.0.11.1791388361"></script>
+    <script src="/static/js/shared/utils.js?v=1.0.11.1791368711"></script>
+    <script src="/static/js/shared/morph-button.js?v=1.0.11.1791368711"></script>
+    <script src="/static/js/i18n.js?v=1.0.11.1791368711"></script>
+    <link rel="stylesheet" href="/static/vendor/css/fonts.css?v=1.0.11.1791368711">
+    <link rel="stylesheet" href="/static/css/marvis-shared.css?v=1.0.11.1791432702">
     <style>
         /* 本地 Tailwind 工具类兜底：CDN 慢/未就绪时也能立刻给图标尺寸，避免首屏左侧栏空白 */
         .w-1\.5 { width: 0.375rem; }
@@ -3569,17 +3569,17 @@
                     <div class="skeleton-card"></div>
                 </div>
             </div>
-            <iframe id="frame-home" src="/static/home.html?v=1.0.10.1791518718" class="active" scrolling="yes"></iframe>
-            <iframe id="frame-zimage" data-src="/static/zimage.html?v=1.0.10.1791479641" scrolling="yes"></iframe>
-            <iframe id="frame-enhance" data-src="/static/enhance.html?v=1.0.10.1791518718" scrolling="yes"></iframe>
-            <iframe id="frame-klein" data-src="/static/klein.html?v=1.0.10.1791479641" scrolling="yes"></iframe>
-            <iframe id="frame-angle" data-src="/static/angle.html?v=1.0.10.1791518718" scrolling="yes"></iframe>
-            <iframe id="frame-online" data-src="/static/online.html?v=1.0.10.1791479641" scrolling="yes"></iframe>
-            <iframe id="frame-gpt-chat" data-src="/static/gpt-chat.html?v=1.0.10.1791518718" scrolling="yes"></iframe>
-            <iframe id="frame-asset-manager" data-src="/static/asset-manager.html?v=1.0.10.1791518718" scrolling="yes"></iframe>
-            <iframe id="frame-api-settings" data-src="/static/api-settings.html?v=1.0.10.1791518718" scrolling="yes"></iframe>
-            <iframe id="frame-comfyui-settings" data-src="/static/comfyui-settings.html?v=1.0.10.1791518718" scrolling="yes"></iframe>
-            <iframe id="frame-canvas" data-src="/static/canvas-list.html?v=1.0.10.1791518718" scrolling="yes"></iframe>
+            <iframe id="frame-home" src="/static/home.html?v=1.0.11.1791519152" class="active" scrolling="yes"></iframe>
+            <iframe id="frame-zimage" data-src="/static/zimage.html?v=1.0.11.1791518872" scrolling="yes"></iframe>
+            <iframe id="frame-enhance" data-src="/static/enhance.html?v=1.0.11.1791519152" scrolling="yes"></iframe>
+            <iframe id="frame-klein" data-src="/static/klein.html?v=1.0.11.1791518872" scrolling="yes"></iframe>
+            <iframe id="frame-angle" data-src="/static/angle.html?v=1.0.11.1791519152" scrolling="yes"></iframe>
+            <iframe id="frame-online" data-src="/static/online.html?v=1.0.11.1791518872" scrolling="yes"></iframe>
+            <iframe id="frame-gpt-chat" data-src="/static/gpt-chat.html?v=1.0.11.1791519152" scrolling="yes"></iframe>
+            <iframe id="frame-asset-manager" data-src="/static/asset-manager.html?v=1.0.11.1791519152" scrolling="yes"></iframe>
+            <iframe id="frame-api-settings" data-src="/static/api-settings.html?v=1.0.11.1791519152" scrolling="yes"></iframe>
+            <iframe id="frame-comfyui-settings" data-src="/static/comfyui-settings.html?v=1.0.11.1791519152" scrolling="yes"></iframe>
+            <iframe id="frame-canvas" data-src="/static/canvas-list.html?v=1.0.11.1791519152" scrolling="yes"></iframe>
 
         </main>
     </div>
@@ -3614,7 +3614,7 @@
             <div class="studio-modal-head">
                 <div>
                     <div class="studio-modal-kicker" data-i18n="update.available">发现更新</div>
-                    <h2 id="project-update-title" class="studio-modal-title">一键更新</h2>
+                    <h2 id="project-update-title" class="studio-modal-title">更新说明</h2>
                 </div>
                 <button class="studio-modal-close" type="button" onclick="closeProjectUpdateModal()" title="关闭" aria-label="关闭">
                     <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -3714,7 +3714,7 @@
                         <path d="M21 12a9 9 0 1 1-2.64-6.36"></path>
                         <path d="M21 3v6h-6"></path>
                     </svg>
-                    <span id="project-update-confirm-text">开始更新</span>
+                    <span id="project-update-confirm-text">自动更新</span>
                 </button>
             </div>
         </div>
@@ -3995,12 +3995,17 @@
                                     </svg>
                                     <span data-i18n="common.checkUpdate">检查更新</span>
                                 </button>
+                                <!-- 「一键更新」已收敛：该行改为只打开更新说明弹窗。
+                                     原来 onclick 是 runProjectUpdate()（打开含下载按钮的弹窗），
+                                     现在镜像热更不再作为常规更新方式，文案也相应改为「更新说明」。
+                                     有新版时该行由 JS 自动显示（.show），点击可查看更新内容；
+                                     真正的安装由桌面端启动时的自动更新完成。 -->
                                 <button id="settings-update-now-btn" class="settings-row settings-update-row" onclick="runProjectUpdate(); closeSettingsModal();" type="button">
                                     <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
                                         <path d="M21 12a9 9 0 1 1-2.64-6.36"></path>
                                         <path d="M21 3v6h-6"></path>
                                     </svg>
-                                    <span id="settings-update-now-text">一键更新</span>
+                                    <span id="settings-update-now-text">更新说明</span>
                                 </button>
                                 <div id="settings-update-progress" class="update-progress-box" hidden>
                                     <div class="update-progress-head">
@@ -5266,7 +5271,10 @@
             }
             if(!btn || !text || !hasUpdate) {
                 if(settingsText && settingsBtn?.classList.contains('show')) {
-                    settingsText.textContent = isEn ? 'Update' : '一键更新';
+                    // 这里是设置页那一行的文案。不能写「一键更新」——
+                    // 该入口已收敛为"查看更新说明"，写「一键更新」会让用户以为
+                    // 点下去就会下载安装（实际不会，那是桌面端自动更新负责的）。
+                    settingsText.textContent = isEn ? 'Release notes' : '更新说明';
                 }
                 return;
             }
@@ -5292,10 +5300,12 @@
                     settingsBtn.setAttribute('aria-label', `${prefix} ${versionLabel(remoteVersion)}`);
                 }
             } else {
-                text.textContent = isEn ? 'Update' : '一键更新';
+                // 无远端版本号时也写成「更新说明」——该入口只负责查看说明，
+                // 不再承担下载安装（由桌面端启动时的自动更新完成）。
+                text.textContent = isEn ? 'Release notes' : '更新说明';
                 btn.setAttribute('aria-label', text.textContent);
                 if(settingsText) {
-                    settingsText.textContent = isEn ? 'Update' : '一键更新';
+                    settingsText.textContent = isEn ? 'Release notes' : '更新说明';
                     settingsBtn.setAttribute('aria-label', settingsText.textContent);
                 }
             }
@@ -5349,8 +5359,10 @@
             const actionText = document.getElementById('update-reminder-action-text');
             const closeBtn = document.getElementById('update-reminder-close');
             if(titleEl) titleEl.textContent = isEn ? ('New version ' + versionLabel(remoteVersion)) : ('发现新版本 ' + versionLabel(remoteVersion));
-            if(textEl) textEl.textContent = isEn ? 'An update is ready to install.' : '新版本已就绪，可以立即安装。';
-            if(actionText) actionText.textContent = isEn ? 'Update now' : '立即更新';
+            if(textEl) textEl.textContent = isEn
+                ? 'Restart the app to install it automatically.'
+                : '重启应用即可自动安装。';
+            if(actionText) actionText.textContent = isEn ? 'Release notes' : '更新说明';
             if(closeBtn) {
                 closeBtn.title = isEn ? 'Ignore this version' : '忽略此版本';
                 closeBtn.setAttribute('aria-label', closeBtn.title);
@@ -5554,30 +5566,32 @@
             return compareVersions(String(remoteVersion), String(localVersion)) <= 0;
         }
 
-        // 统一设置「开始更新」按钮的状态。
-        // 两个调用点（弹窗刷新、更新结束复位）共用它，避免逻辑分叉 ——
-        // 之前复位块里无条件启用按钮，把"已是最新版则禁用"的判定覆盖掉了。
+        // 「一键更新」（镜像热更）入口已收敛。
+        //
+        // 为什么去掉它：国内镜像（gh-proxy / jsDelivr）是 CDN，缓存明显滞后，
+        // 实测出现过本地 1.0.9 而镜像只提供 1.0.7 / 1.0.4 的情况。用户点「开始更新」
+        // 后要么拉同版本文件白跑一趟、要么把已装的新版本"降级"回去，表现就是
+        // "更新过了版本号却没变甚至变旧"，非常难理解。
+        // 而桌面端本身已有完整的自动更新链路（启动后检查 GitHub Releases、
+        // 有下载进度窗、有失败提示），镜像热更属于重复且易误导的通道。
+        //
+        // 现在：弹窗仅用于查看更新说明；执行入口一律禁用并说明原因。
+        // 后端仍保留 /api/update-from-github 与防降级闸门，作为极端情况下的兜底，
+        // 但界面不再引导用户使用它。
         function applyConfirmButtonState(isEn) {
             const btn = document.getElementById('project-update-confirm-btn');
             const text = document.getElementById('project-update-confirm-text');
             if(!btn) return;
-            if(isAlreadyLatestVersion()) {
-                btn.disabled = true;
-                btn.title = isEn ? 'Already up to date' : '当前已是最新版本，无需更新';
-                // 摘掉 morph 属性：success 态会把按钮刷成橙绿色并盖住文字，
-                // 用户就看不到「已是最新版本」这几个字了。
-                btn.removeAttribute('data-morph');
-                btn.removeAttribute('data-morph-keep-width');
-                btn.removeAttribute('data-nv-morph-state');
-                if(text) text.textContent = isEn ? 'Up to date' : '已是最新版本';
-            } else {
-                btn.disabled = false;
-                btn.title = '';
-                btn.setAttribute('data-morph', '');
-                btn.setAttribute('data-morph-keep-width', '');
-                btn.setAttribute('data-nv-morph-state', 'idle');
-                if(text) text.textContent = isEn ? 'Start update' : '开始更新';
-            }
+            btn.disabled = true;
+            // 摘掉 morph 属性：其 success 态会把按钮刷成 #10b981 并盖住文字，
+            // 只剩一个看不懂的绿勾。
+            btn.removeAttribute('data-morph');
+            btn.removeAttribute('data-morph-keep-width');
+            btn.removeAttribute('data-nv-morph-state');
+            btn.title = isEn
+                ? 'Updates are installed automatically by the desktop app'
+                : '更新由桌面端自动完成，此处无需操作';
+            if(text) text.textContent = isEn ? 'Auto update' : '自动更新';
         }
 
         function refreshProjectUpdateModalText() {
@@ -5587,7 +5601,7 @@
             const sourceName = updateSourceLabel();
             const title = remoteVersion
                 ? updateUiText(`更新到 ${versionLabel(remoteVersion)}`, `Update to ${versionLabel(remoteVersion)}`)
-                : updateUiText('一键更新', 'One-click update');
+                : updateUiText('更新说明', 'Release notes');
             const titleEl = document.getElementById('project-update-title');
             const copyEl = document.getElementById('project-update-copy');
             const testText = document.getElementById('connectivity-test-text');
@@ -5613,8 +5627,8 @@
                 }
             });
             if(copyEl) copyEl.textContent = updateUiText(
-                `将从 ${sourceName} 下载并更新后端代码与页面资源。更新前会自动备份，更新完成后后端会自动重启。当前 ${versionLabel(localVersion)}，最新 ${versionLabel(remoteVersion || localVersion)}。`,
-                `This downloads and updates the backend code and web assets from ${sourceName}. A backup is created first, then the backend restarts automatically. Current ${versionLabel(localVersion)}, latest ${versionLabel(remoteVersion || localVersion)}.`
+                `本窗口用于查看更新说明。更新由桌面端自动完成：启动后会检查并提示，按提示重启即可安装。当前 ${versionLabel(localVersion)}${remoteVersion && remoteVersion !== localVersion ? `，可更新到 ${versionLabel(remoteVersion)}` : '，已是最新版本'}。`,
+                `This window shows release notes. Updates are handled automatically by the desktop app: it checks on startup and prompts you to restart. Current ${versionLabel(localVersion)}${remoteVersion && remoteVersion !== localVersion ? `, ${versionLabel(remoteVersion)} available` : ', already up to date'}.`
             );
             if(testText) testText.textContent = updateConnectivityResult ? updateUiText('重新测试', 'Retest') : updateUiText('测试连通性', 'Test connectivity');
             if(cancelText) cancelText.textContent = updateUiText('取消', 'Cancel');
@@ -5666,9 +5680,11 @@
                 setUpdateSummary(
                     google?.ok ? 'ok' : 'warn',
                     updateUiText(`${sourceName} 下载源可用`, `${sourceName} source reachable`),
+                    // 不再引导"开始更新"：该通道已停用，连通性测试仅用于排查
+                    // 桌面端自动更新（走 GitHub Releases）的网络状况。
                     fastest
-                        ? updateUiText(`${sourceName} 可访问，最快节点约 ${fastest.elapsed_ms || 0}ms，可以开始更新。`, `${sourceName} is reachable; fastest endpoint is about ${fastest.elapsed_ms || 0}ms.`)
-                        : updateUiText(`${sourceName} 更新节点可用，可以开始更新。`, `${sourceName} update endpoints are reachable.`)
+                        ? updateUiText(`${sourceName} 可访问，最快节点约 ${fastest.elapsed_ms || 0}ms。`, `${sourceName} is reachable; fastest endpoint is about ${fastest.elapsed_ms || 0}ms.`)
+                        : updateUiText(`${sourceName} 更新节点可用。`, `${sourceName} update endpoints are reachable.`)
                 );
             } else {
                 setUpdateSummary(
@@ -6063,7 +6079,7 @@
                 // 改回「开始更新」，把 refreshProjectUpdateModalText 里的禁用覆盖掉了
                 // —— 于是更新失败后按钮又变回可点的「开始更新」，用户反复点、反复失败。
                 applyConfirmButtonState(isEn);
-                if(text) text.textContent = oldText || (isEn ? 'Update' : '一键更新');
+                if(text) text.textContent = oldText || (isEn ? 'Release notes' : '更新说明');
                 refreshUpdateButtonText();
             }
         }
