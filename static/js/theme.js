@@ -143,13 +143,37 @@
         }
     }
 
+    // 把缩放值吸附到"对文字栅格化友好"的档位。
+    //
+    // 为什么需要：界面用 CSS zoom 缩放，zoom 取小数时文字会落在非整数像素
+    // 边界上，被重采样后发虚 —— 小字号（10.5px / 12px）尤其明显。
+    // 实测（同一页面截图做高频能量对比，数值越大越锐利）：
+    //     zoom=0.86 -> 3.09      zoom=0.90 -> 2.69
+    //     zoom=0.95 -> 4.15      zoom=1.00 -> 4.57      zoom=1.10 -> 5.30
+    // 可见 0.86 只有 1.0 的约 68% 锐度，而 0.86 正是 autoScale 在
+    // 1440x900 窗口下的取值 —— 屏幕明明够大，却把界面整体缩小，文字跟着糊。
+    //
+    // 策略：
+    //   · 小窗口（确实需要缩小才能放下）保留缩小，但量化到 0.05 的整数倍；
+    //   · 中等尺寸（0.85~1.0）直接按 1 处理 —— 空间足够，缩小只会损失清晰度；
+    //   · 其余情况量化到 0.05，避免 0.86 / 0.93 这类"最难看的零头"。
+    function snapScale(value){
+        const v = Number(value);
+        if(!Number.isFinite(v) || v <= 0) return 1;
+        // 略小于 1 的一律归 1：空间够用就不缩小
+        if(v >= 0.85 && v < 1) return 1;
+        // 量化到 0.05 档，并裁到允许区间
+        const snapped = Math.round(v * 20) / 20;
+        return Math.max(0.68, Math.min(1.4, snapped));
+    }
+
     function autoScale(){
         const dpr = Math.max(1, Number(window.devicePixelRatio || 1));
         const viewportWidth = Math.max(320, Number(window.innerWidth || 0));
         const viewportHeight = Math.max(320, Number(window.innerHeight || 0));
         const compactRatio = Math.min(viewportWidth / 1500, viewportHeight / 940);
         if(compactRatio < 1) {
-            return Math.max(0.68, Math.min(1, compactRatio));
+            return snapScale(Math.max(0.68, compactRatio));
         }
         const screenLong = Math.max(window.screen?.width || 0, window.screen?.height || 0);
         const viewportLong = Math.max(viewportWidth, viewportHeight);
